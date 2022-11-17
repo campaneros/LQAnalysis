@@ -171,9 +171,13 @@ outputrootfile = [None] * len(categoriesList)
 print(categoriesList)
 for icat,cat in enumerate(categoriesList):
 
-    if "workspace_" in cat:
+    if "workspace_"  in cat:
         continue
-
+    elif "gen_" in cat:
+            print("maremma boia")
+            print(cat)
+            continue
+    print(cat)
     outputrootfile[icat] = TFile.Open(opt.outputdir+"/"+cat+".root","RECREATE")
     outputrootfile[icat].cd()
     indexcat[0]+=1
