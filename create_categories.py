@@ -30,9 +30,9 @@ subDirList = next(os.walk(inputdir))[1]
 print(subDirList)
 
 ## Output directories  
-outputdir = "/data/mcampana/CMS/CMSSW_10_2_13/src/Fit_Signal/output_MC"
-outputdirdatacards = "/data/mcampana/CMS/CMSSW_10_2_13/src/Fit_Signal/datacards"
-weboutputdir = "/data/mcampana/CMS/CMSSW_10_2_13/src/Fit_Signal/output_plot"
+outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC"
+outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards"
+weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_plot"
 os.system("mkdir -p "+outputdir)
 os.system("mkdir -p "+outputdirdatacards)
 os.system(u"rm -f "+outputdirdatacards+"/*")
@@ -60,7 +60,7 @@ varname = "m_muj_ak4"
 vartitle = "m_{\muj}_ak4 [GeV]"
 
 ## Signal input
-signalInputfilename = "/data/mcampana/CMS/CMSSW_10_2_13/src/Fit_Signal/output/signals.txt"
+signalInputfilename = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output/signals.txt"
 
 
 ncategories = len(subDirList)

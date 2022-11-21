@@ -134,7 +134,8 @@ command = ("combine -M MultiDimFit "+str(datacard)
            +" --saveFitResult"
            +" --expectSignal "+str(opt.expectSignal)
            +" -n _toys%s_expectSignal%s" % ( str(opt.toys), str(opt.expectSignal) )
-           +" --cminDefaultMinimizerStrategy=0"
+	   + " -s "+ str(opt.seed) 
+           #+" --cminDefaultMinimizerStrategy=0"
            #+" -v 4"
            #+" --freezeParameters \"rgx{meanShape_sigma_err_*}\""
 #           +" --noErrors"

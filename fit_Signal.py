@@ -25,8 +25,8 @@ subDirList = next(os.walk(inputdir))[1]
 print(subDirList)
 
 ## Output directories  
-outputdir = "/data/mcampana/CMS/CMSSW_10_2_13/src/Fit_Signal/output"
-weboutputdir = "/data/mcampana/CMS/CMSSW_10_2_13/src/Fit_Signal/output"
+outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output"
+weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output"
 os.system("mkdir -p "+outputdir)
 os.system("mkdir -p "+weboutputdir)
 scriptsPath = os.path.dirname(os.path.abspath(__file__))+"/../../"

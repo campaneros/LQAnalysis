@@ -372,7 +372,7 @@ for icat,cat in enumerate(categoriesList):
 	#print("Events per bin ",bin_signalEvents)
 	#print("##########################################################")
       	
-	Sum+=bin_signalEvents
+        Sum+=bin_signalEvents
 
 	 
         hSignal.SetBinContent(ibin,bin_signalEvents_norm)
