@@ -24,28 +24,28 @@ usage = "usage: To be run from trijetana: python bias_study.py -g /afs/cern.ch/w
 
 parser = optparse.OptionParser(usage)
 
-parser.add_option("-g", "--gendatacard", dest="gendatacard",
+parser.add_option("-g", "--gendatacard", dest="gendatacard", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M1000_L0p1/datacard_gen_LQumu_M1000_L0p1.txt",
                   help= "input combine datacard you want to generate from")
 
-parser.add_option("-d", "--datacard", dest="datacard",
+parser.add_option("-d", "--datacard", dest="datacard", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M1000_L0p1/datacard_LQumu_M1000_L0p1.txt",
                   help="input combine datacard you want to use for fit")
 
-parser.add_option("-o", "--output", dest="outputdir",
+parser.add_option("-o", "--output", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/", 
                   help="the directory contains the output of the program. Can be AFS or EOS directory.")
 
 parser.add_option("-S", dest="syst", default=0,
                   help="fit systematics")
 
-parser.add_option("-t", dest="toys", default=0, 
+parser.add_option("-t", dest="toys", default=1, 
                   help="0=data, -1=asimov, >0=run toys")
 
 parser.add_option("-s", "--seed", dest="seed", default=1123456,
                   help="seed for toy generation")
 
-parser.add_option("--expectSignalFile", dest="expectSignal", default=0,
+parser.add_option("--expectSignal", dest="expectSignal", default=0.001,
                   help="expected signal strenght (r)")
 
-parser.add_option("-l", dest="limit", default=0.1,
+parser.add_option("-l", dest="limit", default=0.01,
                   help="expected signal strenght (r)")
 
 (opt, args) = parser.parse_args()
@@ -72,7 +72,6 @@ outputDir = opt.outputdir+"/"+outputlabel
 os.system("mkdir -p "+outputDir)
 #os.system("rm -f "+outputDir+"/*")
 
-pwd = os.environ['PWD']
 #if opt.gendatacard.startswith("/afs"):
 gendatacard = opt.gendatacard
 #else:
@@ -83,6 +82,7 @@ datacard = opt.datacard
 #else:
 #    datacard = pwd+"/"+opt.datacard
 
+pwd = os.environ['PWD']
 os.chdir(outputDir)
 os.environ['PWD'] = outputDir
 
@@ -97,6 +97,7 @@ command = ("combine -M GenerateOnly -d "+str(gendatacard)
            +" -n _toys%s_expectSignal%s" % ( str(opt.toys), str(opt.expectSignal) )
            +" -s "+str(opt.seed)
            +" --expectSignal "+str(opt.expectSignal)
+	   #+" -v 4"
            #+" --toysFrequentist "
            #+" --freezeParameters \"rgx{meanShape_sigma_err_*}\",JES_uncertainty"
            #+" --setParameters pdf_index=0"
@@ -133,7 +134,7 @@ command = ("combine -M MultiDimFit "+str(datacard)
            +" --robustHesse 1"
            +" --saveFitResult"
            +" --expectSignal "+str(opt.expectSignal)
-           +" -n _toys%s_expectSignal%s" % ( str(opt.toys), str(opt.expectSignal) )
+           +" -n _toys%s_expectSignal%s_gen" % ( str(opt.toys), str(opt.expectSignal) )
 	   + " -s "+ str(opt.seed) 
            #+" --cminDefaultMinimizerStrategy=0"
            #+" -v 4"

@@ -49,7 +49,7 @@ var_max = []
 
 for cat in subDirList:
     var_min.append(600)
-    var_max.append(4000)
+    var_max.append(6000)
 
 ## Binning
 varBins_all = [1, 3, 6, 10, 16, 23, 31, 40, 50, 61, 74, 88, 103, 119, 137, 156, 176, 197, 220, 244, 270, 296, 325, 354, 386, 419, 453, 489, 526, 565, 606, 649,  693, 740, 788, 838, 890, 944, 1000, 1058, 1118, 1181, 1246, 1313, 1383, 1455, 1530, 1607, 1687, 1770, 1856, 1945, 2037, 2132, 2231, 2332, 2438, 2546, 2659, 2775, 2895, 3019, 3147, 3279, 3416, 3558, 3704, 3854, 4010, 4171, 4337, 4509, 4686, 4869, 5058, 5253, 5455, 5663, 5877, 6099, 6328, 6564, 6808, 7000, 7250, 7500, 7750, 8000]
@@ -171,21 +171,38 @@ for icat, cat in enumerate(subDirList):
         #    signalPdf.plotOn(frame,RooFit.Binning(100))
         #frame.Draw()
         frame = var[icat].frame()
-        var[icat].setRange("signal",  max(float(M1value)*0.65, var_min[icat]), min(float(M1value)*1.25, 4000) )
+        var[icat].setRange("signal",  max(float(M1value)*0.65, var_min[icat]), min(float(M1value)*1.45, 6000) )
         var[icat].setRange("full", var_min[icat], var_max[icat] )
         rooHist_signal.plotOn(frame,RooFit.Binning(100), RooFit.Range("full"))
         if( float(M1value) > var_min[icat] and float(M1value) < var_max[icat]):
             signalExtPdf.plotOn(frame,RooFit.Binning(100), RooFit.Range("signal"))#,RooFit.VisualizeError(fitResult_signal))
         Chi2 = frame.chiSquare()
         frame.Draw()
+	frame.SetAxisRange(0.001,20000,"Y")
+	canvas.SetLogy(1)
 
-        pt = TPaveText(0.65, 0.75, 0.87, 0.87,"ndc")
+        pt = TPaveText(0.4, 0.1, 0.6, 0.3,"ndc")
         pt.SetFillColor(0)
         
         Chi2Text = "#chi^{2}/ndof="+str(round(Chi2,2))
-        t1 = pt.AddText(Chi2Text)
+        t1 = pt.AddText("mean "+str(round(mean.getValV(),2))+"#pm"+str(round(mean.getError(),2)))
         t1.SetTextColor(1)
-        t1.SetTextSize( 0.04 )
+        t1.SetTextSize( 0.02 )
+        t2 = pt.AddText("width "+str(round(width.getValV(),2))+"#pm"+str(round(width.getError(),2)))
+        t2.SetTextColor(1)
+        t2.SetTextSize( 0.02 )
+        t3 = pt.AddText("alpha1 "+str(round(alpha1.getValV(),2))+"#pm"+str(round(alpha1.getError(),2)))
+        t3.SetTextColor(1)
+        t3.SetTextSize( 0.02 )
+        t4 = pt.AddText("n1 "+str(round(n1.getValV(),2))+"#pm"+str(round(n1.getError(),2)))
+        t4.SetTextColor(1)
+        t4.SetTextSize( 0.02 )
+        t5 = pt.AddText("alpha2 "+str(round(alpha2.getValV(),2))+"#pm"+str(round(alpha2.getError(),2)))
+        t5.SetTextColor(1)
+        t5.SetTextSize( 0.02 )
+        t6 = pt.AddText("n2 "+str(round(n2.getValV(),2))+"#pm"+str(round(n2.getError(),2)))
+        t6.SetTextColor(1)
+        t6.SetTextSize( 0.02 )
 
         pt.Draw("SAME")
         
@@ -193,7 +210,7 @@ for icat, cat in enumerate(subDirList):
         var[icat].setRange("my_range", var_min[icat], var_max[icat])  # create range to integrate over
         intrinsicNorm = signalPdf.createIntegral(RooArgSet(var[icat]), RooArgSet(var[icat]), "my_range")
         #print(var_min[icat], var_min_eff[icat])
-        var[icat].setRange("CBfit_range", max(float(M1value)*0.5, var_min[icat]), min(float(M1value)*1.4, 4000) )  # create range to integrate over
+        var[icat].setRange("CBfit_range", max(float(M1value)*0.5, var_min[icat]), min(float(M1value)*1.4, 6000) )  # create range to integrate over
         CBfitNorm = signalPdf.createIntegral(RooArgSet(var[icat]), RooArgSet(var[icat]), "CBfit_range")
         #var[icat].setRange("my_range_2", var_min_eff[icat], var_max_eff[icat])  # create range to integrate over
         #integral = signalPdf.createIntegral(RooArgSet(var[icat]), RooArgSet(var[icat]),"my_range_2")

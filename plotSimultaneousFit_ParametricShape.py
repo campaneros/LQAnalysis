@@ -194,6 +194,7 @@ for icat,cat in enumerate(categoriesList):
     print(app)
     print(sign_)
     x = workspace.var("m_muj_ak4_"+app)
+    print(x)
     #x = workspace.var("m_muj_ak4_"+app)
     var_min_set = x.getMin()
     var_max_set = x.getMax()
@@ -360,17 +361,18 @@ for icat,cat in enumerate(categoriesList):
         bin_up    = bin_low + bin_width
         
         x.setRange("binrange_"+str(ibin),bin_low,bin_up)
+	print("Range ", x.getVal())
         signal_pdfIntegral = signalPdf.createIntegral(ROOT.RooArgSet(x),RooFit.NormSet(ROOT.RooArgSet(x)),RooFit.Range("binrange_"+str(ibin)))
         signal_pdfIntegral_norm = signal_pdfIntegral.getVal()/signal_pdfIntrinsicNorm.getVal()
         bin_signalEvents = signal_pdfIntegral_norm*nsig.getVal()*r
         bin_signalEvents_norm = signal_pdfIntegral_norm*nsig.getVal()*r/bin_width
-	#print("##########################################################")
-	#print("Fraction of signal pdf of  bin area", signal_pdfIntegral_norm)
+	print("##########################################################")
+	print("Fraction of signal pdf of  bin area", signal_pdfIntegral_norm)
 	#print("Event expected", nsig.getVal())
 	#print("Signal strenght", r)
 	#print("Events per bin normalised per bin width ",bin_signalEvents_norm)
-	#print("Events per bin ",bin_signalEvents)
-	#print("##########################################################")
+	print("Events per bin ",bin_signalEvents)
+	print("##########################################################")
       	
         Sum+=bin_signalEvents
 
