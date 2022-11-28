@@ -139,7 +139,6 @@ ParametricBkgPdf = [None] * ncategories
 canvas = [None] * ncategories
 
 ## Create Workspace
-w = RooWorkspace(workspaceName,workspaceName)
     # output tree with chi2
 M1_br = array('f', [0])
 R_br  = array('f', [0])
@@ -214,22 +213,22 @@ for icat, cat in enumerate(subDirList):
         print("var_min_set: ", str(var_min_set), "varBins[0]: ", str(varBins[0]), "varBins[1]: ", str(varBins[1]))
 
         NvarBins = len(varBins)-1
-	canvas[icat] = TCanvas("canvas_"+cat, "canvas_"+cat, 200, 10, 700, 500 )
+        canvas[icat] = TCanvas("canvas_"+cat, "canvas_"+cat, 200, 10, 700, 500 )
 
 
-	print(varBins)
-	prova=array('d',varBins)
-	print(prova)	
+        print(varBins)
+        prova=array('d',varBins)
+        print(prova)	
         ## Get original TH1 histogram from root file
-       	rootfilename = inputdir+"/"+cat+"/"+filenameInput
+        rootfilename = inputdir+"/"+cat+"/"+filenameInput
         #print rootfilename    
         rootfile[icat] = TFile.Open(rootfilename)
         print("Get "+histoname+" from file "+rootfilename)
         th1_fromFile[icat] = rootfile[icat].Get(histoname) # 1 GeV bin histogram
         th1_fromFile[icat].Draw()
-	canvas[icat].SaveAs("tets.png")
+        canvas[icat].SaveAs("tets.png")
         integral = int(th1_fromFile[icat].Integral())
-	print("diocaro", integral)
+        print("diocaro", integral)
 
 	#outRoot=TFile( outputdir+"/background"+cat+".root","recreate")
 	#th1_fromFile[icat].Write()
@@ -249,7 +248,7 @@ for icat, cat in enumerate(subDirList):
         #rooHist[icat] = RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat,RooArgList(var[icat]),RooFit.Import(th1_rebin[icat]))
         #numberOfEvents[icat] = rooHist[icat].sumEntries()
 
-	test=th1_fromFile[icat].ComputeIntegral() 
+        test=th1_fromFile[icat].ComputeIntegral() 
 	#print(test)
         ## Generate toy histogram
         gRandom = TRandom()
@@ -257,9 +256,9 @@ for icat, cat in enumerate(subDirList):
             th1_original[icat] = TH1D("Toy","Toy", th1_fromFile[icat].GetNbinsX(), th1_fromFile[icat].GetXaxis().GetXmin(), th1_fromFile[icat].GetXaxis().GetXmax())
             #th1_original[icat] = TH1D("","", 5000, 0, 5000)
             gRandom.SetSeed(0)
-	    print("MAREMMA MAIALA")
+            print("MAREMMA MAIALA")
             th1_original[icat].FillRandom(th1_fromFile[icat],integral)
-	    print("MAREMMA MAIALA")
+            print("MAREMMA MAIALA")
             #th1_original[icat].Reset()
             #gRandom.SetSeed(0)
             #th1_original[icat].FillRandom(th1_fromFile[icat],integral)
@@ -278,49 +277,47 @@ for icat, cat in enumerate(subDirList):
 
         ## Main physics observable defined in fit range
     ## Loop over signals
-	dirRootFile=os.path.dirname(signalInputfilename)
-       	signalInputfile = io.open(signalInputfilename, "r")
-       	for iline, line in enumerate(signalInputfile):
+        dirRootFile=os.path.dirname(signalInputfilename)
+        signalInputfile = io.open(signalInputfilename, "r")
+        for iline, line in enumerate(signalInputfile):
 
-        	line = line.rstrip('\n')
-        	splitline = line.split(" ")
-		#print(splitline)
-		modell = splitline[0]
-        	category = splitline[1]
-        	M1 = splitline[2]
-        	L = splitline[3]
-        	Nsig = splitline[4]
-        	e_Nsig = splitline[5]
-        	mu = splitline[6]
-        	e_mu = splitline[7]
-		ssigma = splitline[8]
-        	e_ssigma = splitline[9]
-		a1 = splitline[10]
-		e_a1 = splitline[11]
-		n1 = splitline[12]
-		e_n1 = splitline[13]
-		a2 = splitline[14]
-        	e_a2 = splitline[15]
-        	n2 = splitline[16]
-        	e_n2 = splitline[17]
+            line = line.rstrip('\n')
+            splitline = line.split(" ") 
+            modell = splitline[0]
+            category = splitline[1]
+            M1 = splitline[2]
+            L = splitline[3]
+            Nsig = splitline[4]
+            e_Nsig = splitline[5]
+            mu = splitline[6]
+            e_mu = splitline[7]
+            ssigma = splitline[8]
+            e_ssigma = splitline[9]
+            a1 = splitline[10]
+            e_a1 = splitline[11]
+            n1 = splitline[12]
+            e_n1 = splitline[13]
+            a2 = splitline[14]
+            e_a2 = splitline[15]
+            n2 = splitline[16]
+            e_n2 = splitline[17]
         	
         	#L=L.replace("p",".")
-        	print(modell)	
-        	if not category == cat:
-        	    continue
+            print(modell)	
+            if not category == cat:
+                continue
+            print("current signal = ", modell, category, M1, L, Nsig, e_Nsig, mu, e_mu, ssigma, e_ssigma, a1, e_a1, n1, e_n1, a2, e_a2, n2, e_n2)
         	
-        	print("current signal = ", modell, category, M1, L, Nsig, e_Nsig, mu, e_mu, ssigma, e_ssigma, a1, e_a1, n1, e_n1, a2, e_a2, n2, e_n2)
-        	
-        	signalString = modell+"_"+category#+"_"+"M"+str(int(float(M1)))+"_R0p"+str(int(float(L)*10))+"_"+category
-		print("signal_string   "+signalString)        	
-		InSigRoot=TFile(dirRootFile+"/h1_mmuj_ak4__"+modell+"_"+cat+".root","w")
-		#print(InSigRoot)
-		test= "h1_mmuj_ak4__"+str(modell)
-		#print(test)
-		th1Sig=InSigRoot.Get(test)
-     		sig_rebi = th1Sig.Rebin(NvarBins,"th1_rebin_"+cat,array('d',varBins))
+            signalString = modell+"_"+category#+"_"+"M"+str(int(float(M1)))+"_R0p"+str(int(float(L)*10))+"_"+category
+            print("signal_string   "+signalString)        	
+            InSigRoot=TFile(dirRootFile+"/h1_mmuj_ak4__"+modell+"_"+cat+".root","w")
+            #print(InSigRoot)
+            test= "h1_mmuj_ak4__"+str(modell)
+		    #print(test)
+            th1Sig=InSigRoot.Get(test)
+            sig_rebi = th1Sig.Rebin(NvarBins,"th1_rebin_"+cat,array('d',varBins))
         ## Create RooDataHist in fit range from TH1
-       	 	rooHistSign = RooDataHist("RooDataHist_"+modell+cat,"RooDataHist_"+modell+cat,RooArgList(var[icat]),RooFit.Import(sig_rebi))
+            rooHistSign = RooDataHist("RooDataHist_"+modell+cat,"RooDataHist_"+modell+cat,RooArgList(var[icat]),RooFit.Import(sig_rebi))
 		#print(th1Sig)
 		#InSigRoot.Close()
 		#outSigRoot=TFile(outputdir+"/"+modell+cat+".root","recreate")
@@ -331,55 +328,55 @@ for icat, cat in enumerate(subDirList):
 		#sigclone.Write()
 		#clone_histo.Write()
 		#data_obs.Write()
-		getattr(w,'import')(rooHistSign)
+            getattr(w,'import')(rooHistSign)
 
         	## Signal pdf
         	
 
-		os.system("mkdir -p "+outputdirdatacards+"/"+modell)    
-		os.system("mkdir -p "+outputdirdatacards+"/"+modell+"/categories")    
+            os.system("mkdir -p "+outputdirdatacards+"/"+modell)    
+            os.system("mkdir -p "+outputdirdatacards+"/"+modell+"/categories")    
         	    ## Create datacard for current signal
-        	datacardfilename = outputdirdatacards+"/"+modell+"/categories/"+"datacard_gen_"+signalString+".txt"
-        	outputfile = io.open(datacardfilename,'w')
+            datacardfilename = outputdirdatacards+"/"+modell+"/categories/"+"datacard_gen_"+signalString+".txt"
+            outputfile = io.open(datacardfilename,'w')
         	
         	## Create datacard for current signal
         	#datacardfilename = outputdirdatacards+"/"+"datacard_"+signalString+".txt"
         	#outputfile = io.open(datacardfilename,'w')
         	
-        	outputfile.write( u"## Datacard for "+signalString+"\n" )
-        	outputfile.write( u"----------------------------------------------------------------------------------------------------------------------------------"+"\n" )
-        	outputfile.write( u"imax * number of channels"+"\n" )
-        	outputfile.write( u"jmax * number of backgrounds"+"\n" )
-        	outputfile.write( u"kmax * number of nuisance parameters (source of systematic uncertainties)"+"\n" )
-        	outputfile.write( u"----------------------------------------------------------------------------------------------------------------------------------"+"\n" )
+            outputfile.write( u"## Datacard for "+signalString+"\n" )
+            outputfile.write( u"----------------------------------------------------------------------------------------------------------------------------------"+"\n" )
+            outputfile.write( u"imax * number of channels"+"\n" )
+            outputfile.write( u"jmax * number of backgrounds"+"\n" )
+            outputfile.write( u"kmax * number of nuisance parameters (source of systematic uncertainties)"+"\n" )
+            outputfile.write( u"----------------------------------------------------------------------------------------------------------------------------------"+"\n" )
                 #outputfile.write( u"shapes * * " +str(outSigRoot.GetName())+ " $PROCESS\n" )
                 #outputfile.write( u"shapes sig * " +str(outSigRoot.GetName())+ " $PROCESS\n" )
                 #outputfile.write( u"shapes bkg * " +str(outSigRoot.GetName())+ " $PROCESS\n" )
                 #outputfile.write( u"shapes data_obs * " +str(outSigRoot.GetName())+ " $PROCESS\n" )
                 #outputfile.write( u"shapes bkg "+cat+" " +str(outSigRoot.GetName())+ " "+clone_histo.GetName()+"\n" )
                 #outputfile.write( u"shapes data_obs "+cat+" " +str(outSigRoot.GetName())+ " "+data_obs.GetName()+"\n" )
-                outputfile.write( u"shapes sig "+cat+" "+filenameworkspacePath+ " "+workspaceName+":"+rooHistSign.GetName()+"\n")
-                outputfile.write( u"shapes bkg "+cat+" "+filenameworkspacePath+ " "+workspaceName+":"+rooHist[icat].GetName()+"\n")
-        	outputfile.write( u"shapes data_obs "+cat+" "+filenameworkspacePath+" "+workspaceName+":"+rooHist[icat].GetName()+"\n" )
-        	outputfile.write( u"----------------------------------------------------------------------------------------------------------------------------------"+"\n" )
-        	outputfile.write( u"bin \t\t"+cat+"\n" )
-        	outputfile.write( u"observation \t -1"+"\n" )
-        	outputfile.write( u"----------------------------------------------------------------------------------------------------------------------------------"+"\n" )
-        	outputfile.write( u"bin \t\t"+cat+"\t"+cat+"\n" )
-        	outputfile.write( u"process \t"+"sig \t\t"+ "bkg"+"\n" )
-        	outputfile.write( u"process \t"+ "0" +" \t\t"+"1"+"\n" )
-        	outputfile.write( u"rate \t\t"+ "-1" +" \t\t"+"-1"+"\n" )
-        	#outputfile.write( u"process \t"+"0 \t\t"+ "1"+"\n" )
-        	#outputfile.write( u"rate \t\t"+str(int(nsig.getValV()))+" \t\t"+ str(int(nbkg[icat].getValV())) +"\n" )
-        	outputfile.write( u"----------------------------------------------------------------------------------------------------------------------------------"+"\n" )
+            outputfile.write( u"shapes sig "+cat+" "+filenameworkspacePath+ " "+workspaceName+":"+rooHistSign.GetName()+"\n")
+            outputfile.write( u"shapes bkg "+cat+" "+filenameworkspacePath+ " "+workspaceName+":"+rooHist[icat].GetName()+"\n")
+            outputfile.write( u"shapes data_obs "+cat+" "+filenameworkspacePath+" "+workspaceName+":"+rooHist[icat].GetName()+"\n" )
+            outputfile.write( u"----------------------------------------------------------------------------------------------------------------------------------"+"\n" )
+            outputfile.write( u"bin \t\t"+cat+"\n" )
+            outputfile.write( u"observation \t -1"+"\n" )
+            outputfile.write( u"----------------------------------------------------------------------------------------------------------------------------------"+"\n" )
+            outputfile.write( u"bin \t\t"+cat+"\t"+cat+"\n" )
+            outputfile.write( u"process \t"+"sig \t\t"+ "bkg"+"\n" )
+            outputfile.write( u"process \t"+ "0" +" \t\t"+"1"+"\n" )
+            outputfile.write( u"rate \t\t"+ "-1" +" \t\t"+"-1"+"\n" )
+            #outputfile.write( u"process \t"+"0 \t\t"+ "1"+"\n" )
+            #outputfile.write( u"rate \t\t"+str(int(nsig.getValV()))+" \t\t"+ str(int(nbkg[icat].getValV())) +"\n" )
+            outputfile.write( u"----------------------------------------------------------------------------------------------------------------------------------"+"\n" )
         	#outputfile.write( p1[icat].GetName()+u" flatParam"+"\n" )
         	#outputfile.write( p2[icat].GetName()+u" flatParam"+"\n" )
         	#outputfile.write( p3[icat].GetName()+u" flatParam"+"\n" )
         	#outputfile.write( nbkg[icat].GetName()+u" flatParam"+"\n" )
 		#outputfile.write( u"lumi lnN 1.018 -\n")
-        	outputfile.close()
+            outputfile.close()
 		#outSigRoot.Close()
-	getattr(w,'import')(rooHist[icat])
+        getattr(w,'import')(rooHist[icat])
 
         signalInputfile.close()
 
@@ -431,10 +428,10 @@ for signal in listOfSignalModels:
     ## Loop over event categories    
     for icat, cat in enumerate(subDirList):
         signalStringCat = signal+"_"+cat
-    	datacardfilenameAll = outputdirdatacards+"/"+signal+"/"+"datacard_gen_"+signal+".txt"
+        datacardfilenameAll = outputdirdatacards+"/"+signal+"/"+"datacard_gen_"+signal+".txt"
         datacardfilename = outputdirdatacards+"/"+signal+"/categories/"+"datacard_gen_"+signalStringCat+".txt"        
 
-	print(signal)
+        print(signal)
         if icat==0:
             command = "python "+combineCardScriptPath
 
@@ -457,16 +454,15 @@ for signal in listOfSignalModels:
         #    or ( mass2>=mjetMin and mass2<mjetMax )  
         #    ): 
         command += " "+cat+"="+datacardfilename
-	print(signalStringCat)
+        print(signalStringCat)
 
-    	splitline = signalStringCat.split("_")
-    	modell = splitline[0]
-    	M1val = (splitline[1]).strip("M")
-    	Lval  = (splitline[2]).strip("L")
-    	Lval =  Lval.replace("p",".")
-    	category = splitline[3]    
-
-    	datacardList_single.write(modell+" "+M1val+" "+Lval+" "+category+" "+datacardfilename+"\n")
+        splitline = signalStringCat.split("_")
+        modell = splitline[0]
+        M1val = (splitline[1]).strip("M")
+        Lval  = (splitline[2]).strip("L")
+        Lval =  Lval.replace("p",".")
+        category = splitline[3]         
+        datacardList_single.write(modell+" "+M1val+" "+Lval+" "+category+" "+datacardfilename+"\n")
 
     command += " > "+datacardfilenameAll
     print(command)
@@ -481,7 +477,7 @@ for signal in listOfSignalModels:
 
  
     datacardList.write(modell+" "+M1val+" "+Lval+" "+datacardfilenameAll+"\n")
-    print "Created datacard List at "+outputdirdatacards+"/datacardList.txt"
+    print("Created datacard List at "+outputdirdatacards+"/datacardList.txt")
 
 #datacardList.close()
 
