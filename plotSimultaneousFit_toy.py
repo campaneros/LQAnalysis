@@ -643,7 +643,7 @@ for number in range(nToy):
         #if r < 0.001:
         #    legend.AddEntry(hSignal, "signal (fb) r="+str(round(r*1000,10)), "l")
         #else:
-        legend.AddEntry(hSignal, "signal (pb) r="+str(round(r,6)) +"#pm  "+str(round(err_r,5)), "l")
+        legend.AddEntry(hSignal, "signal (pb) r="+str(round(r,10)) +"#pm  "+str(round(err_r,9)), "l")
         legend.Draw()
         
         ## Plot fit results
