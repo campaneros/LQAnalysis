@@ -344,7 +344,6 @@ for icat, cat in enumerate(subDirList):
 
     ## Loop over signals
         signalInputfile = io.open(signalInputfilename, "r")
-
         for iline, line in enumerate(signalInputfile):
             line = line.rstrip('\n')
             splitline = line.split(" ")
@@ -370,7 +369,7 @@ for icat, cat in enumerate(subDirList):
         	#L=L.replace("p",".")
             print(modell)	
             if not category == cat:
-        	    continue
+                continue
             print("current signal = ", modell, category, M1, L, Nsig, e_Nsig, mu, e_mu, ssigma, e_ssigma, a1, e_a1, n1, e_n1, a2, e_a2, n2, e_n2)
             signalString = modell+"_"+category#+"_"+"M"+str(int(float(M1)))+"_R0p"+str(int(float(L)*10))+"_"+category
             print("signal_string   "+signalString)        	
@@ -385,8 +384,8 @@ for icat, cat in enumerate(subDirList):
             n2 = RooRealVar("n2_"+signalString,"n2_"+signalString,float(n2))
             nsig = RooRealVar("ParametricSignalPdf_"+signalString+"_norm","ParametricSignalPdf_"+signalString+"_norm",float(Nsig),0,100000000)
 
-            var_tmp = RooRealVar("var_tmp","var_tmp",500, 5000)
-            var_tmp.setRange("maximum_range", 500, 5000)  # create range to integrate over
+            var_tmp = RooRealVar("var_tmp","var_tmp",453, 4000)
+            var_tmp.setRange("maximum_range", 453, 4000)  # create range to integrate over
             signalPdf_tmp = RooDoubleCBFast("CB_tmp", "CB_tmp", var_tmp, mean, width, alpha1, n1, alpha2, n2)            
             intrinsicNorm = signalPdf_tmp.createIntegral(RooArgSet(var_tmp), RooFit.NormSet(RooArgSet(var_tmp)), RooFit.Range("maximum_range")) 
             var_tmp.setRange("fit_range", var_min_set, var_max_set)  # create range to integrate over
@@ -462,8 +461,8 @@ for icat, cat in enumerate(subDirList):
             for param in fitparam:
                 outputfile.write( param.GetName()+u" flatParam"+"\n" )
                 outputfile.write( nbkg[icat].GetName()+u" flatParam"+"\n" )
-            outputfile.close            
-            signalInputfile.close()
+            outputfile.close()            
+        signalInputfile.close()
 
     ## Fill Workspace for data and background
     # Import data
@@ -550,9 +549,9 @@ for icat, cat in enumerate(subDirList):
         legend.SetFillStyle(0)
         legend.SetBorderSize(0)
         if(generateToy==1):
-        	legend.AddEntry(th1_rebin[icat], "Toy Data", "p")
+            legend.AddEntry(th1_rebin[icat], "Toy Data", "p")
         else:
-        	legend.AddEntry(th1_rebin[icat], "Data", "p")
+            legend.AddEntry(th1_rebin[icat], "Toy Data", "p")
         legend.AddEntry(th1_rebin_bkg[icat], "Fit", "l")
         legend.Draw()
         

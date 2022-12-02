@@ -47,6 +47,9 @@ workspaceName = "w"
 
 
 
+
+
+
 ## Histogram
 #if opt.fitData:
 #    generateToy = -1
@@ -117,6 +120,7 @@ th1_rebin = [None] * ncategories
 th1_rebin_bkg = [None] * ncategories
 th1_rebin_pull = [None] * ncategories
 rooHist = [None] * ncategories
+rooHist_bkg = [None] * ncategories
 numberOfEvents = [None] * ncategories
 
 nbkg = [None] * ncategories
@@ -139,6 +143,7 @@ ParametricBkgPdf = [None] * ncategories
 canvas = [None] * ncategories
 
 ## Create Workspace
+w = RooWorkspace(workspaceName,workspaceName)
     # output tree with chi2
 M1_br = array('f', [0])
 R_br  = array('f', [0])
@@ -182,7 +187,7 @@ for icat, cat in enumerate(subDirList):
         #Res2mjet_low = float(category_edges[4])
         #Res2mjet_high = float(category_edges[5])
 
-        var_min_set = 450
+        var_min_set = 453
         var_max_set = 4000
         
         ## Modify variable binning
@@ -216,9 +221,9 @@ for icat, cat in enumerate(subDirList):
         canvas[icat] = TCanvas("canvas_"+cat, "canvas_"+cat, 200, 10, 700, 500 )
 
 
-        print(varBins)
-        prova=array('d',varBins)
-        print(prova)	
+        #print(varBins)
+        #prova=array('d',varBins)
+        #print(prova)	
         ## Get original TH1 histogram from root file
         rootfilename = inputdir+"/"+cat+"/"+filenameInput
         #print rootfilename    
@@ -236,20 +241,16 @@ for icat, cat in enumerate(subDirList):
 	#print("dai")
 	#print("cazo")
 	#clone_histo.Write()
-        var[icat] = RooRealVar(varname+"_"+cat,vartitle,var_min_set,var_max_set)
-        var[icat].Print()
+
         
-        ## Create data histogram with coarser binning
-        th1_rebin[icat] = th1_fromFile[icat].Rebin(NvarBins,"th1_rebin_"+cat,array('d',varBins))
-        ## Create RooDataHist in fit range from TH1
-        rooHist[icat] = RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat,RooArgList(var[icat]),RooFit.Import(th1_rebin[icat]))
+
       	  
         ## Create RooDataHist in fit range from TH1
         #rooHist[icat] = RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat,RooArgList(var[icat]),RooFit.Import(th1_rebin[icat]))
         #numberOfEvents[icat] = rooHist[icat].sumEntries()
-
+  
         test=th1_fromFile[icat].ComputeIntegral() 
-	#print(test)
+        print(test)
         ## Generate toy histogram
         gRandom = TRandom()
         if(generateToy==1):
@@ -274,6 +275,21 @@ for icat, cat in enumerate(subDirList):
         print("------------------------------------------------------------")
         print("                   FINAL FIT                                ")
         print("------------------------------------------------------------")
+
+        var[icat] = RooRealVar(varname+"_"+cat,vartitle,var_min_set,var_max_set)
+        var[icat].Print()
+
+        RooFit.SumW2Error(kTRUE)
+        ## Create data histogram with coarser binning
+        th1_rebin_bkg[icat] = th1_original[icat].Rebin(NvarBins,"th1_rebin_"+cat,array('d',varBins))
+        th1_rebin[icat] = th1_fromFile[icat].Rebin(NvarBins,"th1_rebin_"+cat,array('d',varBins))
+        print(varBins)
+        ## Create RooDataHist in fit range from TH1
+        rooHist[icat] = RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat,RooArgList(var[icat]),RooFit.Import(th1_rebin[icat]))
+        rooHist_bkg[icat] = RooDataHist("RooDataHist_bkg_"+cat,"RooDataHist_bkg_"+cat,RooArgList(var[icat]),RooFit.Import(th1_rebin_bkg[icat]))
+        numberOfEvents[icat] = rooHist[icat].sumEntries()
+        th1_rebin[icat].SetBinErrorOption(TH1.kPoisson)
+        th1_rebin_bkg[icat].SetBinErrorOption(TH1.kPoisson)
 
         ## Main physics observable defined in fit range
     ## Loop over signals
@@ -315,6 +331,7 @@ for icat, cat in enumerate(subDirList):
             test= "h1_mmuj_ak4__"+str(modell)
 		    #print(test)
             th1Sig=InSigRoot.Get(test)
+            sig_integral = int(th1Sig.Integral())
             sig_rebi = th1Sig.Rebin(NvarBins,"th1_rebin_"+cat,array('d',varBins))
         ## Create RooDataHist in fit range from TH1
             rooHistSign = RooDataHist("RooDataHist_"+modell+cat,"RooDataHist_"+modell+cat,RooArgList(var[icat]),RooFit.Import(sig_rebi))
@@ -357,7 +374,7 @@ for icat, cat in enumerate(subDirList):
                 #outputfile.write( u"shapes data_obs "+cat+" " +str(outSigRoot.GetName())+ " "+data_obs.GetName()+"\n" )
             outputfile.write( u"shapes sig "+cat+" "+filenameworkspacePath+ " "+workspaceName+":"+rooHistSign.GetName()+"\n")
             outputfile.write( u"shapes bkg "+cat+" "+filenameworkspacePath+ " "+workspaceName+":"+rooHist[icat].GetName()+"\n")
-            outputfile.write( u"shapes data_obs "+cat+" "+filenameworkspacePath+" "+workspaceName+":"+rooHist[icat].GetName()+"\n" )
+            outputfile.write( u"shapes data_obs "+cat+" "+filenameworkspacePath+" "+workspaceName+":"+rooHist_bkg[icat].GetName()+"\n" )
             outputfile.write( u"----------------------------------------------------------------------------------------------------------------------------------"+"\n" )
             outputfile.write( u"bin \t\t"+cat+"\n" )
             outputfile.write( u"observation \t -1"+"\n" )
@@ -365,7 +382,7 @@ for icat, cat in enumerate(subDirList):
             outputfile.write( u"bin \t\t"+cat+"\t"+cat+"\n" )
             outputfile.write( u"process \t"+"sig \t\t"+ "bkg"+"\n" )
             outputfile.write( u"process \t"+ "0" +" \t\t"+"1"+"\n" )
-            outputfile.write( u"rate \t\t"+ "-1" +" \t\t"+"-1"+"\n" )
+            outputfile.write( u"rate \t\t"+ str(sig_integral) +" \t\t"+str(numberOfEvents[icat])+"\n" )
             #outputfile.write( u"process \t"+"0 \t\t"+ "1"+"\n" )
             #outputfile.write( u"rate \t\t"+str(int(nsig.getValV()))+" \t\t"+ str(int(nbkg[icat].getValV())) +"\n" )
             outputfile.write( u"----------------------------------------------------------------------------------------------------------------------------------"+"\n" )
@@ -375,8 +392,10 @@ for icat, cat in enumerate(subDirList):
         	#outputfile.write( nbkg[icat].GetName()+u" flatParam"+"\n" )
 		#outputfile.write( u"lumi lnN 1.018 -\n")
             outputfile.close()
+    #workspacePath = workspacePath.split("/")[-1]
 		#outSigRoot.Close()
         getattr(w,'import')(rooHist[icat])
+        getattr(w,'import')(rooHist_bkg[icat])
 
         signalInputfile.close()
 
@@ -464,7 +483,7 @@ for signal in listOfSignalModels:
         category = splitline[3]         
         datacardList_single.write(modell+" "+M1val+" "+Lval+" "+category+" "+datacardfilename+"\n")
 
-    command += " > "+datacardfilenameAll
+    command += " -S > "+datacardfilenameAll
     print(command)
     os.system("cd "+outputdirdatacards+" ; "+command+" ; "+ "cd .." )
     print("Created final datacard at "+datacardfilenameAll)

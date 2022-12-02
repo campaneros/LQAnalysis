@@ -39,7 +39,7 @@ parser.add_option("-S", dest="syst", default=0,
 parser.add_option("-t", dest="toys", default=1, 
                   help="0=data, -1=asimov, >0=run toys")
 
-parser.add_option("-s", "--seed", dest="seed", default=1123456,
+parser.add_option("-s", "--seed", dest="seed", default=123456,
                   help="seed for toy generation")
 
 parser.add_option("--expectSignal", dest="expectSignal", default=0.001,
@@ -95,21 +95,23 @@ command = ("combine -M GenerateOnly -d "+str(gendatacard)
            +" -S "+str(opt.syst)
            +" --saveToys"
            +" -n _toys%s_expectSignal%s" % ( str(opt.toys), str(opt.expectSignal) )
-           +" -s "+str(opt.seed)
+           #+" -s "+str(opt.seed)
            +" --expectSignal "+str(opt.expectSignal)
-	   #+" -v 4"
+           #+" --expectSignalMass 0"
+	        #+" -v 4"
            #+" --toysFrequentist "
            #+" --freezeParameters \"rgx{meanShape_sigma_err_*}\",JES_uncertainty"
            #+" --setParameters pdf_index=0"
            #+" --freezeParameters pdf_index"
            )
 
-print command
+print(command)
 os.system(command)
 
 limit = float(opt.limit)
 if float(opt.expectSignal)==0:
     rMin = -limit*10
+    #rMin = 0
     rMax = limit*10
 
     if mass >= 7000:
@@ -122,20 +124,21 @@ else:
 #rMin=0 # require rMin>0 ALWAYS, only to rerun failed jobs
 #	rMin= -0.01
 #	rMax=0.01
+print("RMIN ", rMin, "      RMAX",rMax)
 #command = ("combine -M FitDiagnostics "+str(datacard)
-print "higgsCombine_toys"+str(opt.toys)+"_expectSignal"+str(opt.expectSignal)+".GenerateOnly.mH120."+str(opt.seed)+".root"
+print("higgsCombine_toys"+str(opt.toys)+"_expectSignal"+str(opt.expectSignal)+".GenerateOnly.mH120."+str(opt.seed)+".root")
 command = ("combine -M MultiDimFit "+str(datacard)
            +" -t "+str(opt.toys)
-           +" --toysFile higgsCombine_toys"+str(opt.toys)+"_expectSignal"+str(opt.expectSignal)+".GenerateOnly.mH120."+str(opt.seed)+".root"
+           +" --toysFile "+outputDir +"/higgsCombine_toys"+str(opt.toys)+"_expectSignal"+str(opt.expectSignal)+".GenerateOnly.mH120."+str(opt.seed)+".root"
            +" --rMin "+str(rMin)
            +" --rMax "+str(rMax)
            +" -S "+str(opt.syst)
            +" --trackParameters \"rgx{.*}\""
            +" --robustHesse 1"
            +" --saveFitResult"
-           +" --expectSignal "+str(opt.expectSignal)
+          # +" --expectSignal "+str(opt.expectSignal)
            +" -n _toys%s_expectSignal%s_gen" % ( str(opt.toys), str(opt.expectSignal) )
-	   + " -s "+ str(opt.seed) 
+            #+ " -s "+ str(opt.seed) 
            #+" --cminDefaultMinimizerStrategy=0"
            #+" -v 4"
            #+" --freezeParameters \"rgx{meanShape_sigma_err_*}\""
@@ -144,7 +147,7 @@ command = ("combine -M MultiDimFit "+str(datacard)
 #           +" --freezeParameters r"
           )
 
-print command    
+print(command)  
 os.system(command)
 
 #moveTree = "mv "+"higgsCombineTest.FitDiagnostics.mH120."+str(opt.seed)+".root"+" "+outputDir

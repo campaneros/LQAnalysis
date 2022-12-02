@@ -31,10 +31,10 @@ parser = optparse.OptionParser(usage)
 
 
 
-parser.add_option("-t", "--toysfile", dest="toysfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M3000_L1p0_t_100_syst0_seed1123456/higgsCombine_toys100_expectSignal0.0.GenerateOnly.mH120.123456.root",
+parser.add_option("-t", "--toysfile", dest="toysfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M3000_L1p0_t_10_syst0_seed1123456/higgsCombine_toys10_expectSignal0.0.GenerateOnly.mH120.123456.root",
                   help="input file with fitted toys")
 
-parser.add_option("-f", "--fitfile", dest="fitfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M3000_L1p0_t_100_syst0_seed1123456/higgsCombine_toys100_expectSignal0.0_gen.MultiDimFit.mH120.123456.root",
+parser.add_option("-f", "--fitfile", dest="fitfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M3000_L1p0_t_10_syst0_seed1123456/higgsCombine_toys10_expectSignal0.0_gen.MultiDimFit.mH120.123456.root",
                   help="input file with tree of post-fit parameters.")
 
 parser.add_option("-c", "--catdir", dest="catdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M1000_L0p1/categories/",
@@ -102,8 +102,8 @@ iPeriod = 4
 os.system("mkdir -p "+opt.outputdir)
 
 #Define binning
-varBins_all = [1, 3, 6, 10, 16, 23, 31, 40, 50, 61, 74, 88, 103, 119, 137, 156, 176, 197, 220, 244, 270, 296, 325, 354, 386, 419, 453, 489, 526, 565, 606, 649,  693, 740, 788, 838, 890, 944, 1000, 1058,1118, 1181, 1246, 1313, 1383, 1455, 1530, 1607, 1687, 1770, 1856, 1945, 2037, 2132, 2231, 2332, 2438, 2546, 2659, 2775, 2895, 3019, 3147, 3279, 3416, 3558, 3704, 3854, 4010, 4171, 4337, 4509, 4686, 4869,5058, 5253, 5455, 5663, 5877, 6099, 6328, 6564, 6808, 7150, 7500, 7850, 8250, 8650, 8999, 9500, 9999]
-NvarBins_all = len(varBins_all)-1
+#varBins_all = [1, 3, 6, 10, 16, 23, 31, 40, 50, 61, 74, 88, 103, 119, 137, 156, 176, 197, 220, 244, 270, 296, 325, 354, 386, 419, 453, 489, 526, 565, 606, 649,  693, 740, 788, 838, 890, 944, 1000, 1058,1118, 1181, 1246, 1313, 1383, 1455, 1530, 1607, 1687, 1770, 1856, 1945, 2037, 2132, 2231, 2332, 2438, 2546, 2659, 2775, 2895, 3019, 3147, 3279, 3416, 3558, 3704, 3854, 4010, 4171, 4337, 4509, 4686, 4869,5058, 5253, 5455, 5663, 5877, 6099, 6328, 6564, 6808, 7150, 7500, 7850, 8250, 8650, 8999, 9500, 9999]
+varBins_all = [1, 3, 6, 10, 16, 23, 31, 40, 50, 61, 74, 88, 103, 119, 137, 156, 176, 197, 220, 244, 270, 296, 325, 354, 386, 419, 453, 489, 526, 565, 606, 649,  693, 740, 788, 838, 890, 944, 1000, 1058,1118, 1181, 1246, 1313, 1383, 1455, 1530, 1607, 1687, 1770, 1856, 1945, 2037, 2132, 2231, 2332, 2438, 2546, 2659, 2775, 2895, 3019, 3147, 3279, 3416, 3558, 3704, 3854, 4010, 4171, 4337, 4509, 4686, 4869,5058, 5253, 5455, 5663, 5877, 6099, 6328, 6564, 6808, 7000, 7250, 7500, 7750, 8000]
 
 fitFunction = opt.fitFunction
 
@@ -404,7 +404,7 @@ for number in range(nToy):
 
             #print(x.setRange("binrange",bin_low,bin_up))
             
-    #	print("bin range ",bin_low,"  ", bin_up)
+            print("bin range ",bin_low,"  ", bin_up)
     #	print("X range ",x.getMin(),"  ", x.getMax())
             signal_pdfIntegral = signalPdf.createIntegral(ROOT.RooArgSet(x),RooFit.NormSet(ROOT.RooArgSet(x)),RooFit.Range("toy_"+str(ibin)))
             signal_pdfIntegral_norm = signal_pdfIntegral.getVal()/signal_pdfIntrinsicNorm.getVal()
