@@ -114,7 +114,7 @@ if float(opt.expectSignal)==0:
     #rMin = 0
     rMax = limit*10
 
-    if mass >= 2000:
+    if mass >= 2100:
         rMin = 0
 else:
     rMin = -float(opt.expectSignal)*10

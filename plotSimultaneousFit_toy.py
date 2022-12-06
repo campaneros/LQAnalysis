@@ -8,7 +8,7 @@ import datetime
 import subprocess
 import io
 import ROOT
-#import re
+import re
 
 from array import array
 from glob import glob
@@ -31,16 +31,16 @@ parser = optparse.OptionParser(usage)
 
 
 
-parser.add_option("-t", "--toysfile", dest="toysfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M3000_L1p0_t_10_syst0_seed1123456/higgsCombine_toys10_expectSignal0.0.GenerateOnly.mH120.123456.root",
+parser.add_option("-t", "--toysfile", dest="toysfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M2000_L1p0_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.0.GenerateOnly.mH120.123456.root",
                   help="input file with fitted toys")
 
-parser.add_option("-f", "--fitfile", dest="fitfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M3000_L1p0_t_10_syst0_seed1123456/higgsCombine_toys10_expectSignal0.0_gen.MultiDimFit.mH120.123456.root",
+parser.add_option("-f", "--fitfile", dest="fitfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M2000_L1p0_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.0_gen.MultiDimFit.mH120.123456.root",
                   help="input file with tree of post-fit parameters.")
 
 parser.add_option("-c", "--catdir", dest="catdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M1000_L0p1/categories/",
                   help="name of directory containing categories dirs")
                   
-parser.add_option("-o", "--outputdir", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/plotSimFit_std_4par/LQumu_M1000_L0p1_bis",
+parser.add_option("-o", "--outputdir", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/plotSimFit_std_4par/LQumu_M1000_L0p1_bis_test",
                   help="name of the output directory")
 
 parser.add_option("-b", "--outputfilename", dest="outputfile", default="expect_signal",
@@ -346,7 +346,7 @@ for number in range(nToy):
         #     meanShape_mu_err_postfit[0] = 1
         #fitTree.SetBranchAddress("trackedParam_meanShape_sigma_err_"+signalstring, meanShape_sigma_err_postfit)
 
-        fitTree.GetEntry(0)
+        fitTree.GetEntry(number)
 
         #JES_sys.setVal(JES_sys_postfit[0])
         #JER_sys.setVal(JER_sys_postfit[0])
@@ -404,7 +404,7 @@ for number in range(nToy):
 
             #print(x.setRange("binrange",bin_low,bin_up))
             
-            print("bin range ",bin_low,"  ", bin_up)
+           # print("bin range ",bin_low,"  ", bin_up)
     #	print("X range ",x.getMin(),"  ", x.getMax())
             signal_pdfIntegral = signalPdf.createIntegral(ROOT.RooArgSet(x),RooFit.NormSet(ROOT.RooArgSet(x)),RooFit.Range("toy_"+str(ibin)))
             signal_pdfIntegral_norm = signal_pdfIntegral.getVal()/signal_pdfIntrinsicNorm.getVal()
@@ -439,7 +439,7 @@ for number in range(nToy):
             hBkg.SetBinContent(ibin,bin_bkgEvents_norm)
             
             bin_data = hData.GetBinContent(ibin)
-            #print(bin_data)
+            print(bin_data)
             hData_norm.SetBinContent(ibin, bin_data/bin_width)
             hData_norm.SetBinError(ibin, TMath.Sqrt(bin_data)/bin_width)
         
