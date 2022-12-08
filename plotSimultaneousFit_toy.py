@@ -136,7 +136,7 @@ workspace = RooWorkspace()
 
 workspace=workspacefile.Get(workspacename)
 
-toy = toysfile.Get("toys/toy_1")
+#toy = toysfile.Get("toys/toy_1")
 #print(toy)
 #else:
 #    toy = toysfile.Get("toys/toy_"+str(nToy) )
@@ -215,15 +215,28 @@ for number in range(nToy):
 
         app=(cat.split("_"))[4]
         sign_=(cat.strip("datacard_"))
-        print(app)
-        print(sign_)
+        #print(app)
+        #print(sign_)
         #x = RooRealVar("m_muj_ak4_category1Muon","m_muj_ak4_category1Muon",41,453,3854)
         #x = workspace.var("m_muj_ak4_"+app)
 
-        t= toy.get()
+        t= toy.get() ##RooArgSet
+        print(toy.Print())
         toyvar= t.find("m_muj_ak4_"+app)
         print(toyvar)
-        test = toy.binnedClone("test","test")
+        test=toy.binnedClone("test","test")
+        print(test.Print())
+        name = "m_muj_ak4_"+app
+        #toy2 = RooDataSet("Dataset_m_muj_ak4_"+app,"Dataset_m_muj_ak4_"+app, toy ,RooArgSet(toyvar), RooFormulaVar("Dataset_m_muj_ak4_"+app,"Dataset_m_muj_ak4_"+app,"m_muj_ak4_"+app+"<3600",RooArgList(toyvar)), "weight:_weight_")
+        #test = toy2.binnedClone("test","test")
+        #print(toy2.Print())
+       #print(test.Print())
+        #toy.printArgs()
+        #for ind in range(toy.sumEntries()):
+        #    print()
+        #test= toy.binnedClone("test","test",toyvar<4000)
+        #test=toy.split(RooAbsCategory(toyvar))
+        #print(test.Print())
         #print(test.binVolume())
         #print(test.Print())
         var_min_set = toyvar.getMin()
@@ -260,7 +273,12 @@ for number in range(nToy):
         
         #Get toy data RooDataHist from file
         #roohist_data = workspace.data("RooDataHist_"+app)
-        hData = test.createHistogram("hData_"+app, toyvar, RooFit.Binning(b))
+        #RooAbsData("m_muj_ak4_"+app,"m_muj_ak4_"+app,RooArgList(toyvar))
+        toyvar.setRange("Reduced_range",var_min_set,var_max_set)
+        hData = test.createHistogram("RooDataHist_"+cat, toyvar, RooFit.Binning(b))
+        #hData2 = RooAbsReal.fillHistogram(hData,RooArgList(toyvar))
+       # hData= RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat,RooArgList(toyvar))
+        #hData = toy.createHistogram("hData_"+app, toyvar, RooFit.Binning(b))
         hData_norm = hData.Clone("hData_norm_"+app)
 
         #Get ParametricShapeBin pdf and parameters from workspace and extend with norm
@@ -439,7 +457,9 @@ for number in range(nToy):
             hBkg.SetBinContent(ibin,bin_bkgEvents_norm)
             
             bin_data = hData.GetBinContent(ibin)
-            print(bin_data)
+            if bin_data !=  norm_var.getVal() and bin_up == a[NvarBins]:
+                bin_data=0 
+            print(bin_data, norm_var.getVal())
             hData_norm.SetBinContent(ibin, bin_data/bin_width)
             hData_norm.SetBinError(ibin, TMath.Sqrt(bin_data)/bin_width)
         
