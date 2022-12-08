@@ -11,13 +11,14 @@ import array
 
 from array import array
 from glob import glob
-from ROOT import *
+import ROOT as R
+#from ROOT import R.TGraph, R.TFile, R.gROOT, R.TCanvas, R.gPad, R.TLegend, TColor
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__))+"/../../")
 import tdrstyle
 import CMS_lumi
 
-gROOT.SetBatch(True)
+R.gROOT.SetBatch(True)
 
 usage = "usage: python plotLimits.py -i /afs/cern.ch/work/s/santanas/Releases/CMSSW_8_1_0_Trijet/src/CMSJET/RootTreeAnalyzer/scripts/fit/trijetAna/output/fit_data/limit/Res1ToRes2ToGluGlu -l 40926"
 
@@ -89,17 +90,17 @@ for fl in file_list:
 
         model = (filename.split(".AsymptoticLimits")[0]).split("_") [1]
         mass = ( filename.split(".AsymptoticLimits")[0]).split("_") [2]
-        R = ( filename.split(".AsymptoticLimits")[0]).split("_") [3]
+        L = ( filename.split(".AsymptoticLimits")[0]).split("_") [3]
         cat = (filename.split(".AsymptoticLimits")[0]).split("_") [4]
-        print model, mass, R, cat
+        print(model, mass, L, cat)
 
 
         #fl_fullpath = opt.inputdir+"/"+fl
-        print fl
+        print(fl)
 
-        tfileinput = TFile.Open(fl)
-        #tfileinput.ls()
-        tree = tfileinput.Get("limit")
+        inputfile = R.TFile.Open(str(fl))
+        #inputfile.ls()
+        tree = inputfile.Get("limit")
  
         if app != cat:
             app=cat
@@ -111,11 +112,11 @@ for fl in file_list:
             limit_2sigmaDown[cat] = []
             limit_observed[cat] = []
             sigma[cat] = []
-        if "0p1" in R:
+        if "0p1" in L:
             sigma[cat].append(9.51E-04)
             sigma[cat].append(5.16E-05)
             sigma[cat].append(5.73E-06)
-        elif "1p0"in R:
+        elif "1p0"in L:
             sigma[cat].append(9.53E-02)
             sigma[cat].append(5.27E-03)
             sigma[cat].append(6.09E-04)
@@ -123,7 +124,7 @@ for fl in file_list:
         for event in tree:
             limit = event.limit
             quantile = event.quantileExpected
-            print limit, quantile
+            print(limit, quantile)
 
             if quantile>0.95 and quantile<1:
                 limit_2sigmaUp[cat].append(limit)
@@ -138,7 +139,7 @@ for fl in file_list:
             if quantile == -1:
                 limit_observed[cat].append(limit)
 
-        tfileinput.Close()
+        inputfile.Close()
         counter+=1
 
 print(var)
@@ -152,11 +153,11 @@ for key in var:
     
     N = len(var[key])
     #print N
-    yellow[key] = TGraph(2*N)    # yellow band
-    green[key] = TGraph(2*N)     # green band
-    median[key] = TGraph(N)      # median line
-    observed[key] = TGraph(N)
-    cross[key] =  TGraph(N)   # median line
+    yellow[key] = R.TGraph(2*N)    # yellow band
+    green[key] = R.TGraph(2*N)     # green band
+    median[key] = R.TGraph(N)      # median line
+    observed[key] = R.TGraph(N)
+    cross[key] =  R.TGraph(N)   # median line
 
     for i in range(N):
 	#if opt.single and "all" in cat:
@@ -184,14 +185,14 @@ for key in var:
     T = 0.08*H
     B = 0.12*H
     L = 0.12*W
-    R = 0.04*W
-    c = TCanvas("c","c",100,100,W,H)
+    L = 0.04*W
+    c = R.TCanvas("c","c",100,100,W,H)
     c.SetFillColor(0)
     c.SetBorderMode(0)
     c.SetFrameFillStyle(0)
     c.SetFrameBorderMode(0)
     c.SetLeftMargin( L/W )
-    c.SetRightMargin( R/W )
+    c.SetRightMargin( L/W )
     c.SetTopMargin( T/H )
     c.SetBottomMargin( B/H )
     c.SetTickx(0)
@@ -214,13 +215,13 @@ for key in var:
     frame.SetMaximum(max(limit_2sigmaUp[key])*1.05)
     frame.GetXaxis().SetLimits(float(min(var[key])),float(max(var[key])))
 
-    yellow[key].SetFillColor(kOrange)
-    yellow[key].SetLineColor(kOrange)
+    yellow[key].SetFillColor(R.kOrange)
+    yellow[key].SetLineColor(R.kOrange)
     yellow[key].SetFillStyle(1001)
     yellow[key].Draw('F')
  
-    green[key].SetFillColor(kGreen+1)
-    green[key].SetLineColor(kGreen+1)
+    green[key].SetFillColor(R.kGreen+1)
+    green[key].SetLineColor(R.kGreen+1)
     green[key].SetFillStyle(1001)
     green[key].Draw('Fsame')
  
@@ -235,14 +236,14 @@ for key in var:
     observed[key].Draw('Lsame')
  
     CMS_lumi.CMS_lumi(c, iPeriod, iPos)   
-    gPad.SetTicks(1,1)
+    R.gPad.SetTicks(1,1)
     frame.Draw('sameaxis')
  
     x1 = 0.45
     x2 = x1 + 0.24
     y2 = 0.76
     y1 = 0.60
-    legend = TLegend(x1,y1,x2,y2)
+    legend = R.TLegend(x1,y1,x2,y2)
     legend.SetFillStyle(0)
     legend.SetBorderSize(0)
     legend.SetTextSize(0.041)
@@ -252,7 +253,7 @@ for key in var:
     legend.AddEntry(green[key], "#pm 1 std. deviation",'f')
     legend.AddEntry(yellow[key],"#pm 2 std. deviation",'f')
     legend.Draw()
-    print " "
+    print(" ")
     canvasfilename_png = "UpperLimits_R"+str(key)+".png"
     canvasfilename_pdf = "UpperLimits_R"+str(key)+".pdf"
     c.SaveAs(canvasfilename_png)
@@ -269,14 +270,14 @@ H = 600
 T = 0.08*H
 B = 0.12*H
 L = 0.12*W
-R = 0.04*W
-c = TCanvas("c","c",100,100,W,H)
+L = 0.04*W
+c = R.TCanvas("c","c",100,100,W,H)
 c.SetFillColor(0)
 c.SetBorderMode(0)
 c.SetFrameFillStyle(0)
 c.SetFrameBorderMode(0)
 c.SetLeftMargin( L/W )
-c.SetRightMargin( R/W )
+c.SetRightMargin( L/W )
 c.SetTopMargin( T/H )
 c.SetBottomMargin( B/H )
 c.SetTickx(0)
@@ -303,13 +304,13 @@ for count,key in enumerate(sorted(var)):
         frame.SetMaximum(max(max(limit_2sigmaUp[key]),max(sigma[key]))*10)
         frame.GetXaxis().SetLimits(float(min(var[key])),float(max(var[key])))
         c.SetLogy(1)        
-        yellow[key].SetFillColor(kOrange)
-        yellow[key].SetLineColor(kOrange)
+        yellow[key].SetFillColor(R.kOrange)
+        yellow[key].SetLineColor(R.kOrange)
         yellow[key].SetFillStyle(1001)
         yellow[key].Draw('F')
 
-        green[key].SetFillColor(kGreen+1)
-        green[key].SetLineColor(kGreen+1)
+        green[key].SetFillColor(R.kGreen+1)
+        green[key].SetLineColor(R.kGreen+1)
         green[key].SetFillStyle(1001)
         green[key].Draw('Fsame')
 
@@ -322,20 +323,20 @@ for count,key in enumerate(sorted(var)):
         observed[key].SetLineStyle(1)
         observed[key].Draw('Lsame')
 
-        cross[key].SetLineColor(kBlue)
+        cross[key].SetLineColor(R.kBlue)
         cross[key].SetLineWidth(2)
         cross[key].SetLineStyle(1)
         cross[key].Draw('Lsame')
 
 
         CMS_lumi.CMS_lumi(c, iPeriod, iPos)   
-        gPad.SetTicks(1,1)
+        R.gPad.SetTicks(1,1)
         frame.Draw('sameaxis')
         x1 = 0.40
         x2 = x1 + 0.24
         y2 = 0.90
         y1 = 0.70
-        legend = TLegend(x1,y1,x2,y2)
+        legend = R.TLegend(x1,y1,x2,y2)
         legend.SetFillStyle(0)
         legend.SetBorderSize(0)
         legend.SetTextSize(0.041)
@@ -352,7 +353,7 @@ for count,key in enumerate(sorted(var)):
         median[key].Draw('Lsame')
         legend.AddEntry(median[key], " Median asymptotic expected %s"%(key.strip("category")),'L')
 
-	legend.Draw()
+    legend.Draw()
 for ext in ['png','pdf']:
 	canvasfilename = "UpperLimits_all_cat."+ext
 #canvasfilename_pdf = "UpperLimits_all_cat.pdf"
@@ -364,5 +365,5 @@ c.Close()
 #os.system("mv "+canvasfilename_pdf+" "+opt.inputdir)
 
 	
-print "Output in: "+opt.inputdir
+print("Output in: "+opt.inputdir)
 
