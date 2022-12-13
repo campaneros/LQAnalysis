@@ -31,13 +31,13 @@ parser = optparse.OptionParser(usage)
 
 
 
-parser.add_option("-t", "--toysfile", dest="toysfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M2000_L1p0_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.0.GenerateOnly.mH120.123456.root",
+parser.add_option("-t", "--toysfile", dest="toysfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M2000_L1p0_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.0004.GenerateOnly.mH120.123456.root",
                   help="input file with fitted toys")
 
-parser.add_option("-f", "--fitfile", dest="fitfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M2000_L1p0_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.0_gen.MultiDimFit.mH120.123456.root",
+parser.add_option("-f", "--fitfile", dest="fitfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M2000_L1p0_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.0004_gen.MultiDimFit.mH120.123456.root",
                   help="input file with tree of post-fit parameters.")
 
-parser.add_option("-c", "--catdir", dest="catdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M1000_L0p1/categories/",
+parser.add_option("-c", "--catdir", dest="catdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M2000_L1p0/categories/",
                   help="name of directory containing categories dirs")
                   
 parser.add_option("-o", "--outputdir", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/plotSimFit_std_4par/LQumu_M1000_L0p1_bis_test",
@@ -663,7 +663,7 @@ for number in range(nToy):
         #if r < 0.001:
         #    legend.AddEntry(hSignal, "signal (fb) r="+str(round(r*1000,10)), "l")
         #else:
-        legend.AddEntry(hSignal, "signal (pb) r="+str(round(r,10)) +"#pm  "+str(round(err_r,9)), "l")
+        legend.AddEntry(hSignal, "signal (pb) r="+str(round(r,5)) +"#pm  "+str(round(err_r,5)), "l")
         legend.Draw()
         
         ## Plot fit results

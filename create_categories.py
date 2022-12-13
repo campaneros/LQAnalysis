@@ -572,7 +572,7 @@ for icat, cat in enumerate(subDirList):
         t1.SetTextColor(1)
         t1.SetTextSize( 0.04 )
         WWText = "N+ = "+str(int(Npos[0]))+"  N- = "+str(int(Nneg[0]))+"\n Nruns = "+str(int(WWruns[0])) + "  pval = "+str(round(WWpval[0],2)) 
-        t1 = pt.AddText(WWText)
+        #t1 = pt.AddText(WWText)
         t1.SetTextColor(1)
         t1.SetTextSize( 0.04 )
         

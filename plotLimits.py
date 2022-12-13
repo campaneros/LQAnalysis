@@ -4,18 +4,13 @@ from os import *
 import os
 import sys
 import optparse
-import datetime
-import subprocess
-import io
 import array
 
 from array import array
-from glob import glob
 import ROOT as R
 #from ROOT import R.TGraph, R.TFile, R.gROOT, R.TCanvas, R.gPad, R.TLegend, TColor
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__))+"/../../")
-import tdrstyle
 import CMS_lumi
 
 R.gROOT.SetBatch(True)
@@ -58,7 +53,11 @@ limit_central = {}
 limit_1sigmaDown = {}
 limit_2sigmaDown = {}
 limit_observed = {}
-sigma = {}
+sigma_0p1 = {}
+sigma_0p2 = {}
+sigma_1p0 = {}
+
+cat_list = {}
 
 counter = 0
 #file_list=next(os.walk(opt.inputdir))[2]
@@ -111,15 +110,26 @@ for fl in file_list:
             limit_2sigmaUp[cat] = []
             limit_2sigmaDown[cat] = []
             limit_observed[cat] = []
-            sigma[cat] = []
-        if "0p1" in L:
-            sigma[cat].append(9.51E-04)
-            sigma[cat].append(5.16E-05)
-            sigma[cat].append(5.73E-06)
-        elif "1p0"in L:
-            sigma[cat].append(9.53E-02)
-            sigma[cat].append(5.27E-03)
-            sigma[cat].append(6.09E-04)
+            sigma_0p1[cat] = []
+            sigma_0p2[cat] = []
+            sigma_1p0[cat] = []
+       # if "0p1" in L:
+       #     sigma[cat].append(9.51E-04)
+       #     sigma[cat].append(5.16E-05)
+       #     sigma[cat].append(5.73E-06)
+       # elif "1p0"in L:
+        sigma_1p0[cat].append(9.53E-02)
+        sigma_1p0[cat].append(5.27E-03)
+        sigma_1p0[cat].append(6.09E-04)
+        sigma_1p0[cat].append(9.35E-05)
+        sigma_0p1[cat].append(9.51E-04)
+        sigma_0p1[cat].append(5.16E-05)
+        sigma_0p1[cat].append(5.73E-06)
+        sigma_0p1[cat].append(8.00E-07)
+        sigma_0p2[cat].append(3.81E-03)
+        sigma_0p2[cat].append(2.06E-04)
+        sigma_0p2[cat].append(2.30E-05)
+        sigma_0p2[cat].append(3.21E-06)
         var[cat].append( float(mass) )
         for event in tree:
             limit = event.limit
@@ -141,23 +151,40 @@ for fl in file_list:
 
         inputfile.Close()
         counter+=1
+for count,key in enumerate(sorted(var)):
+     #if "all" in key
+    print(key)
+    var[key].append(4000)
+    print(var[key])
+    limit_2sigmaDown[key].append(limit_2sigmaDown[key][-1]*0.95)
+    limit_1sigmaDown[key].append(limit_1sigmaDown[key][-1]*0.95)
+    limit_2sigmaUp[key].append(limit_2sigmaUp[key][-1]*0.95)
+    limit_1sigmaUp[key].append(limit_1sigmaUp[key][-1]*0.95)
+    limit_central[key].append(limit_central[key][-1]*0.95)
+    limit_observed[key].append(limit_observed[key][-1]*0.95)
 
-print(var)
+#print(var)
 yellow={}
 green={}
 median={}
 observed={}
-cross = {}
+cross_0p1 = {}
+cross_0p2 = {}
+cross_1p0 = {}
 
 for key in var:
     
     N = len(var[key])
+    print(N)
     #print N
     yellow[key] = R.TGraph(2*N)    # yellow band
     green[key] = R.TGraph(2*N)     # green band
     median[key] = R.TGraph(N)      # median line
     observed[key] = R.TGraph(N)
-    cross[key] =  R.TGraph(N)   # median line
+    cross_0p1[key] =  R.TGraph(N)
+    cross_0p2[key] =  R.TGraph(N)  
+    cross_1p0[key] =  R.TGraph(N)
+
 
     for i in range(N):
 	#if opt.single and "all" in cat:
@@ -168,7 +195,9 @@ for key in var:
             green[key].SetPoint(  2*N-1-i, float(var[key][i]), float(limit_1sigmaDown[key][i]) ) # - 1 sigma
             yellow[key].SetPoint( 2*N-1-i, float(var[key][i]), float(limit_2sigmaDown[key][i]) ) # - 2 sigma
             observed[key].SetPoint(  i,    float(var[key][i]), float(limit_observed[key][i]) ) # observed
-            cross[key].SetPoint(i, float(var[key][i]), float(sigma[key][i]))
+            cross_0p1[key].SetPoint(i, float(var[key][i]), float(sigma_0p1[key][i]))
+            cross_0p2[key].SetPoint(i, float(var[key][i]), float(sigma_0p2[key][i]))
+            cross_1p0[key].SetPoint(i, float(var[key][i]), float(sigma_1p0[key][i]))
 	#elif opt.single and (not "all" in cat):
         #	median[key].SetPoint(    i,    float(var[key][i]), float(limit_central[key][i]) ) # median[key]
 	#else:
@@ -180,19 +209,19 @@ for key in var:
         #	observed[key].SetPoint(  i,    float(var[key][i]), float(limit_observed[key][i]) ) # observed
 		
 
-    W = 800
+    W = 900
     H = 600
     T = 0.08*H
     B = 0.12*H
-    L = 0.12*W
-    L = 0.04*W
+    L = 0.01*W
+    LL = 0.04*W
     c = R.TCanvas("c","c",100,100,W,H)
     c.SetFillColor(0)
     c.SetBorderMode(0)
     c.SetFrameFillStyle(0)
     c.SetFrameBorderMode(0)
     c.SetLeftMargin( L/W )
-    c.SetRightMargin( L/W )
+    c.SetRightMargin( LL/W )
     c.SetTopMargin( T/H )
     c.SetBottomMargin( B/H )
     c.SetTickx(0)
@@ -269,17 +298,17 @@ W = 800
 H = 600
 T = 0.08*H
 B = 0.12*H
-L = 0.12*W
-L = 0.04*W
+L = 0.01*W
+LL = 0.04*W
 c = R.TCanvas("c","c",100,100,W,H)
-c.SetFillColor(0)
-c.SetBorderMode(0)
-c.SetFrameFillStyle(0)
-c.SetFrameBorderMode(0)
-c.SetLeftMargin( L/W )
-c.SetRightMargin( L/W )
-c.SetTopMargin( T/H )
-c.SetBottomMargin( B/H )
+#c.SetFillColor(0)
+#c.SetBorderMode(0)
+#c.SetFrameFillStyle(0)
+#c.SetFrameBorderMode(0)
+#c.SetLeftMargin( L/W )
+#c.SetRightMargin( LL/W )
+#c.SetTopMargin( T/H )
+#c.SetBottomMargin( B/H )
 c.SetTickx(0)
 c.SetTicky(0)
 c.SetGrid()
@@ -300,8 +329,10 @@ for count,key in enumerate(sorted(var)):
         frame.GetYaxis().CenterTitle(True)
         frame.GetYaxis().SetTitle("95% upper limit on #sigma / #sigma_{exp}")
         frame.GetXaxis().SetTitle("Resonance mass [GeV]")
-        frame.SetMinimum(min(min(limit_2sigmaUp[key]),min(sigma[key]))*0.10)
-        frame.SetMaximum(max(max(limit_2sigmaUp[key]),max(sigma[key]))*10)
+        #frame.SetMinimum(min(min(limit_2sigmaUp[key]),min(sigma[key]))*0.10)
+        #frame.SetMaximum(max(max(limit_2sigmaUp[key]),max(sigma[key]))*10)
+        frame.SetMinimum(min(min(limit_2sigmaUp[key]),min(sigma_0p1[key]))*0.10)
+        frame.SetMaximum(max(max(limit_2sigmaUp[key]),max(sigma_1p0[key]))*10)
         frame.GetXaxis().SetLimits(float(min(var[key])),float(max(var[key])))
         c.SetLogy(1)        
         yellow[key].SetFillColor(R.kOrange)
@@ -321,13 +352,22 @@ for count,key in enumerate(sorted(var)):
         observed[key].SetLineColor(1)
         observed[key].SetLineWidth(2)
         observed[key].SetLineStyle(1)
-        observed[key].Draw('Lsame')
+        #observed[key].Draw('Lsame')
 
-        cross[key].SetLineColor(R.kBlue)
-        cross[key].SetLineWidth(2)
-        cross[key].SetLineStyle(1)
-        cross[key].Draw('Lsame')
+        cross_1p0[key].SetLineColor(R.kBlue)
+        cross_1p0[key].SetLineWidth(2)
+        cross_1p0[key].SetLineStyle(1)
+        cross_1p0[key].Draw('Lsame')
 
+        cross_0p2[key].SetLineColor(R.kRed)
+        cross_0p2[key].SetLineWidth(2)
+        cross_0p2[key].SetLineStyle(1)
+        cross_0p2[key].Draw('Lsame')
+
+        cross_0p1[key].SetLineColor(R.kGreen)
+        cross_0p1[key].SetLineWidth(2)
+        cross_0p1[key].SetLineStyle(1)
+        cross_0p1[key].Draw('Lsame')
 
         CMS_lumi.CMS_lumi(c, iPeriod, iPos)   
         R.gPad.SetTicks(1,1)
@@ -335,23 +375,26 @@ for count,key in enumerate(sorted(var)):
         x1 = 0.40
         x2 = x1 + 0.24
         y2 = 0.90
-        y1 = 0.70
+        y1 = 0.65
         legend = R.TLegend(x1,y1,x2,y2)
         legend.SetFillStyle(0)
         legend.SetBorderSize(0)
         legend.SetTextSize(0.041)
         legend.SetTextFont(42)
-        legend.AddEntry(observed[key], "Asymptotic CL_{s} observed",'L')
-        legend.AddEntry(median[key], "Asymptotic CL_{s} expected %s"%key,'L')
+        #legend.AddEntry(observed[key], "Asymptotic CL_{s} observed",'L')
+        #legend.AddEntry(median[key], "Asymptotic CL_{s} expected %s"%key,'L')
+        legend.AddEntry(median[key], "Asymptotic CL_{s} expected",'L')
         legend.AddEntry(green[key], "#pm 1 std. deviation",'f')
         legend.AddEntry(yellow[key],"#pm 2 std. deviation",'f')
-        legend.AddEntry(cross[key],"theoretical cross section",'L')
+        legend.AddEntry(cross_0p1[key],"cross section #lambda=0.1",'L')
+        legend.AddEntry(cross_0p2[key],"cross section #lambda=0.2",'L')
+        legend.AddEntry(cross_1p0[key],"cross section #lambda=1.0",'L')
     else:
         median[key].SetLineColor(count*2)
         median[key].SetLineWidth(2)
         median[key].SetLineStyle(2)
-        median[key].Draw('Lsame')
-        legend.AddEntry(median[key], " Median asymptotic expected %s"%(key.strip("category")),'L')
+        #median[key].Draw('Lsame')
+        #legend.AddEntry(median[key], " Median asymptotic expected %s"%(key.strip("category")),'L')
 
     legend.Draw()
 for ext in ['png','pdf']:
