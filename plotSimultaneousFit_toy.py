@@ -227,7 +227,9 @@ for number in range(nToy):
         test=toy.binnedClone("test","test")
         print(test.Print())
         name = "m_muj_ak4_"+app
-        #toy2 = RooDataSet("Dataset_m_muj_ak4_"+app,"Dataset_m_muj_ak4_"+app, toy ,RooArgSet(toyvar), RooFormulaVar("Dataset_m_muj_ak4_"+app,"Dataset_m_muj_ak4_"+app,"m_muj_ak4_"+app+"<3600",RooArgList(toyvar)), "weight:_weight_")
+        #hData = RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat, RooArgList(toyvar), RooFit.Cut("CMS_channel==CMS_channel::category1Muon"))
+        #RooFit.Cut("CMS_channel==CMS_channel::category1Muon")
+        #toy2 = RooDataSet("Dataset_m_muj_ak4_"+app,"Dataset_m_muj_ak4_"+app, toy ,RooArgSet(toyvar), RooFormulaVar("CMS_channel::category1Muon"))
         #test = toy2.binnedClone("test","test")
         #print(toy2.Print())
        #print(test.Print())
@@ -275,9 +277,9 @@ for number in range(nToy):
         #roohist_data = workspace.data("RooDataHist_"+app)
         #RooAbsData("m_muj_ak4_"+app,"m_muj_ak4_"+app,RooArgList(toyvar))
         toyvar.setRange("Reduced_range",var_min_set,var_max_set)
-        hData = test.createHistogram("RooDataHist_"+cat, toyvar, RooFit.Binning(b))
+        hData = test.createHistogram("RooDataHist_"+cat, toyvar, RooFit.Binning(b), RooFit.Cut("CMS_channel==CMS_channel::"+app))
         #hData2 = RooAbsReal.fillHistogram(hData,RooArgList(toyvar))
-       # hData= RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat,RooArgList(toyvar))
+        #hData= RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat,RooArgList(toyvar), RooFit.Cut("CMS_channel==CMS_channel::category1Muon"))
         #hData = toy.createHistogram("hData_"+app, toyvar, RooFit.Binning(b))
         hData_norm = hData.Clone("hData_norm_"+app)
 
@@ -457,8 +459,8 @@ for number in range(nToy):
             hBkg.SetBinContent(ibin,bin_bkgEvents_norm)
             
             bin_data = hData.GetBinContent(ibin)
-            if bin_data !=  norm_var.getVal() and bin_up == a[NvarBins]:
-                bin_data=0 
+            #if bin_data !=  norm_var.getVal() and bin_up == a[NvarBins]:
+            #    bin_data=0 
             print(bin_data, norm_var.getVal())
             hData_norm.SetBinContent(ibin, bin_data/bin_width)
             hData_norm.SetBinError(ibin, TMath.Sqrt(bin_data)/bin_width)

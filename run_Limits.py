@@ -76,7 +76,7 @@ for line in datacardFile:
     
     
     if len(splitline) != lenline:
-        print "ERROR: wrong file with datacard list"
+        print("ERROR: wrong file with datacard list")
         sys.exit()
         
     #print splitline
@@ -84,11 +84,11 @@ for line in datacardFile:
     mass = splitline[1]
     R = splitline[2].replace(".","p")
     if opt.single:
-	category = splitline[3]
-    	datacard = splitline[4]
+        category = splitline[3]
+        datacard = splitline[4]
     else:
-	category = "all"
-    	datacard = splitline[3]
+        category = "all"
+        datacard = splitline[3]
 	
     label = "_"+str(model)+"_"+str(mass)+"_"+str(R)+"_"+category
 
@@ -126,7 +126,7 @@ for line in datacardFile:
                +" -S "+str(opt.syst)
               # +" --expectSignal 1"
                )
-    print command
+    print(command)
     os.system(command)
 
     os.system("mkdir -p "+outputDir+"/"+R)
@@ -136,5 +136,5 @@ for line in datacardFile:
     commandOutput = "mv "+outputrootfile+" "+outputDir+"/"+R+"/"+category
     os.system(commandOutput) 
 
-print "Output in "+outputDir
+print("Output in "+outputDir)
 
