@@ -10,7 +10,9 @@ import io
 
 from array import array
 from glob import glob
-from ROOT import *
+#from ROOT import *
+import ROOT as ROOT
+
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__))+"/../../")
 import tdrstyle
@@ -19,10 +21,10 @@ import create_workspaces_and_datacards_utils as cwd_utils
 
 fitFunction_name = "std_4par"
 fitparam = []
-#gROOT.LoadMacro(os.path.dirname(os.path.abspath(__file__))+"/../../src/libCpp/RooDoubleCBFast.cc+")
-gROOT.SetBatch(True)
-gErrorIgnoreLevel = kFatal
-RooMsgService.instance().setGlobalKillBelow(RooFit.WARNING)
+#ROOT.gROOT.LoadMacro(os.path.dirname(os.path.abspath(__file__))+"/../../src/libCpp/RooDoubleCBFast.cc+")
+ROOT.gROOT.SetBatch(True)
+gErrorIgnoreLevel = ROOT.kFatal
+ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 
 inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna/src/RootTreeAnalyzer/Fit_Signal/category"
 filenameInput = "test_h1_mmuj_ak4.root"
@@ -143,7 +145,7 @@ ParametricBkgPdf = [None] * ncategories
 canvas = [None] * ncategories
 
 ## Create Workspace
-w = RooWorkspace(workspaceName,workspaceName)
+w = ROOT.RooWorkspace(workspaceName,workspaceName)
     # output tree with chi2
 M1_br = array('f', [0])
 R_br  = array('f', [0])
@@ -218,7 +220,7 @@ for icat, cat in enumerate(subDirList):
         print("var_min_set: ", str(var_min_set), "varBins[0]: ", str(varBins[0]), "varBins[1]: ", str(varBins[1]))
 
         NvarBins = len(varBins)-1
-        canvas[icat] = TCanvas("canvas_"+cat, "canvas_"+cat, 200, 10, 700, 500 )
+        canvas[icat] = ROOT.TCanvas("canvas_"+cat, "canvas_"+cat, 200, 10, 700, 500 )
 
 
         #print(varBins)
@@ -227,7 +229,7 @@ for icat, cat in enumerate(subDirList):
         ## Get original TH1 histogram from root file
         rootfilename = inputdir+"/"+cat+"/"+filenameInput
         #print rootfilename    
-        rootfile[icat] = TFile.Open(rootfilename)
+        rootfile[icat] = ROOT.TFile.Open(rootfilename)
         print("Get "+histoname+" from file "+rootfilename)
         th1_fromFile[icat] = rootfile[icat].Get(histoname) # 1 GeV bin histogram
         th1_fromFile[icat].Draw()
@@ -235,7 +237,7 @@ for icat, cat in enumerate(subDirList):
         integral = int(th1_fromFile[icat].Integral())
         print("diocaro", integral)
 
-	#outRoot=TFile( outputdir+"/background"+cat+".root","recreate")
+	#outRoot=ROOT.TFile( outputdir+"/background"+cat+".root","recreate")
 	#th1_fromFile[icat].Write()
 	#getattr(w,'import')(th1_fromFile[icat])
 	#print("dai")
@@ -245,17 +247,17 @@ for icat, cat in enumerate(subDirList):
         
 
       	  
-        ## Create RooDataHist in fit range from TH1
-        #rooHist[icat] = RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat,RooArgList(var[icat]),RooFit.Import(th1_rebin[icat]))
+        ## Create ROOT.RooDataHist in fit range from TH1
+        #rooHist[icat] = ROOT.RooDataHist("ROOT.RooDataHist_"+cat,"ROOT.RooDataHist_"+cat,ROOT.RooArgList(var[icat]),ROOT.RooFit.Import(th1_rebin[icat]))
         #numberOfEvents[icat] = rooHist[icat].sumEntries()
   
         test=th1_fromFile[icat].ComputeIntegral() 
         print(test)
         ## Generate toy histogram
-        gRandom = TRandom()
+        gRandom = ROOT.TRandom()
         if(generateToy==1):
-            th1_original[icat] = TH1D("Toy","Toy", th1_fromFile[icat].GetNbinsX(), th1_fromFile[icat].GetXaxis().GetXmin(), th1_fromFile[icat].GetXaxis().GetXmax())
-            #th1_original[icat] = TH1D("","", 5000, 0, 5000)
+            th1_original[icat] = ROOT.TH1D("Toy","Toy", th1_fromFile[icat].GetNbinsX(), th1_fromFile[icat].GetXaxis().GetXmin(), th1_fromFile[icat].GetXaxis().GetXmax())
+            #th1_original[icat] = ROOT.TH1D("","", 5000, 0, 5000)
             gRandom.SetSeed(0)
             print("MAREMMA MAIALA")
             th1_original[icat].FillRandom(th1_fromFile[icat],integral)
@@ -269,28 +271,28 @@ for icat, cat in enumerate(subDirList):
             # th1_original[icat].Add(th1_injected_2[icat], 1)
             # th1_original[icat].Add(th1_injected_1[icat], -2)
 
-        var[icat] = RooRealVar(varname+"_"+cat,vartitle,varBins_all[0],varBins_all[-1])
+        var[icat] = ROOT.RooRealVar(varname+"_"+cat,vartitle,varBins_all[0],varBins_all[-1])
         var[icat].Print()
 
         print("------------------------------------------------------------")
         print("                   FINAL FIT                                ")
         print("------------------------------------------------------------")
 
-        var[icat] = RooRealVar(varname+"_"+cat,vartitle,var_min_set,var_max_set)
+        var[icat] = ROOT.RooRealVar(varname+"_"+cat,vartitle,var_min_set,var_max_set)
         var[icat].Print()
 
-        RooFit.SumW2Error(kTRUE)
+        ROOT.RooFit.SumW2Error(ROOT.kTRUE)
         ## Create data histogram with coarser binning
         th1_rebin_bkg[icat] = th1_original[icat].Rebin(NvarBins,"th1_rebin_"+cat,array('d',varBins))
         th1_rebin[icat] = th1_fromFile[icat].Rebin(NvarBins,"th1_rebin_"+cat,array('d',varBins))
         print(varBins)
-        ## Create RooDataHist in fit range from TH1
-        rooHist[icat] = RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat,RooArgList(var[icat]),RooFit.Import(th1_rebin[icat]))
-        rooHist_bkg[icat] = RooDataHist("RooDataHist_bkg_"+cat,"RooDataHist_bkg_"+cat,RooArgList(var[icat]),RooFit.Import(th1_rebin_bkg[icat]))
+        ## Create ROOT.RooDataHist in fit range from TH1
+        rooHist[icat] = ROOT.RooDataHist("ROOT.RooDataHist_"+cat,"ROOT.RooDataHist_"+cat,ROOT.RooArgList(var[icat]),ROOT.RooFit.Import(th1_rebin[icat]))
+        rooHist_bkg[icat] = ROOT.RooDataHist("ROOT.RooDataHist_bkg_"+cat,"ROOT.RooDataHist_bkg_"+cat,ROOT.RooArgList(var[icat]),ROOT.RooFit.Import(th1_rebin_bkg[icat]))
         numberOfEvents[icat] = rooHist_bkg[icat].sumEntries()
         nbkg[icat] = rooHist[icat].sumEntries()
-        th1_rebin[icat].SetBinErrorOption(TH1.kPoisson)
-        th1_rebin_bkg[icat].SetBinErrorOption(TH1.kPoisson)
+        th1_rebin[icat].SetBinErrorOption(ROOT.TH1.kPoisson)
+        th1_rebin_bkg[icat].SetBinErrorOption(ROOT.TH1.kPoisson)
 
         ## Main physics observable defined in fit range
     ## Loop over signals
@@ -327,18 +329,18 @@ for icat, cat in enumerate(subDirList):
         	
             signalString = modell+"_"+category#+"_"+"M"+str(int(float(M1)))+"_R0p"+str(int(float(L)*10))+"_"+category
             print("signal_string   "+signalString)        	
-            InSigRoot=TFile(dirRootFile+"/h1_mmuj_ak4__"+modell+"_"+cat+".root","w")
+            InSigRoot=ROOT.TFile(dirRootFile+"/h1_mmuj_ak4__"+modell+"_"+cat+".root","w")
             #print(InSigRoot)
             test= "h1_mmuj_ak4__"+str(modell)
 		    #print(test)
             th1Sig=InSigRoot.Get(test)
             sig_integral = int(th1Sig.Integral())
             sig_rebi = th1Sig.Rebin(NvarBins,"th1_rebin_"+cat,array('d',varBins))
-        ## Create RooDataHist in fit range from TH1
-            rooHistSign = RooDataHist("RooDataHist_"+modell+cat,"RooDataHist_"+modell+cat,RooArgList(var[icat]),RooFit.Import(sig_rebi))
+        ## Create ROOT.RooDataHist in fit range from TH1
+            rooHistSign = ROOT.RooDataHist("ROOT.RooDataHist_"+modell+cat,"ROOT.RooDataHist_"+modell+cat,ROOT.RooArgList(var[icat]),ROOT.RooFit.Import(sig_rebi))
 		#print(th1Sig)
 		#InSigRoot.Close()
-		#outSigRoot=TFile(outputdir+"/"+modell+cat+".root","recreate")
+		#outSigRoot=ROOT.TFile(outputdir+"/"+modell+cat+".root","recreate")
 		#print(outSigRoot)
 		#th1Sig.SetName("sig")
 		#th1Sig.Write()

@@ -10,7 +10,8 @@ import io
 
 from array import array
 from glob import glob
-from ROOT import *
+#from ROOT import *
+import ROOT as ROOT
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__))+"/../../")
 import tdrstyle
@@ -20,9 +21,9 @@ import create_workspaces_and_datacards_utils as cwd_utils
 fitFunction_name = "std_4par"
 fitparam = []
 #gROOT.LoadMacro(os.path.dirname(os.path.abspath(__file__))+"/../../src/libCpp/RooDoubleCBFast.cc+")
-gROOT.SetBatch(True)
-gErrorIgnoreLevel = kFatal
-RooMsgService.instance().setGlobalKillBelow(RooFit.WARNING)
+ROOT.gROOT.SetBatch(True)
+gErrorIgnoreLevel = ROOT.kFatal
+ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 
 inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna/src/RootTreeAnalyzer/Fit_Signal/category"
 filenameInput = "test_h1_mmuj_ak4.root"
@@ -139,7 +140,7 @@ ParametricBkgPdf = [None] * ncategories
 canvas = [None] * ncategories
 
 ## Create Workspace
-w = RooWorkspace(workspaceName,workspaceName)
+w = ROOT.RooWorkspace(workspaceName,workspaceName)
     # output tree with chi2
 M1_br = array('f', [0])
 R_br  = array('f', [0])
@@ -214,12 +215,12 @@ for icat, cat in enumerate(subDirList):
         print("var_min_set: ", str(var_min_set), "varBins[0]: ", str(varBins[0]), "varBins[1]: ", str(varBins[1]))
 
         NvarBins = len(varBins)-1
-        canvas[icat] = TCanvas("canvas_"+cat, "canvas_"+cat, 200, 10, 700, 500 )
+        canvas[icat] = ROOT.TCanvas("canvas_"+cat, "canvas_"+cat, 200, 10, 700, 500 )
 
         ## Get original TH1 histogram from root file
         rootfilename = inputdir+"/"+cat+"/"+filenameInput
         #print rootfilename    
-        rootfile[icat] = TFile.Open(rootfilename)
+        rootfile[icat] = ROOT.TFile.Open(rootfilename)
         print("Get "+histoname+" from file "+rootfilename)
         th1_fromFile[icat] = rootfile[icat].Get(histoname) # 1 GeV bin histogram
         th1_fromFile[icat].Draw()
@@ -232,9 +233,9 @@ for icat, cat in enumerate(subDirList):
         test=th1_fromFile[icat].ComputeIntegral()   
         print(test)
         ## Generate toy histogram
-        gRandom = TRandom()
+        gRandom = ROOT.TRandom()
         if(generateToy==1):
-            th1_original[icat] = TH1D("Toy","Toy", th1_fromFile[icat].GetNbinsX(), th1_fromFile[icat].GetXaxis().GetXmin(), th1_fromFile[icat].GetXaxis().GetXmax())
+            th1_original[icat] = ROOT.TH1D("Toy","Toy", th1_fromFile[icat].GetNbinsX(), th1_fromFile[icat].GetXaxis().GetXmin(), th1_fromFile[icat].GetXaxis().GetXmax())
             #th1_original[icat] = TH1D("","", 5000, 0, 5000)
             gRandom.SetSeed(0)
             print("MAREMMA MAIALA")
@@ -249,7 +250,7 @@ for icat, cat in enumerate(subDirList):
             # th1_original[icat].Add(th1_injected_2[icat], 1)
             # th1_original[icat].Add(th1_injected_1[icat], -2)
 
-        var[icat] = RooRealVar(varname+"_"+cat,vartitle,varBins_all[0],varBins_all[-1])
+        var[icat] = ROOT.RooRealVar(varname+"_"+cat,vartitle,varBins_all[0],varBins_all[-1])
         var[icat].Print()
 
         print("------------------------------------------------------------")
@@ -260,28 +261,28 @@ for icat, cat in enumerate(subDirList):
         fitrange_L[0] = varBins[ 0]
         fitrange_R[0] = varBins[-1]
 
-        var[icat] = RooRealVar(varname+"_"+cat,vartitle,var_min_set,var_max_set)
+        var[icat] = ROOT.RooRealVar(varname+"_"+cat,vartitle,var_min_set,var_max_set)
         var[icat].Print()
         
         ## Create data histogram with coarser binning
         th1_rebin[icat] = th1_original[icat].Rebin(NvarBins,"th1_rebin_"+cat,array('d',varBins))
         print(th1_rebin[icat].GetBin(0))
 
-        ## Create RooDataHist in fit range from TH1
-        rooHist[icat] = RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat,RooArgList(var[icat]),RooFit.Import(th1_rebin[icat]))
+        ## Create ROOT.RooDataHist in fit range from TH1
+        rooHist[icat] = ROOT.RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat,ROOT.RooArgList(var[icat]),ROOT.RooFit.Import(th1_rebin[icat]))
         numberOfEvents[icat] = rooHist[icat].sumEntries()
 
         # Set RooPdf and parameters of selected background function, corresponding to fitFunction_name
         cwd_utils.set_bkg_fit_function(icat, cat, var, fitFunction_name, fitparam, nbkg, bkgPdf, ParametricBkgPdf, bkgExtPdf, th1_rebin, numberOfEvents)
 
         ## Bkg Fit
-        RooFit.SumW2Error(kTRUE)
+        ROOT.RooFit.SumW2Error(ROOT.kTRUE)
         fitResult[icat] = bkgExtPdf[icat].fitTo(rooHist[icat], 
-                                                RooFit.Strategy(1),
-                                                RooFit.Range(var_min_set,var_max_set),
-                                                RooFit.Save(kTRUE),
-                                                RooFit.Verbose(kFALSE),
-                                                RooFit.Extended(kTRUE)
+                                                ROOT.RooFit.Strategy(1),
+                                                ROOT.RooFit.Range(var_min_set,var_max_set),
+                                                ROOT.RooFit.Save(ROOT.kTRUE),
+                                                ROOT.RooFit.Verbose(ROOT.kFALSE),
+                                                ROOT.RooFit.Extended(ROOT.kTRUE)
         )
         fitResult[icat].Print()
         Nevt[0] = int(nbkg[icat].getVal())
@@ -295,9 +296,9 @@ for icat, cat in enumerate(subDirList):
         bkgExtPdfTF1[icat].SetLineColor(2)        
         
         ## Create background and pull histogram for final plot
-        th1_rebin[icat].SetBinErrorOption(TH1.kPoisson)
-        th1_rebin_bkg[icat] = TH1D("th1_rebin_bkg_"+cat,"th1_rebin_bkg_"+cat,NvarBins,array('d',varBins))
-        th1_rebin_pull[icat] = TH1D("th1_rebin_pull_"+cat,"th1_rebin_pull_"+cat,NvarBins,array('d',varBins))
+        th1_rebin[icat].SetBinErrorOption(ROOT.TH1.kPoisson)
+        th1_rebin_bkg[icat] = ROOT.TH1D("th1_rebin_bkg_"+cat,"th1_rebin_bkg_"+cat,NvarBins,array('d',varBins))
+        th1_rebin_pull[icat] = ROOT.TH1D("th1_rebin_pull_"+cat,"th1_rebin_pull_"+cat,NvarBins,array('d',varBins))
 
         Npos[0] = 0
         Nneg[0] = 0
@@ -329,8 +330,8 @@ for icat, cat in enumerate(subDirList):
                 else:
                     Nneg[0] += 1
                 if prev_pull_sign == 0:
-                    prev_pull_sign = TMath.Sign(1, pull)
-                pull_sign = TMath.Sign(1, pull)
+                    prev_pull_sign = ROOT.TMath.Sign(1, pull)
+                pull_sign = ROOT.TMath.Sign(1, pull)
 
             if pull_sign != prev_pull_sign and data != 0: 
                 WWruns[0] += 1
@@ -338,7 +339,7 @@ for icat, cat in enumerate(subDirList):
         ## Chi2 and p-value
         icat_br[0] = icat
         cwd_utils.evaluate_chi2(icat, ndof, chi2, rchi2, ndof_allbins, chi2_allbins, reducedchi2_allbins, th1_rebin, th1_rebin_pull, len(fitparam)+1)
-        pval[0] = TMath.Prob(chi2[0], ndof[0])
+        pval[0] = ROOT.TMath.Prob(chi2[0], ndof[0])
 
         pval_ok[0] = 0
 
@@ -376,43 +377,43 @@ for icat, cat in enumerate(subDirList):
 
 
         	## Signal pdf
-            mean = RooRealVar("mean_"+signalString,"mean_"+signalString,float(mu)) 
-            width = RooRealVar("width_"+signalString,"width_"+signalString,float(ssigma)) 
-            alpha1 = RooRealVar("alpha1_"+signalString,"alpha1_"+signalString,float(a1))
-            n1 = RooRealVar("n1_"+signalString,"n1_"+signalString,float(n1))
-            alpha2 = RooRealVar("alpha2_"+signalString,"alpha2_"+signalString,float(a2))
-            n2 = RooRealVar("n2_"+signalString,"n2_"+signalString,float(n2))
-            nsig = RooRealVar("ParametricSignalPdf_"+signalString+"_norm","ParametricSignalPdf_"+signalString+"_norm",float(Nsig),0,100000000)
+            mean = ROOT.RooRealVar("mean_"+signalString,"mean_"+signalString,float(mu)) 
+            width = ROOT.RooRealVar("width_"+signalString,"width_"+signalString,float(ssigma)) 
+            alpha1 = ROOT.RooRealVar("alpha1_"+signalString,"alpha1_"+signalString,float(a1))
+            n1 = ROOT.RooRealVar("n1_"+signalString,"n1_"+signalString,float(n1))
+            alpha2 = ROOT.RooRealVar("alpha2_"+signalString,"alpha2_"+signalString,float(a2))
+            n2 = ROOT.RooRealVar("n2_"+signalString,"n2_"+signalString,float(n2))
+            nsig = ROOT.RooRealVar("ParametricSignalPdf_"+signalString+"_norm","ParametricSignalPdf_"+signalString+"_norm",float(Nsig),0,100000000)
 
-            var_tmp = RooRealVar("var_tmp","var_tmp",453, 4000)
+            var_tmp = ROOT.RooRealVar("var_tmp","var_tmp",453, 4000)
             var_tmp.setRange("maximum_range", 453, 4000)  # create range to integrate over
-            signalPdf_tmp = RooDoubleCBFast("CB_tmp", "CB_tmp", var_tmp, mean, width, alpha1, n1, alpha2, n2)            
-            intrinsicNorm = signalPdf_tmp.createIntegral(RooArgSet(var_tmp), RooFit.NormSet(RooArgSet(var_tmp)), RooFit.Range("maximum_range")) 
+            signalPdf_tmp = ROOT.RooDoubleCBFast("CB_tmp", "CB_tmp", var_tmp, mean, width, alpha1, n1, alpha2, n2)            
+            intrinsicNorm = signalPdf_tmp.createIntegral(ROOT.RooArgSet(var_tmp), ROOT.RooFit.NormSet(ROOT.RooArgSet(var_tmp)), ROOT.RooFit.Range("maximum_range")) 
             var_tmp.setRange("fit_range", var_min_set, var_max_set)  # create range to integrate over
-            signal_integral = signalPdf_tmp.createIntegral(RooArgSet(var_tmp), RooFit.NormSet(RooArgSet(var_tmp)), RooFit.Range("fit_range"))
+            signal_integral = signalPdf_tmp.createIntegral(ROOT.RooArgSet(var_tmp), ROOT.RooFit.NormSet(ROOT.RooArgSet(var_tmp)), ROOT.RooFit.Range("fit_range"))
             nsig.setVal( float(Nsig)*signal_integral.getVal()/intrinsicNorm.getVal() )
             print(str(nsig.getVal()))
 
         	
-            signalPdf = RooDoubleCBFast("signalPdf_"+signalString, "signalPdf_"+signalString, var[icat], mean, width, alpha1, n1, alpha2, n2)
+            signalPdf = ROOT.RooDoubleCBFast("signalPdf_"+signalString, "signalPdf_"+signalString, var[icat], mean, width, alpha1, n1, alpha2, n2)
         	
-        #	meanShape_mu_err_cat = RooRealVar("meanShape_mu_err_"+signalString, "meanShape_mu_err_"+signalString, 1, 0.5, 1.5)
-        #	meanShape_ssigma_err_cat = RooRealVar("meanShape_ssigma_err_"+signalString, "meanShape_ssigma_err_"+signalString, 1, 0.4, 1.6)
-        #	mean_sist  = RooFormulaVar("mean_sist_" +signalString, "mean_sist_" +signalString, "mean_" +signalString+"*meanShape_mu_err_"+signalString   , RooArgList(mean , meanShape_mu_err_cat   ))
-       # 	width_sist = RooFormulaVar("width_sist_"+signalString, "width_sist_"+signalString, "width_"+signalString+"*meanShape_ssigma_err_"+signalString, RooArgList(width, meanShape_ssigma_err_cat))
+        #	meanShape_mu_err_cat = ROOT.RooRealVar("meanShape_mu_err_"+signalString, "meanShape_mu_err_"+signalString, 1, 0.5, 1.5)
+        #	meanShape_ssigma_err_cat = ROOT.RooRealVar("meanShape_ssigma_err_"+signalString, "meanShape_ssigma_err_"+signalString, 1, 0.4, 1.6)
+        #	mean_sist  = RooFormulaVar("mean_sist_" +signalString, "mean_sist_" +signalString, "mean_" +signalString+"*meanShape_mu_err_"+signalString   , ROOT.RooArgList(mean , meanShape_mu_err_cat   ))
+       # 	width_sist = RooFormulaVar("width_sist_"+signalString, "width_sist_"+signalString, "width_"+signalString+"*meanShape_ssigma_err_"+signalString, ROOT.RooArgList(width, meanShape_ssigma_err_cat))
         	
         #	signalPdf = RooDoubleCBFast("signalPdf_"+signalString, "signalPdf_"+signalString, var[icat], mean_sist, width_sist, alpha1, n1, alpha2, n2)            
-        	#ParametricSignalPdf_ = RooParametricShapeBinPdf("ParametricSignalPdf_"+signalString, "ParametricSignalPdf_"+signalString, signalPdf, var[icat], RooArgList(mean_sist, width_sist, alpha1, n1, alpha2, n2), th1_rebin[icat])
-            ParametricSignalPdf_ = RooParametricShapeBinPdf("ParametricSignalPdf_"+signalString, "ParametricSignalPdf_"+signalString, signalPdf, var[icat], RooArgList(mean, width, alpha1, n1, alpha2, n2), th1_rebin[icat])
+        	#ParametricSignalPdf_ = RooParametricShapeBinPdf("ParametricSignalPdf_"+signalString, "ParametricSignalPdf_"+signalString, signalPdf, var[icat], ROOT.RooArgList(mean_sist, width_sist, alpha1, n1, alpha2, n2), th1_rebin[icat])
+            ParametricSignalPdf_ = ROOT.RooParametricShapeBinPdf("ParametricSignalPdf_"+signalString, "ParametricSignalPdf_"+signalString, signalPdf, var[icat], ROOT.RooArgList(mean, width, alpha1, n1, alpha2, n2), th1_rebin[icat])
 
 
-            mean.setConstant(kTRUE)
-            width.setConstant(kTRUE)
-            alpha1.setConstant(kTRUE)
-            n1.setConstant(kTRUE)
-            alpha2.setConstant(kTRUE)
-            n2.setConstant(kTRUE)
-            nsig.setConstant(kTRUE) #signal normalization should be set to constant (required by combine tool)
+            mean.setConstant(ROOT.kTRUE)
+            width.setConstant(ROOT.kTRUE)
+            alpha1.setConstant(ROOT.kTRUE)
+            n1.setConstant(ROOT.kTRUE)
+            alpha2.setConstant(ROOT.kTRUE)
+            n2.setConstant(ROOT.kTRUE)
+            nsig.setConstant(ROOT.kTRUE) #signal normalization should be set to constant (required by combine tool)
 
             signalPdf.Print()
             nsig.Print()
@@ -474,9 +475,9 @@ for icat, cat in enumerate(subDirList):
    ############### Plots ##################
 
    ## Create canvas
-        canvas[icat] = TCanvas("canvas_"+cat, "canvas_"+cat, 200, 10, 700, 500 )
-        fPads1 = TPad("pad1_"+cat, "pad1_"+cat, 0.00, 0.28, 0.99, 0.99)
-        fPads2 = TPad("pad2_"+cat, "pad2_"+cat, 0.00, 0.00, 0.99, 0.345)
+        canvas[icat] = ROOT.TCanvas("canvas_"+cat, "canvas_"+cat, 200, 10, 700, 500 )
+        fPads1 = ROOT.TPad("pad1_"+cat, "pad1_"+cat, 0.00, 0.28, 0.99, 0.99)
+        fPads2 = ROOT.TPad("pad2_"+cat, "pad2_"+cat, 0.00, 0.00, 0.99, 0.345)
    #
         fPads1.SetFillColor(0)
         fPads1.SetLineColor(0)
@@ -531,7 +532,7 @@ for icat, cat in enumerate(subDirList):
         th1_rebin_pull[icat].SetMarkerStyle(20)
         th1_rebin_pull[icat].SetMarkerColor(1)
         th1_rebin_pull[icat].SetStats(0)
-        th1_rebin_pull[icat].GetYaxis().SetNdivisions(405, kTRUE)
+        th1_rebin_pull[icat].GetYaxis().SetNdivisions(405, ROOT.kTRUE)
         th1_rebin_pull[icat].GetXaxis().SetTitleSize(0.16)
         th1_rebin_pull[icat].GetXaxis().SetLabelSize(0.13)
         th1_rebin_pull[icat].GetXaxis().SetTitleOffset(0.83)
@@ -542,7 +543,7 @@ for icat, cat in enumerate(subDirList):
    ## Pa
         ## Legend
         fPads1.cd()
-        legend = TLegend(0.7, 0.7, 0.87, 0.87)
+        legend = ROOT.TLegend(0.7, 0.7, 0.87, 0.87)
         legend.SetLineColor(0)
         legend.SetLineWidth(0)
         legend.SetFillColor(0)
@@ -556,7 +557,7 @@ for icat, cat in enumerate(subDirList):
         legend.Draw()
         
        ## Plot fit results
-        pt = TPaveText(0.73, 0.58, 0.87, 0.87,"ndc")
+        pt = ROOT.TPaveText(0.73, 0.58, 0.87, 0.87,"ndc")
         pt.SetFillColor(0)
         
         Chi2Text = "#chi^{2}="+str(round(chi2[0],2))+"   Ndf="+str(ndof[0])
@@ -626,7 +627,7 @@ for icat, cat in enumerate(subDirList):
         outputfilename_root = outputdir+"/"+"c_"+cat+".root"
         canvas[icat].SaveAs(outputfilename_pdf)
         canvas[icat].SaveAs(outputfilename_png)
-        out=TFile(outputfilename_root,"recreate")
+        out=ROOT.TFile(outputfilename_root,"recreate")
         canvas[icat].Write()
         th1_original[icat].Write()
         th1_fromFile[icat].Write()

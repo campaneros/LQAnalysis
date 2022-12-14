@@ -10,15 +10,15 @@ import io
 
 from array import array
 from glob import glob
-from ROOT import *
+#from ROOT import *
 import ROOT as ROOT
 sys.path.append(os.path.dirname(os.path.abspath(__file__))+"/../../")
 import tdrstyle
 import CMS_lumi
 
-gROOT.SetBatch(True)
+ROOT.gROOT.SetBatch(True)
 ROOT.gErrorIgnoreLevel = ROOT.kFatal
-RooMsgService.instance().setGlobalKillBelow(RooFit.WARNING)
+ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 
 usage = "usage: To be run from trijetana: python bias_study.py -g /afs/cern.ch/work/s/santanas/Releases/CMSSW_8_1_0_Trijet/src/CMSJET/RootTreeAnalyzer/scripts/fit/trijetAna/output/fit_data/datacards_gen/datacard_Res1ToRes2ToGluGlu_M7000_R0p1.txt -d /afs/cern.ch/work/s/santanas/Releases/CMSSW_8_1_0_Trijet/src/CMSJET/RootTreeAnalyzer/scripts/fit/trijetAna/output/fit_data/datacards_fit/datacard_Res1ToRes2ToGluGlu_M7000_R0p1.txt -o /afs/cern.ch/work/s/santanas/Releases/CMSSW_8_1_0_Trijet/src/CMSJET/RootTreeAnalyzer/scripts/fit/trijetAna/output/fit_data/multiDimFit -t 100 --expectSignal 0 -l 0.001 -S 1"
 

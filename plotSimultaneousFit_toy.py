@@ -7,24 +7,24 @@ import optparse
 import datetime
 import subprocess
 import io
-import ROOT
+import ROOT as ROOT
 import re
 
 from array import array
 from glob import glob
-from ROOT import *
-from ROOT import AddressOf
-from ROOT import RooFit
+#from ROOT import *
+#from ROOT import AddressOf
+#from ROOT import ROOT.RooFit
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__))+"/../../")
 import tdrstyle
 import CMS_lumi
 
-gROOT.SetBatch(True)
+ROOT.gROOT.SetBatch(True)
 ROOT.gErrorIgnoreLevel = ROOT.kFatal
-RooMsgService.instance().setGlobalKillBelow(RooFit.WARNING)
+ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.ROOT.RooFit.WARNING)
 
-usage = "usage: python plotSimFit.py -t toysfile/workspacefile -f fitfile -n 1 -c catdir -o outputdir -w weboutputdir -F fitFunction --draw_limit_(exp/obs) limit_dir"
+usage = "usage: python plotSimFit.py -t toysfile/workspacefile -f fitFile -n 1 -c catdir -o outputdir -w weboutputdir -F fitFunction --draw_limit_(exp/obs) limit_dir"
 
 parser = optparse.OptionParser(usage)
 
@@ -34,7 +34,7 @@ parser = optparse.OptionParser(usage)
 parser.add_option("-t", "--toysfile", dest="toysfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M2000_L1p0_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.0004.GenerateOnly.mH120.123456.root",
                   help="input file with fitted toys")
 
-parser.add_option("-f", "--fitfile", dest="fitfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M2000_L1p0_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.0004_gen.MultiDimFit.mH120.123456.root",
+parser.add_option("-f", "--fitFile", dest="fitFile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M2000_L1p0_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.0004_gen.MultiDimFit.mH120.123456.root",
                   help="input file with tree of post-fit parameters.")
 
 parser.add_option("-c", "--catdir", dest="catdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M2000_L1p0/categories/",
@@ -43,7 +43,7 @@ parser.add_option("-c", "--catdir", dest="catdir", default="/data/mcampana/CMS/C
 parser.add_option("-o", "--outputdir", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/plotSimFit_std_4par/LQumu_M1000_L0p1_bis_test",
                   help="name of the output directory")
 
-parser.add_option("-b", "--outputfilename", dest="outputfile", default="expect_signal",
+parser.add_option("-b", "--outpuROOT.TFilename", dest="outpuROOT.TFile", default="expect_signal",
                   help="name of the output file")
 
 parser.add_option("-w", "--weboutputdir", dest="weboutputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_plot/plotSimFit_std_4par/LQumu_M1000_L0p1_bis",
@@ -76,7 +76,7 @@ parser.add_option("--nc", dest="ncat", default="all",
 if not opt.toysfile:   
     parser.error('input toy file not provided')
 
-if not opt.fitfile:   
+if not opt.fiROOT.TFile:   
     parser.error('input fit file not provided')
 
 if not opt.outputdir:
@@ -111,7 +111,7 @@ fitFunction = opt.fitFunction
 nToy = int(opt.nToy)
 toysfilenamePath = opt.toysfile
 toysfilename     = toysfilenamePath.split("/")[-1]
-toysfile = TFile.Open(toysfilenamePath)
+toysfile = ROOT.TFile.Open(toysfilenamePath)
 #print(toysfile)
 
 
@@ -129,10 +129,10 @@ L           = float(L.replace("p","."))
 
 workspacePath = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/workspace.root"
 #workspacePath = workspacePath.split("/")[-1]
-workspacefile = TFile.Open(workspacePath)
+workspacefile = ROOT.TFile.Open(workspacePath)
 
 workspacename = "w"
-workspace = RooWorkspace()
+workspace = ROOT.RooWorkspace()
 
 workspace=workspacefile.Get(workspacename)
 
@@ -156,7 +156,7 @@ ncategories = len(categoriesList)
 #else:
 #    catType = 4
 
-#Create output rootfile with chi2
+#Create output rooROOT.TFile with chi2
 indexcat = array('i', [0 ])
 Chi2     = array('d', [0.])
 Ndof     = array('d', [0.])
@@ -168,22 +168,22 @@ GlobalNdof = array('d', [-1.]) #subtract r parameter
 CombineGoF = array('d', [0. ])
 CombineDof = array('d', [-1.]) #subtract r parameter
 
-chi2file = TFile.Open(opt.outputdir+"/test_statistics.root", "RECREATE")
+chi2file = ROOT.TFile.Open(opt.outputdir+"/test_statistics.root", "RECREATE")
 
-chi2tree = TTree("chi2tree","chi2tree")
+chi2tree = ROOT.TTree("chi2tree","chi2tree")
 icatbranch = chi2tree.Branch("icat", indexcat, "icat/I")
 chi2branch = chi2tree.Branch("chi2", Chi2, "chi2/D")
 ndofbranch = chi2tree.Branch("ndof", Ndof, "ndof/D")
 chi2branch = chi2tree.Branch("Mass", Mass, "Mass/D")
 ndofbranch = chi2tree.Branch("L", L, "L/D")
 
-globchi2tree = TTree("globchi2tree","globchi2tree")
+globchi2tree = ROOT.TTree("globchi2tree","globchi2tree")
 globchi2branch = globchi2tree.Branch("globchi2"  , GlobalChi2, "globchi2/D"  )
 globndofbranch = globchi2tree.Branch("globndof"  , GlobalNdof, "globndof/D"  )
 combiGoFbranch = globchi2tree.Branch("CombineGoF", CombineGoF, "CombineGoF/D")
 combiDoFbranch = globchi2tree.Branch("CombineDof", CombineDof, "CombineDof/D")
 
-outputrootfile = [None] * len(categoriesList)
+outputrooTFile = [None] * len(categoriesList)
 print(categoriesList)
 
 for number in range(nToy):
@@ -202,8 +202,8 @@ for number in range(nToy):
         elif opt.ncat != "all" and opt.ncat not in cat:
             continue
         print(cat)
-        outputrootfile[icat] = TFile.Open(opt.outputdir+"/"+cat+".root","RECREATE")
-        outputrootfile[icat].cd()
+        outputrooTFile[icat] = ROOT.TFile.Open(opt.outputdir+"/"+cat+".root","RECREATE")
+        outputrooTFile[icat].cd()
         indexcat[0]+=1
 
         #Define mjj category range
@@ -227,8 +227,8 @@ for number in range(nToy):
         test=toy.binnedClone("test","test")
         print(test.Print())
         name = "m_muj_ak4_"+app
-        #hData = RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat, RooArgList(toyvar), RooFit.Cut("CMS_channel==CMS_channel::category1Muon"))
-        #RooFit.Cut("CMS_channel==CMS_channel::category1Muon")
+        #hData = RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat, RooArgList(toyvar), ROOT.RooFit.Cut("CMS_channel==CMS_channel::category1Muon"))
+        #ROOT.RooFit.Cut("CMS_channel==CMS_channel::category1Muon")
         #toy2 = RooDataSet("Dataset_m_muj_ak4_"+app,"Dataset_m_muj_ak4_"+app, toy ,RooArgSet(toyvar), RooFormulaVar("CMS_channel::category1Muon"))
         #test = toy2.binnedClone("test","test")
         #print(toy2.Print())
@@ -277,10 +277,10 @@ for number in range(nToy):
         #roohist_data = workspace.data("RooDataHist_"+app)
         #RooAbsData("m_muj_ak4_"+app,"m_muj_ak4_"+app,RooArgList(toyvar))
         toyvar.setRange("Reduced_range",var_min_set,var_max_set)
-        hData = test.createHistogram("RooDataHist_"+cat, toyvar, RooFit.Binning(b), RooFit.Cut("CMS_channel==CMS_channel::"+app))
+        hData = test.createHistogram("RooDataHist_"+cat, toyvar, ROOT.RooFit.Binning(b), ROOT.RooFit.Cut("CMS_channel==CMS_channel::"+app))
         #hData2 = RooAbsReal.fillHistogram(hData,RooArgList(toyvar))
-        #hData= RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat,RooArgList(toyvar), RooFit.Cut("CMS_channel==CMS_channel::category1Muon"))
-        #hData = toy.createHistogram("hData_"+app, toyvar, RooFit.Binning(b))
+        #hData= RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat,RooArgList(toyvar), ROOT.RooFit.Cut("CMS_channel==CMS_channel::category1Muon"))
+        #hData = toy.createHistogram("hData_"+app, toyvar, ROOT.RooFit.Binning(b))
         hData_norm = hData.Clone("hData_norm_"+app)
 
         #Get ParametricShapeBin pdf and parameters from workspace and extend with norm
@@ -298,7 +298,7 @@ for number in range(nToy):
             p2_var    = workspace.var("p2_modExp"+app) 
 
         norm_var  = workspace.var("ParametricBkgPdf_"+app+"_norm")
-        ExtBkgFit = RooExtendPdf("ExtBkgPdf_"+app, "ExtBkgPdf_"+app, BkgFit, norm_var)
+        ExtBkgFit = ROOT.RooExtendPdf("ExtBkgPdf_"+app, "ExtBkgPdf_"+app, BkgFit, norm_var)
 
         ## Get signal shape and floating parameters (only sys floating in the fit=
         #if signalname == "":
@@ -313,13 +313,13 @@ for number in range(nToy):
 
         nsig = workspace.var("ParametricSignalPdf_"+sign_+"_norm")
         print("maremma maiala",sign_)
-        signalExtendPdf = RooExtendPdf("ParametricSignalExtPdf_"+sign_, "ParametricSignalExtPdf_"+sign_, signalPdf, nsig)
+        signalExtendPdf = ROOT.RooExtendPdf("ParametricSignalExtPdf_"+sign_, "ParametricSignalExtPdf_"+sign_, signalPdf, nsig)
 
 
 
         #Load post-simultaneous fit parameters
-        fitfile = TFile.Open(opt.fitfile)
-        fitTree = fitfile.Get("limit")
+        fitTFile = ROOT.TFile.Open(opt.fiTFile)
+        fitTree = fitTFile.Get("limit")
 
         # Bkg parameters
         p0_postfit = array('f', [0.])
@@ -383,29 +383,29 @@ for number in range(nToy):
         # Signal r = expected limit on cross section
         if opt.draw_limit_exp != False:
             limitdir  = opt.draw_limit_exp
-            limitfile = TFile.Open(limitdir+"/higgsCombine_Res1ToRes2ToGluGlu_"+str(M1)+"_"+str(R)+".AsymptoticLimits.mH120.root")
-            limittree = limitfile.Get("limit")
-            limittree.GetEntry(2)
-            r = limittree.limit
+            limitTFile = ROOT.TFile.Open(limitdir+"/higgsCombine_Res1ToRes2ToGluGlu_"+str(M1)+"_"+str(L)+".AsymptoticLimits.mH120.root")
+            limitTTree = limitTFile.Get("limit")
+            limitTTree.GetEntry(2)
+            r = limitTTree.limit
 
         # Signal r = observed limit on cross section
         if opt.draw_limit_obs != False:
             limitdir  = opt.draw_limit_obs
-            limitfile = TFile.Open(limitdir+"/higgsCombine_Res1ToRes2ToGluGlu_"+str(M1)+"_"+str(R)+".AsymptoticLimits.mH120.root")
-            limittree = limitfile.Get("limit")
-            limittree.GetEntry(5)
-            r = limittree.limit
+            limitTFile = ROOT.TFile.Open(limitdir+"/higgsCombine_Res1ToRes2ToGluGlu_"+str(M1)+"_"+str(L)+".AsymptoticLimits.mH120.root")
+            limitTTree = limitTFile.Get("limit")
+            limitTTree.GetEntry(5)
+            r = limitTTree.limit
 
-        fitfile.Close()
+        fitTFile.Close()
 
         #Make histogram from signal and background shape
-        hSignal = TH1D("hSignal_"+app,"",NvarBins,a)
-        hBkg    = TH1D("hBkg_"+app,"",NvarBins,a)
+        hSignal = ROOT.TH1D("hSignal_"+app,"",NvarBins,a)
+        hBkg    = ROOT.TH1D("hBkg_"+app,"",NvarBins,a)
 
         x.setRange("global_range", a[0], a[NvarBins])
         print(a[0], a[NvarBins])
-        signal_pdfIntrinsicNorm = signalPdf.createIntegral(ROOT.RooArgSet(x),RooFit.NormSet(ROOT.RooArgSet(x)),RooFit.Range("global_range"))
-        bkg_pdfIntrinsicNorm    = BkgFit.createIntegral(ROOT.RooArgSet(x),RooFit.NormSet(ROOT.RooArgSet(x)),RooFit.Range("global_range"))
+        signal_pdfIntrinsicNorm = signalPdf.createIntegral(ROOT.RooArgSet(x),ROOT.RooFit.NormSet(ROOT.RooArgSet(x)),ROOT.RooFit.Range("global_range"))
+        bkg_pdfIntrinsicNorm    = BkgFit.createIntegral(ROOT.RooArgSet(x),ROOT.RooFit.NormSet(ROOT.RooArgSet(x)),ROOT.RooFit.Range("global_range"))
         print(signal_pdfIntrinsicNorm.getVal(), nsig.getVal())
 
 
@@ -426,7 +426,7 @@ for number in range(nToy):
             
            # print("bin range ",bin_low,"  ", bin_up)
     #	print("X range ",x.getMin(),"  ", x.getMax())
-            signal_pdfIntegral = signalPdf.createIntegral(ROOT.RooArgSet(x),RooFit.NormSet(ROOT.RooArgSet(x)),RooFit.Range("toy_"+str(ibin)))
+            signal_pdfIntegral = signalPdf.createIntegral(ROOT.RooArgSet(x),ROOT.RooFit.NormSet(ROOT.RooArgSet(x)),ROOT.RooFit.Range("toy_"+str(ibin)))
             signal_pdfIntegral_norm = signal_pdfIntegral.getVal()/signal_pdfIntrinsicNorm.getVal()
             bin_signalEvents = signal_pdfIntegral_norm*nsig.getVal()*r
             bin_signalEvents_norm = signal_pdfIntegral_norm*nsig.getVal()*r/bin_width
@@ -448,7 +448,7 @@ for number in range(nToy):
         # 
             hSignal.SetBinContent(ibin,bin_signalEvents_norm)
 
-            bkg_pdfIntegral = BkgFit.createIntegral(ROOT.RooArgSet(x),RooFit.NormSet(ROOT.RooArgSet(x)),RooFit.Range("toy_"+str(ibin)))
+            bkg_pdfIntegral = BkgFit.createIntegral(ROOT.RooArgSet(x),ROOT.RooFit.NormSet(ROOT.RooArgSet(x)),ROOT.RooFit.Range("toy_"+str(ibin)))
             bkg_pdfIntegral_norm = bkg_pdfIntegral.getVal()/bkg_pdfIntrinsicNorm.getVal()
             bin_bkgEvents = bkg_pdfIntegral_norm*norm_var.getVal()
             bin_bkgEvents_norm = bkg_pdfIntegral_norm*norm_var.getVal()/bin_width
@@ -463,7 +463,7 @@ for number in range(nToy):
             #    bin_data=0 
             print(bin_data, norm_var.getVal())
             hData_norm.SetBinContent(ibin, bin_data/bin_width)
-            hData_norm.SetBinError(ibin, TMath.Sqrt(bin_data)/bin_width)
+            hData_norm.SetBinError(ibin, ROOT.TMath.Sqrt(bin_data)/bin_width)
         
 
 
@@ -486,8 +486,8 @@ for number in range(nToy):
         GlobalNdof[0] -= 3
         CombineDof[0] -= 3
         redChi2 = 0.
-        hist_pull = TH1D("pull_"+app, "", NvarBins, a)
-        hist_pull_signal = TH1D("pull_signal_"+app, "", NvarBins, a)
+        hist_pull = ROOT.TH1D("pull_"+app, "", NvarBins, a)
+        hist_pull_signal = ROOT.TH1D("pull_signal_"+app, "", NvarBins, a)
 
         frame_Ymax = 0
         #frame_Ymin =40
@@ -499,7 +499,7 @@ for number in range(nToy):
             #data  = float(hData.GetBinContent(ibin))
             data  = float(hData_norm.GetBinContent(ibin))
             bkg   = float(hBkg.GetBinContent(ibin) )
-            bkg_err = TMath.Sqrt(bkg*bin_width)/bin_width
+            bkg_err = ROOT.TMath.Sqrt(bkg*bin_width)/bin_width
             sign  = float(hSignal.GetBinContent(ibin))
 
         ##print(data)
@@ -513,8 +513,8 @@ for number in range(nToy):
             if data!=0 and bkg!=0:
                 pull = (data-bkg)/bkg_err
                 hist_pull.SetBinContent(ibin,pull)
-                CombineGoF[0] += 2*(  (bkg+sign*r)-data + data*TMath.Log( data/(bkg+sign*r) )  )
-            #print data, bkg, sign*r, 2*(  (bkg+sign*r)-data + data*TMath.Log( data/(bkg+sign*r) )  ), GlobalNdof[0], CombineGoF[0]
+                CombineGoF[0] += 2*(  (bkg+sign*r)-data + data*ROOT.TMath.Log( data/(bkg+sign*r) )  )
+            #print data, bkg, sign*r, 2*(  (bkg+sign*r)-data + data*ROOT.TMath.Log( data/(bkg+sign*r) )  ), GlobalNdof[0], CombineGoF[0]
             else:
                 CombineGoF[0] += 2*( (bkg+sign*r)-data )
             #print data, bkg, sign*r, 2*( (bkg+sign*r)-data ), GlobalNdof[0], CombineGoF[0]
@@ -540,10 +540,10 @@ for number in range(nToy):
             redChi2 = Chi2[0]/Ndof[0]
 
         ## Create canvas
-        canvas = TCanvas("canvas_"+app, "canvas_"+app, 200, 10, 700, 500 )
+        canvas = ROOT.TCanvas("canvas_"+app, "canvas_"+app, 200, 10, 700, 500 )
 
-        fPads1 = TPad("pad1_"+app, "pad1_"+app, 0.00, 0.28, 0.99, 0.99)
-        fPads2 = TPad("pad2_"+app, "pad2_"+app, 0.00, 0.00, 0.99, 0.345)
+        fPads1 = ROOT.TPad("pad1_"+app, "pad1_"+app, 0.00, 0.28, 0.99, 0.99)
+        fPads2 = ROOT.TPad("pad2_"+app, "pad2_"+app, 0.00, 0.00, 0.99, 0.345)
         #
         fPads1.SetFillColor(0)
         fPads1.SetLineColor(0)
@@ -591,25 +591,25 @@ for number in range(nToy):
         frame.Draw()
         #test.plotOn(frame)
 
-        hBkg.SetLineColor(kRed)
+        hBkg.SetLineColor(ROOT.kRed)
         hBkg.SetLineWidth(2)
         hBkg.Draw("same")
 
-        hSignal.SetLineColor(kBlue)
-        hSignal.SetLineStyle(kDashed)
+        hSignal.SetLineColor(ROOT.kBlue)
+        hSignal.SetLineStyle(ROOT.kDashed)
         hSignal.SetLineWidth(2)
         hSignal.Draw("same")
 
-        hData.SetLineColor(kBlack)
+        hData.SetLineColor(ROOT.kBlack)
         hData.SetMarkerStyle(8)
         #hData.Draw("same")
-        gStyle.SetErrorX(0.0001)
-        hData_norm.SetLineColor(kBlack)
+        ROOT.gStyle.SetErrorX(0.0001)
+        hData_norm.SetLineColor(ROOT.kBlack)
         hData_norm.SetMarkerStyle(8)
         hData_norm.Draw("E1 SAME")
 
         #line = TLine(var_min_set, 0.05, var_min_set, frame_Ymax*6)
-        #line.SetLineColor(kRed)
+        #line.SetLineColor(ROOT.kRed)
         #line.SetLineWidth(2)
         #line.Draw("same")
 
@@ -633,7 +633,7 @@ for number in range(nToy):
         hist_pull.SetMarkerStyle(20)
         hist_pull.SetMarkerColor(1)
         hist_pull.SetStats(0)
-        hist_pull.GetYaxis().SetNdivisions(405, kTRUE)
+        hist_pull.GetYaxis().SetNdivisions(405, ROOT.kTRUE)
         hist_pull.GetXaxis().SetTitleSize(0.16)
         hist_pull.GetXaxis().SetLabelSize(0.13)
         hist_pull.GetXaxis().SetTitleOffset(0.83)
@@ -641,15 +641,15 @@ for number in range(nToy):
         hist_pull.GetYaxis().SetLabelSize(0.11)
         hist_pull.GetYaxis().SetTitleOffset(0.35)
         hist_pull.Draw("hist")
-        hist_pull_signal.SetLineColor(kBlue)
-        hist_pull_signal.SetLineStyle(kDashed)
+        hist_pull_signal.SetLineColor(ROOT.kBlue)
+        hist_pull_signal.SetLineStyle(ROOT.kDashed)
         hist_pull_signal.SetLineWidth(2)
         hist_pull_signal.Draw("same")
 
 
         ## Legend
         fPads1.cd()
-        legend = TLegend(0.64, 0.65, 0.87, 0.87)
+        legend = ROOT.TLegend(0.64, 0.65, 0.87, 0.87)
         legend.SetLineColor(0)
         legend.SetLineWidth(0)
         legend.SetFillColor(0)
@@ -669,7 +669,7 @@ for number in range(nToy):
         legend.Draw()
         
         ## Plot fit results
-        pt = TPaveText(0.44, 0.58, 0.54, 0.87,"ndc")
+        pt = ROOT.TPaveText(0.44, 0.58, 0.54, 0.87,"ndc")
         pt.SetFillColor(0)
 
         if nToy>0:
@@ -700,16 +700,16 @@ for number in range(nToy):
         canvas.Update()
 
         #canvas.SaveAs(opt.outputdir+"/canvas_toy_"+str(nToy)+"_"+app+".pdf")
-        canvas.SaveAs(opt.outputdir+"/canvas_toy_"+str(nToy)+"_"+app+"_"+opt.outputfile+"toyesnumber"+str(number)+".png")
+        canvas.SaveAs(opt.outputdir+"/canvas_toy_"+str(nToy)+"_"+app+"_"+opt.outpuROOT.TFile+"toyesnumber"+str(number)+".png")
 
         #Write to file
-        outputrootfile[icat].cd()
+        outputrooTFile[icat].cd()
         hBkg.Write()
         hSignal.Write()
         #hData.Write()
         #hData_norm.Write()
         #hist_pull_signal.Write()
-        outputrootfile[icat].Close()
+        outputrooTFile[icat].Close()
 
     #Fill Global chi2 tree
     if GlobalNdof[0]>0:
@@ -720,7 +720,7 @@ for number in range(nToy):
         CombineDof[0] = 0
     globchi2tree.Fill()
 
-    ## Save Chi2 in rootfile
+    ## Save Chi2 in rooROOT.TFile
     
   
     #Save on web dir

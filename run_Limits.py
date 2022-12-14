@@ -10,13 +10,14 @@ import io
 
 from array import array
 from glob import glob
-from ROOT import *
+#from ROOT import *
+import ROOT as ROOT
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__))+"/../../")
 import tdrstyle
 import CMS_lumi
 
-gROOT.SetBatch(True)
+ROOT.gROOT.SetBatch(True)
 
 usage = "usage: python runLimits.py -d /afs/cern.ch/work/s/santanas/Releases/CMSSW_8_1_0_Trijet/src/CMSJET/RootTreeAnalyzer/scripts/fit/trijetAna/output/fit_data/datacards/datacardList_Res1ToRes2ToGluGlu.txt -o /afs/cern.ch/work/s/santanas/Releases/CMSSW_8_1_0_Trijet/src/CMSJET/RootTreeAnalyzer/scripts/fit/trijetAna/output/fit_data/limit -l Res1ToRes2ToGluGlu"
 
