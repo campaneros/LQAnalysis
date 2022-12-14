@@ -22,7 +22,7 @@ import CMS_lumi
 
 ROOT.gROOT.SetBatch(True)
 ROOT.gErrorIgnoreLevel = ROOT.kFatal
-ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.ROOT.RooFit.WARNING)
+ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 
 usage = "usage: python plotSimFit.py -t toysfile/workspacefile -f fitFile -n 1 -c catdir -o outputdir -w weboutputdir -F fitFunction --draw_limit_(exp/obs) limit_dir"
 
@@ -43,7 +43,7 @@ parser.add_option("-c", "--catdir", dest="catdir", default="/data/mcampana/CMS/C
 parser.add_option("-o", "--outputdir", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/plotSimFit_std_4par/LQumu_M1000_L0p1_bis_test",
                   help="name of the output directory")
 
-parser.add_option("-b", "--outpuROOT.TFilename", dest="outpuROOT.TFile", default="expect_signal",
+parser.add_option("-b", "--outputFilename", dest="outputFile", default="expect_signal",
                   help="name of the output file")
 
 parser.add_option("-w", "--weboutputdir", dest="weboutputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_plot/plotSimFit_std_4par/LQumu_M1000_L0p1_bis",
@@ -76,7 +76,7 @@ parser.add_option("--nc", dest="ncat", default="all",
 if not opt.toysfile:   
     parser.error('input toy file not provided')
 
-if not opt.fiROOT.TFile:   
+if not opt.fitFile:   
     parser.error('input fit file not provided')
 
 if not opt.outputdir:
@@ -318,7 +318,7 @@ for number in range(nToy):
 
 
         #Load post-simultaneous fit parameters
-        fitTFile = ROOT.TFile.Open(opt.fiTFile)
+        fitTFile = ROOT.TFile.Open(opt.fitFile)
         fitTree = fitTFile.Get("limit")
 
         # Bkg parameters
@@ -700,7 +700,7 @@ for number in range(nToy):
         canvas.Update()
 
         #canvas.SaveAs(opt.outputdir+"/canvas_toy_"+str(nToy)+"_"+app+".pdf")
-        canvas.SaveAs(opt.outputdir+"/canvas_toy_"+str(nToy)+"_"+app+"_"+opt.outpuROOT.TFile+"toyesnumber"+str(number)+".png")
+        canvas.SaveAs(opt.outputdir+"/canvas_toy_"+str(nToy)+"_"+app+"_"+opt.outputFile+"toyesnumber"+str(number)+".png")
 
         #Write to file
         outputrooTFile[icat].cd()
