@@ -385,8 +385,8 @@ for icat, cat in enumerate(subDirList):
             n2 = ROOT.RooRealVar("n2_"+signalString,"n2_"+signalString,float(n2))
             nsig = ROOT.RooRealVar("ParametricSignalPdf_"+signalString+"_norm","ParametricSignalPdf_"+signalString+"_norm",float(Nsig),0,100000000)
 
-            var_tmp = ROOT.RooRealVar("var_tmp","var_tmp",453, 4000)
-            var_tmp.setRange("maximum_range", 453, 4000)  # create range to integrate over
+            var_tmp = ROOT.RooRealVar("var_tmp","var_tmp",453, 5000)
+            var_tmp.setRange("maximum_range", 453, 5000)  # create range to integrate over
             signalPdf_tmp = ROOT.RooDoubleCBFast("CB_tmp", "CB_tmp", var_tmp, mean, width, alpha1, n1, alpha2, n2)            
             intrinsicNorm = signalPdf_tmp.createIntegral(ROOT.RooArgSet(var_tmp), ROOT.RooFit.NormSet(ROOT.RooArgSet(var_tmp)), ROOT.RooFit.Range("maximum_range")) 
             var_tmp.setRange("fit_range", var_min_set, var_max_set)  # create range to integrate over
