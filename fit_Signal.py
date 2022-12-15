@@ -18,7 +18,7 @@ import tdrstyle
 import CMS_lumi
 
 #ROOT.kTRUE.LoadMacro(os.path.dirname(os.path.abspath(__file__))+"/../../src/libCpp/ROOT.RooDoubleCBFast.cc+")
-ROOT.kTRUE.SetBatch(True)
+ROOT.gROOT.SetBatch(True)
 
 ## Input directories (each folder contains a root file with histograms)
 inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna/src/RootTreeAnalyzer/Fit_Signal/category"
@@ -50,7 +50,7 @@ var_max = []
 
 for cat in subDirList:
     var_min.append(453)
-    var_max.append(4000)
+    var_max.append(5000)
 
 ## Binning
 varBins_all = [1, 3, 6, 10, 16, 23, 31, 40, 50, 61, 74, 88, 103, 119, 137, 156, 176, 197, 220, 244, 270, 296, 325, 354, 386, 419, 453, 489, 526, 565, 606, 649,  693, 740, 788, 838, 890, 944, 1000, 1058, 1118, 1181, 1246, 1313, 1383, 1455, 1530, 1607, 1687, 1770, 1856, 1945, 2037, 2132, 2231, 2332, 2438, 2546, 2659, 2775, 2895, 3019, 3147, 3279, 3416, 3558, 3704, 3854, 4010, 4171, 4337, 4509, 4686, 4869, 5058, 5253, 5455, 5663, 5877, 6099, 6328, 6564, 6808, 7000, 7250, 7500, 7750, 8000]
@@ -149,7 +149,7 @@ for icat, cat in enumerate(subDirList):
         signalPdf = ROOT.RooDoubleCBFast("signalPdf_"+signalString, "signalPdf_"+signalString, var[icat], mean, width, alpha1, n1, alpha2, n2)
         
         # Signal extended pdf
-        signalExtPdf = ROOT.ExtendPdf("signalExtPdf_"+signalString,"signalExtPdf_"+signalString,signalPdf,nsig) 
+        signalExtPdf = ROOT.RooExtendPdf("signalExtPdf_"+signalString,"signalExtPdf_"+signalString,signalPdf,nsig) 
         
         ## Fit to signal
         if( float(M1value) > var_min[icat] and float(M1value) < var_max[icat]):
@@ -171,7 +171,7 @@ for icat, cat in enumerate(subDirList):
         #if( float(M1value) > var_min[icat] and float(M1value) < var_max[icat]):
         #    signalPdf.plotOn(frame,ROOT.RooFit.Binning(100))
         #frame.Draw()
-        frame = var[icat].frame()
+        #frame = var[icat].frame()
         var[icat].setRange("signal",  max(float(M1value)*0.65, var_min[icat]), min(float(M1value)*1.45, 4000) )
         var[icat].setRange("full", var_min[icat], var_max[icat] )
         rooHist_signal.plotOn(frame,ROOT.RooFit.Binning(100), ROOT.RooFit.Range("full"))

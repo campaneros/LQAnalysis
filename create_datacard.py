@@ -190,7 +190,7 @@ for icat, cat in enumerate(subDirList):
         #Res2mjet_high = float(category_edges[5])
 
         var_min_set = 453
-        var_max_set = 4000
+        var_max_set = 5000
         
         ## Modify variable binning
         i_min_border = 0
