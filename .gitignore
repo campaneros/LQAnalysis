@@ -4,3 +4,7 @@
 *.pyc
 *.root*
 *.log
+*.d
+*.so
+*.pcm
+*.vscode

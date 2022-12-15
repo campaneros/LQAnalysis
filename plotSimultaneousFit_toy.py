@@ -55,7 +55,7 @@ parser.add_option("-s", "--signaname", dest="signaname", default="LQumu_M1000_L0
 parser.add_option("-n", dest="nToy", default=1,
                   help="number of the toy to plot")
 
-parser.add_option("-F", dest="fitFunction", default="std_3par",
+parser.add_option("-F", dest="fitFunction", default="std_4par",
                   help="fit function name")
 
 parser.add_option("--fit_to_data", action="store_true", dest="fitData",
@@ -66,7 +66,8 @@ parser.add_option("--draw_limit_exp", dest="draw_limit_exp", default=False,
 
 parser.add_option("--draw_limit_obs", dest="draw_limit_obs", default=False,
                   help="Draw signal with observed limit on cross section")
-
+parser.add_option("--save", dest="save", default=False,
+                  help="Draw signal with observed limit on cross section")
 parser.add_option("--nc", dest="ncat", default="all",
                   help="fcategories to be run")
 
@@ -184,7 +185,7 @@ combiGoFbranch = globchi2tree.Branch("CombineGoF", CombineGoF, "CombineGoF/D")
 combiDoFbranch = globchi2tree.Branch("CombineDof", CombineDof, "CombineDof/D")
 
 outputrooTFile = [None] * len(categoriesList)
-print(categoriesList)
+#print(categoriesList)
 
 for number in range(nToy):
     toy = toysfile.Get("toys/toy_"+str(number+1))
@@ -201,7 +202,7 @@ for number in range(nToy):
                 continue
         elif opt.ncat != "all" and opt.ncat not in cat:
             continue
-        print(cat)
+       # print(cat)
         outputrooTFile[icat] = ROOT.TFile.Open(opt.outputdir+"/"+cat+".root","RECREATE")
         outputrooTFile[icat].cd()
         indexcat[0]+=1
@@ -221,11 +222,11 @@ for number in range(nToy):
         #x = workspace.var("m_muj_ak4_"+app)
 
         t= toy.get() ##RooArgSet
-        print(toy.Print())
+        #print(toy.Print())
         toyvar= t.find("m_muj_ak4_"+app)
-        print(toyvar)
+        #print(toyvar)
         test=toy.binnedClone("test","test")
-        print(test.Print())
+        #print(test.Print())
         name = "m_muj_ak4_"+app
         #hData = RooDataHist("RooDataHist_"+cat,"RooDataHist_"+cat, RooArgList(toyvar), ROOT.RooFit.Cut("CMS_channel==CMS_channel::category1Muon"))
         #ROOT.RooFit.Cut("CMS_channel==CMS_channel::category1Muon")
@@ -244,8 +245,8 @@ for number in range(nToy):
         var_min_set = toyvar.getMin()
         var_max_set = toyvar.getMax()
 
-        print(var_min_set)
-        print(var_max_set)
+        #print(var_min_set)
+        #print(var_max_set)
 
         #var_max_set=4000    
         #var_min_set=500   
@@ -268,7 +269,7 @@ for number in range(nToy):
         #NvarBins = 41
         b = toyvar.getBinning()
         NvarBins = toyvar.getBins()
-        print(NvarBins)
+        #print(NvarBins)
 
 
         x = workspace.var("m_muj_ak4_"+app)
@@ -312,7 +313,7 @@ for number in range(nToy):
         #meanShape_sigma_err = workspace.var("meanShape_sigma_err_"+signalstring)
 
         nsig = workspace.var("ParametricSignalPdf_"+sign_+"_norm")
-        print("maremma maiala",sign_)
+        #print("maremma maiala",sign_)
         signalExtendPdf = ROOT.RooExtendPdf("ParametricSignalExtPdf_"+sign_, "ParametricSignalExtPdf_"+sign_, signalPdf, nsig)
 
 
@@ -348,10 +349,10 @@ for number in range(nToy):
         p3_var.setVal(p3_postfit[0])
 
 
-        print("P1 post fit ",p1_var.getVal())
-        print("P0 post fit ",norm_var.getVal())
-        print("P2 post fit ",p2_var.getVal())
-        print("P3 post fit ",p3_var.getVal())
+        #print("P1 post fit ",p1_var.getVal())
+        #print("P0 post fit ",norm_var.getVal())
+        #print("P2 post fit ",p2_var.getVal())
+        #print("P3 post fit ",p3_var.getVal())
         # Signal parameters
         #JES_sys_postfit = array('f', [0.])
         #JER_sys_postfit = array('f', [0.])
@@ -403,10 +404,10 @@ for number in range(nToy):
         hBkg    = ROOT.TH1D("hBkg_"+app,"",NvarBins,a)
 
         x.setRange("global_range", a[0], a[NvarBins])
-        print(a[0], a[NvarBins])
+        #print(a[0], a[NvarBins])
         signal_pdfIntrinsicNorm = signalPdf.createIntegral(ROOT.RooArgSet(x),ROOT.RooFit.NormSet(ROOT.RooArgSet(x)),ROOT.RooFit.Range("global_range"))
         bkg_pdfIntrinsicNorm    = BkgFit.createIntegral(ROOT.RooArgSet(x),ROOT.RooFit.NormSet(ROOT.RooArgSet(x)),ROOT.RooFit.Range("global_range"))
-        print(signal_pdfIntrinsicNorm.getVal(), nsig.getVal())
+        #print(signal_pdfIntrinsicNorm.getVal(), nsig.getVal())
 
 
         Sum=0
@@ -461,24 +462,24 @@ for number in range(nToy):
             bin_data = hData.GetBinContent(ibin)
             #if bin_data !=  norm_var.getVal() and bin_up == a[NvarBins]:
             #    bin_data=0 
-            print(bin_data, norm_var.getVal())
+            #print(bin_data, norm_var.getVal())
             hData_norm.SetBinContent(ibin, bin_data/bin_width)
             hData_norm.SetBinError(ibin, ROOT.TMath.Sqrt(bin_data)/bin_width)
         
 
 
-        print("#################################################################")
-        print("#################################################################")
-        print("######          #######   ###     ##   ####              ########")
-        print("######          ##        ## ##   ##   ##  ##            ########")
-        print("######          #######   ##  ##  ##   ##   ##           ########")
-        print("######          ##        ##   ## ##   ##  ##            ########")
-        print("######          #######   ##     ###   ####              ########")
-        print("#################################################################")
-        print("#################################################################")
-        print("Sum of all events", Sum)
-        print("Expected Events * Signal strenght ", nsig.getVal()*r )
-        print("Signal strenght", r)
+        #print("#################################################################")
+        #print("#################################################################")
+        #print("######          #######   ###     ##   ####              ########")
+        #print("######          ##        ## ##   ##   ##  ##            ########")
+        #print("######          #######   ##  ##  ##   ##   ##           ########")
+        #print("######          ##        ##   ## ##   ##  ##            ########")
+        #print("######          #######   ##     ###   ####              ########")
+        #print("#################################################################")
+        #print("#################################################################")
+        #print("Sum of all events", Sum)
+        #print("Expected Events * Signal strenght ", nsig.getVal()*r )
+        #print("Signal strenght", r)
 
         #Pull histo2 and chi square computation
         Ndof[0] = -3
@@ -488,6 +489,7 @@ for number in range(nToy):
         redChi2 = 0.
         hist_pull = ROOT.TH1D("pull_"+app, "", NvarBins, a)
         hist_pull_signal = ROOT.TH1D("pull_signal_"+app, "", NvarBins, a)
+        #chi2_dist = ROOT.TH1D("chi2"+app,"chi2"+app,500,0,5)
 
         frame_Ymax = 0
         #frame_Ymin =40
@@ -510,7 +512,7 @@ for number in range(nToy):
                 frame_Ymin = data
 
             CombineDof[0] += 1
-            if data!=0 and bkg!=0:
+            if data!=0 or bkg!=0:
                 pull = (data-bkg)/bkg_err
                 hist_pull.SetBinContent(ibin,pull)
                 CombineGoF[0] += 2*(  (bkg+sign*r)-data + data*ROOT.TMath.Log( data/(bkg+sign*r) )  )
@@ -570,8 +572,8 @@ for number in range(nToy):
         frame = x.frame()
 
         #frame_Ymax = hData.GetMaximum(1)
-        print(frame_Ymax)
-        print(frame_Ymin)
+        #print(frame_Ymax)
+        #print(frame_Ymin)
         if frame_Ymin == 0:
             frame.GetYaxis().SetRangeUser(0.0005, frame_Ymax*6)
         else:
@@ -700,7 +702,9 @@ for number in range(nToy):
         canvas.Update()
 
         #canvas.SaveAs(opt.outputdir+"/canvas_toy_"+str(nToy)+"_"+app+".pdf")
-        canvas.SaveAs(opt.outputdir+"/canvas_toy_"+str(nToy)+"_"+app+"_"+opt.outputFile+"toyesnumber"+str(number)+".png")
+        if (number%100 == 0) or opt.save:
+            print(number)
+            canvas.SaveAs(opt.outputdir+"/canvas_toy_"+str(nToy)+"_"+app+"_"+opt.outputFile+"toyesnumber"+str(number)+".png")
 
         #Write to file
         outputrooTFile[icat].cd()

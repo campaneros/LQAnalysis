@@ -74,7 +74,7 @@ os.system("mkdir -p "+outputDir)
 #os.system("rm -f "+outputDir+"/*")
 
 #if opt.gendatacard.startswith("/afs"):
-gendatacard = opt.gendatacard
+#gendatacard = opt.gendatacard
 #else:
 #    gendatacard = pwd+"/"+opt.gendatacard
 
@@ -108,8 +108,10 @@ else:
 print("RMIN ", rMin, "      RMAX",rMax)
 if opt.fixr:
     fixed = "--setParameters r=0 --freezeParameters r"
+    fixeddd = "yes"
 else:
     fixed = ""
+    fixeddd = "no"
 
 #command = ("combine -M FitDiagnostics "+str(datacard)
 print("higgsCombine_toys"+str(opt.toys)+"_expectSignal"+str(opt.expectSignal)+".GenerateOnly.mH120."+str(opt.seed)+".root")
@@ -123,7 +125,7 @@ command = ("combine -M MultiDimFit "+str(datacard)
            +" --robustHesse 1"
            +" --saveFitResult"
           # +" --expectSignal "+str(opt.expectSignal)
-           +" -n _toys%s_expectSignal%s_gen" % ( str(opt.toys), str(opt.expectSignal) )
+           +" -n _toys%s_expectSignal%s_bias_fit_%s " % ( str(opt.toys), str(opt.expectSignal), fixeddd )
            + fixed
             #+ " -s "+ str(opt.seed) 
            #+" --cminDefaultMinimizerStrategy=0"
