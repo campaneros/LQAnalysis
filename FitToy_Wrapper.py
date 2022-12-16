@@ -29,13 +29,13 @@ parser = optparse.OptionParser(usage)
 
 
 
-parser.add_option("-t", "--toysfile", dest="toysfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M2000_L1p0_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.0004.GenerateOnly.mH120.123456.root",
+parser.add_option("-t", "--toysfile", dest="toysfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M3000_L1p0_t_1000_syst0_seed123456/higgsCombine_toys1000_expectSignal0.GenerateOnly.mH120.123456.root",
                   help="input file with fitted toys")
 
-parser.add_option("-f", "--fitFile", dest="fitFile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M2000_L1p0_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.0004_gen.MultiDimFit.mH120.123456.root",
+parser.add_option("-f", "--fitFile", dest="fitFile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M3000_L1p0_t_1000_syst0_seed123456/higgsCombine_toys1000_expectSignal0.0_gen.MultiDimFit.mH120.123456.root",
                   help="input file with tree of post-fit parameters.")
 
-parser.add_option("-c", "--catdir", dest="catdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M2000_L1p0/categories/",
+parser.add_option("-c", "--catdir", dest="catdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M3000_L1p0/categories/",
                   help="name of directory containing categories dirs")
                   
 parser.add_option("-o", "--outputdir", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/plotSimFit_std_4par/LQumu_M1000_L0p1_bis_test",
@@ -47,7 +47,7 @@ parser.add_option("-b", "--outputFilename", dest="outputFile", default="expect_s
 parser.add_option("-w", "--weboutputdir", dest="weboutputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_plot/plotSimFit_std_4par/LQumu_M1000_L0p1_bis",
                   help="name of the web output directory")
 
-parser.add_option("-s", "--signaname", dest="signaname", default="LQumu_M1000_L0p1",
+parser.add_option("-s", "--signaname", dest="signaname", default="LQumu_M3000_L1p0",
                   help="signale name model")
 
 parser.add_option("-n", dest="nToy", default=1,
@@ -189,9 +189,9 @@ combiDoFbranch = globchi2tree.Branch("CombineDof", CombineDof, "CombineDof/D")
 outputrooTFile = [None] * len(categoriesList)
 
 if opt.debug:
-    ROOT.gROOT.LoadMacro("Loop_toy.C++")
+    ROOT.gROOT.LoadMacro("./Loop_toy.C++")
 else:
-    ROOT.gROOT.LoadMacro("Loop_toy.C")
+    ROOT.gROOT.LoadMacro("./Loop_toy.C")
 
 
 for icat,cat in enumerate(categoriesList):
@@ -213,6 +213,7 @@ for icat,cat in enumerate(categoriesList):
         sign_=(cat.strip("datacard_"))
 
         varname = "m_muj_ak4_"+app
+        print(app, sign_)
 
 
-        ROOT.Make_x2(toysfilenamePath, workspacePath, opt.fitFile, nToy, varname, app)
+        ROOT.Make_x2(toysfilenamePath, workspacePath, opt.fitFile, nToy, varname, app, sign_)
