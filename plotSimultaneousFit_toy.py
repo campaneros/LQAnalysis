@@ -210,12 +210,12 @@ for number in range(nToy):
         #Define mjj category range
         #print cat
         splitname = cat.split("_")
-        Mass[0] = float(splitname[2].strip("M"))
-        L[0] = float(splitname[3].strip("L").replace("p","."))
+        Mass[0] = float(splitname[4].strip("M"))
+        L[0] = float(splitname[5].strip("L").replace("p","."))
         #L[0] = float(L.replace("p","."))
 
-        app=(cat.split("_"))[4]
-        sign_=(cat.strip("datacard_"))
+        app=(cat.split("_"))[6]
+        sign_=(cat.replace("datacard_"+opt.fitFunction+"_", ""))
         #print(app)
         #print(sign_)
         #x = RooRealVar("m_muj_ak4_category1Muon","m_muj_ak4_category1Muon",41,453,3854)
@@ -702,9 +702,9 @@ for number in range(nToy):
         canvas.Update()
 
         #canvas.SaveAs(opt.outputdir+"/canvas_toy_"+str(nToy)+"_"+app+".pdf")
-        if (number%100 == 0) or opt.save:
-            print(number)
-            canvas.SaveAs(opt.outputdir+"/canvas_toy_"+str(nToy)+"_"+app+"_"+opt.outputFile+"toyesnumber"+str(number)+".png")
+        #if (number%100 == 0) or opt.save:
+        print(number)
+        canvas.SaveAs(opt.outputdir+"/canvas_toy_"+str(nToy)+"_"+app+"_"+opt.outputFile+"toyesnumber"+str(number)+".png")
 
         #Write to file
         outputrooTFile[icat].cd()
@@ -739,3 +739,5 @@ globchi2tree.Write()
 
 chi2file.Write()
 chi2file.Close()
+toysfile.Close()
+workspacefile.Close()

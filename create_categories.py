@@ -18,7 +18,18 @@ import tdrstyle
 import CMS_lumi
 import create_workspaces_and_datacards_utils as cwd_utils
 
-fitFunction_name = "std_4par"
+usage = "usage: python plotSimFit.py -t toysfile/workspacefile -f fitFile -n 1 -c catdir -o outputdir -w weboutputdir -F fitFunction --draw_limit_(exp/obs) limit_dir"
+
+parser = optparse.OptionParser(usage)
+
+parser.add_option("-F", dest="fitFunction", default="std_4par",
+                  help="fit function name")
+
+
+(opt, args) = parser.parse_args()
+
+fitFunction_name = opt.fitFunction
+#fitFunction_name = "std_4par"
 fitparam = []
 #gROOT.LoadMacro(os.path.dirname(os.path.abspath(__file__))+"/../../src/libCpp/RooDoubleCBFast.cc+")
 ROOT.gROOT.SetBatch(True)
@@ -36,11 +47,11 @@ outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards
 weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_plot"
 os.system("mkdir -p "+outputdir)
 os.system("mkdir -p "+outputdirdatacards)
-os.system(u"rm -f "+outputdirdatacards+"/*")
+#os.system(u"rm -f "+outputdirdatacards+"/*")
 os.system("mkdir -p "+weboutputdir)
 scriptsPath = os.path.dirname(os.path.abspath(__file__))+"/../../"
 os.system("cp "+scriptsPath+"/index.php "+weboutputdir)
-filenameworkspace = "workspace.root"
+filenameworkspace = "workspace_"+fitFunction_name+".root"
 filenameworkspacePath = outputdir+"/"+filenameworkspace
 workspaceName = "w"
 
@@ -427,7 +438,7 @@ for icat, cat in enumerate(subDirList):
             os.system("mkdir -p "+outputdirdatacards+"/"+modell)    
             os.system("mkdir -p "+outputdirdatacards+"/"+modell+"/categories")    
         	    ## Create datacard for current signal
-            datacardfilename = outputdirdatacards+"/"+modell+"/categories/"+"datacard_"+signalString+".txt"
+            datacardfilename = outputdirdatacards+"/"+modell+"/categories/"+"datacard_"+fitFunction_name+"_"+signalString+".txt"
             outputfile = io.open(datacardfilename,'w')
 
             ## Create datacard for current signal
@@ -666,8 +677,8 @@ for iline, line in enumerate(signalInputfile):
 signalInputfile.close()
 print(listOfSignalModels)
 
-datacardList = io.open(outputdirdatacards+"/datacardList.txt", 'w')
-datacardList_single = io.open(outputdirdatacards+"/datacardList_single_category.txt", 'w')
+datacardList = io.open(outputdirdatacards+"/datacardList_"+fitFunction_name+".txt", 'w')
+datacardList_single = io.open(outputdirdatacards+"/datacardList_"+fitFunction_name+"_single_category.txt", 'w')
 ## Loop over signals and categories (create combined datacard)
 for signal in listOfSignalModels:
     currentPath = os.getcwd()
@@ -676,8 +687,8 @@ for signal in listOfSignalModels:
     ## Loop over event categories    
     for icat, cat in enumerate(subDirList):
         signalStringCat = signal+"_"+cat
-        datacardfilenameAll = outputdirdatacards+"/"+signal+"/"+"datacard_"+signal+".txt"
-        datacardfilename = outputdirdatacards+"/"+signal+"/categories/"+"datacard_"+signalStringCat+".txt"        
+        datacardfilenameAll = outputdirdatacards+"/"+signal+"/"+"datacard_"+fitFunction_name+"_"+signal+".txt"
+        datacardfilename = outputdirdatacards+"/"+signal+"/categories/"+"datacard_"+fitFunction_name+"_"+signalStringCat+".txt"        
 
         print(signal)
         if icat==0:
@@ -710,7 +721,7 @@ for signal in listOfSignalModels:
         Lval  = (splitline[2]).strip("L")
         Lval =  Lval.replace("p",".")
         category = splitline[3]         
-        datacardList_single.write(modell+" "+M1val+" "+Lval+" "+category+" "+datacardfilename+"\    n")
+        datacardList_single.write(modell+" "+M1val+" "+Lval+" "+category+" "+datacardfilename+"\n")
 
         command += " > "+datacardfilenameAll
         print(command)

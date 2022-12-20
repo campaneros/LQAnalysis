@@ -19,6 +19,8 @@ import tdrstyle
 import CMS_lumi
 import create_workspaces_and_datacards_utils as cwd_utils
 
+
+
 fitFunction_name = "std_4par"
 fitparam = []
 #ROOT.gROOT.LoadMacro(os.path.dirname(os.path.abspath(__file__))+"/../../src/libCpp/RooDoubleCBFast.cc+")
@@ -37,7 +39,7 @@ outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards
 weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_plot"
 os.system("mkdir -p "+outputdir)
 os.system("mkdir -p "+outputdirdatacards)
-os.system(u"rm -f "+outputdirdatacards+"/*")
+#os.system(u"rm -f "+outputdirdatacards+"/*")
 os.system("mkdir -p "+weboutputdir)
 scriptsPath = os.path.dirname(os.path.abspath(__file__))+"/../../"
 os.system("cp "+scriptsPath+"/index.php "+weboutputdir)

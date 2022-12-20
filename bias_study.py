@@ -27,7 +27,7 @@ parser = optparse.OptionParser(usage)
 parser.add_option("-g", "--gendatacard", dest="gendatacard", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M1000_L0p1/datacard_gen_LQumu_M1000_L0p1.txt",
                   help= "input combine datacard you want to generate from")
 
-parser.add_option("-d", "--datacard", dest="datacard", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M1000_L0p1/datacard_LQumu_M1000_L0p1.txt",
+parser.add_option("-d", "--datacard", dest="datacard", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M1000_L0p1/datacard_std_4par_LQumu_M1000_L0p1.txt",
                   help="input combine datacard you want to use for fit")
 
 parser.add_option("-o", "--output", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/", 
@@ -35,6 +35,9 @@ parser.add_option("-o", "--output", dest="outputdir", default="/data/mcampana/CM
 
 parser.add_option("-S", dest="syst", default=0,
                   help="fit systematics")
+
+parser.add_option("-F", dest="fitFunction", default="std_4par",
+                  help="fit function name")
 
 parser.add_option("-t", dest="toys", default=1, 
                   help="0=data, -1=asimov, >0=run toys")
@@ -62,9 +65,9 @@ if not opt.toys or int(opt.toys)<=0:
 ##################################################################################################
 
 datacardname = (opt.datacard.split("/")[-1]).split(".")[0]
-#print datacardname
+print(datacardname)
 
-mass = float( (datacardname.split("_")[2]).replace("M","") )
+mass = float( (datacardname.split("_")[4]).replace("M","") )
 
 genoutputlabel = datacardname+"_genToys_"+str(opt.toys)+"_syst"+str(opt.syst)+"_seed"+str(opt.seed)
 outputlabel = datacardname+"_t_"+str(opt.toys)+"_syst"+str(opt.syst)+"_seed"+str(opt.seed)
@@ -79,6 +82,9 @@ gendatacard = opt.gendatacard
 
 #if opt.datacard.startswith("/afs"):
 datacard = opt.datacard
+#index = datacard.find("_LQu")
+#datacard = datacard[:index]+"_"+opt.fitFunction+datacard[index:]
+print(datacard)
 #else:
 #    datacard = pwd+"/"+opt.datacard
 
@@ -137,7 +143,7 @@ command = ("combine -M MultiDimFit "+str(datacard)
            +" --robustHesse 1"
            +" --saveFitResult"
           # +" --expectSignal "+str(opt.expectSignal)
-           +" -n _toys%s_expectSignal%s_gen" % ( str(opt.toys), str(opt.expectSignal) )
+           +" -n _toys%s_expectSignal%s_%s" % ( str(opt.toys), str(opt.expectSignal), str(opt.fitFunction) )
             #+ " -s "+ str(opt.seed) 
            #+" --cminDefaultMinimizerStrategy=0"
            #+" -v 4"

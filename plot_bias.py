@@ -173,7 +173,8 @@ c1.SaveAs(opt.weboutputdir+"/hr_"+opt.outputfile+".png")
 h_pull_sigmaexp = TH1D("h_pull_sigmaexp", "", 400, -4, 4)
 
 sigma = hr.GetRMS()
-print sigma
+print(sigma)
+inputfile.Close()
 #tree.Draw("(r-"+str(opt.rExpected)+")/"+str(sigma)+">>h_pull_sigmaexp", "trackedParamErr_r>0")
 #h_pull_sigmaexp.GetXaxis().SetRangeUser(-1,1)
 #h_pull_sigmaexp.Fit("gaus")

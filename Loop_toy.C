@@ -34,6 +34,8 @@
 #include "TLine.h"
 #include <time.h>
 #include "TBox.h"
+#include "TROOT.h"
+#include "TRint.h"
 
 
 using namespace RooFit;
@@ -42,7 +44,7 @@ using namespace RooFit;
 //int AllFits(std::string filename,std::string path, double mass,double ctau,int channel, std::string wd,std::string sel,double lumiRatio, bool binned, bool blinded ){
 
 
-void Make_x2(std::string ToysFile, std::string WorkspaceFile, std::string FitFile, int NToys, std::string CatName, std::string Cat, std::string Signal){
+void Make_x2(std::string ToysFile, std::string WorkspaceFile, std::string FitFile, int NToys, std::string CatName, std::string Cat, std::string Signal, std::string Output, std::string function, std::string expected_signal){
 
 TFile *f = new TFile((WorkspaceFile).c_str());
 TFile *toys= new TFile((ToysFile).c_str());
@@ -50,6 +52,10 @@ TFile *limitfile = new TFile((FitFile).c_str());
 
 RooWorkspace *w = (RooWorkspace *)f->Get("w");
 RooRealVar *x = w->var((CatName).c_str());
+
+//gROOT->SetBatch(true);
+//gErrorIgnoreLevel = kFatal;
+//RooMsgService::instance().setGlobalKillBelow(WARNING);
 
 
 //RooMsgService->instance()->setGlobalKillBelow(WARNING);
@@ -95,8 +101,8 @@ double pull = 0;
 double GlobalChi2 = 0;
 double CombineGoF = 0;
 
-TH1 *hist_chi2= new TH1D("chi2","chi2",300,0,3);
-
+TH1 *hist_chi2= new TH1D("chi2","chi2",60,0,3);
+TH1 *hist_pval= new TH1D("chi2","chi2",50,0,1);
 
 for (int i=0; i<NToys; i++){
     CombineGoF=0;
@@ -205,26 +211,35 @@ for (int i=0; i<NToys; i++){
     if (Ndof <  0) Ndof = 0;
     if (Ndof != 0) redChi2 = Chi2/Ndof;
 
+    double pval= TMath::Prob(Chi2, Ndof);
+
 
     double frame_Ymax = 0;
     //#frame_Ymin =40
-    double frame_Ymin = hData->GetBinContent(hData->GetNbinsX()-1);
+    //double frame_Ymin = hData->GetBinContent(hData->GetNbinsX()-1);
     //std::cout<<redChi2<<std::endl;
     hist_chi2->Fill(redChi2);
-    hData_norm->Draw();
+    hist_pval->Fill(pval);
+    //hData_norm->Draw();
     //hBkg->Draw("SAMEL");
     //c->SaveAs("test.png");
     //std::cout<<"r= "<<r<<std::endl;
    // std::cout<<"norm val "<<p0_postfit<<std::endl;
     //delete[] arr_varBins;
+    if (i%100==0){
+        std::cout<<i<<std::endl;
+    }
 
 
 
 }
 
 hist_chi2->Draw();
-c->SaveAs("test.png");
-
-
+c->SaveAs((Output+"/"+function+"_"+Signal+"_expect_signal_"+expected_signal+"_toys"+to_string(NToys)+".png").c_str());
+hist_pval->Draw();
+c->SaveAs((Output+"/pval_"+function+"_"+Signal+"_expect_signal"+expected_signal+"_toys"+to_string(NToys)+".png").c_str());
+limitfile->Close();
+toys->Close();
+f->Close();
 }
  

@@ -29,31 +29,34 @@ parser = optparse.OptionParser(usage)
 
 
 
-parser.add_option("-t", "--toysfile", dest="toysfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M3000_L1p0_t_1000_syst0_seed123456/higgsCombine_toys1000_expectSignal0.GenerateOnly.mH120.123456.root",
+parser.add_option("-t", "--toysfile", dest="toysfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_std_4par_LQumu_M1000_L0p1_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.GenerateOnly.mH120.123456.root",
                   help="input file with fitted toys")
 
-parser.add_option("-f", "--fitFile", dest="fitFile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M3000_L1p0_t_1000_syst0_seed123456/higgsCombine_toys1000_expectSignal0.0_gen.MultiDimFit.mH120.123456.root",
+parser.add_option("-f", "--fitFile", dest="fitFile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_std_4par_LQumu_M1000_L0p1_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0_std_4par.MultiDimFit.mH120.123456.root",
                   help="input file with tree of post-fit parameters.")
 
-parser.add_option("-c", "--catdir", dest="catdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M3000_L1p0/categories/",
+parser.add_option("-c", "--catdir", dest="catdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M1000_L0p1/categories/",
                   help="name of directory containing categories dirs")
                   
-parser.add_option("-o", "--outputdir", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/plotSimFit_std_4par/LQumu_M1000_L0p1_bis_test",
+parser.add_option("-o", "--outputdir", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/plotSimFit_std_4par/Chi2_dist",
                   help="name of the output directory")
 
 parser.add_option("-b", "--outputFilename", dest="outputFile", default="expect_signal",
                   help="name of the output file")
 
-parser.add_option("-w", "--weboutputdir", dest="weboutputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_plot/plotSimFit_std_4par/LQumu_M1000_L0p1_bis",
+parser.add_option("-w", "--weboutputdir", dest="workspacePath", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/workspace.root",
                   help="name of the web output directory")
 
 parser.add_option("-s", "--signaname", dest="signaname", default="LQumu_M3000_L1p0",
                   help="signale name model")
 
+parser.add_option("-r", dest="rExpected", default=0,
+                  help="expected signal strenght (r)")
+
 parser.add_option("-n", dest="nToy", default=1,
                   help="number of the toy to plot")
 
-parser.add_option("-F", dest="fitFunction", default="std_3par",
+parser.add_option("-F", dest="fitFunction", default="std_4par",
                   help="fit function name")
 
 parser.add_option("--fit_to_data", action="store_true", dest="fitData",
@@ -83,8 +86,8 @@ if not opt.fitFile:
 if not opt.outputdir:
     parser.error('output dir name not provided')
 
-if not opt.weboutputdir:
-    parser.error('web output dir name not provided')
+#if not opt.weboutputdir:
+#    parser.error('web output dir name not provided')
 
 ######################################################################
 
@@ -130,19 +133,18 @@ L           = float(L.replace("p","."))
 
 #workspacename = toysfilename.replace("workspace_","w_").replace(".root","")
 
-workspacePath = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/workspace.root"
+workspacePath=opt.workspacePath
+
+#workspacePath = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/workspace.root"
 #workspacePath = workspacePath.split("/")[-1]
-workspacefile = ROOT.TFile.Open(workspacePath)
+#workspacefile = ROOT.TFile.Open(workspacePath)
 
 workspacename = "w"
-workspace = ROOT.RooWorkspace()
+#workspace = ROOT.RooWorkspace()
 
-workspace=workspacefile.Get(workspacename)
+#workspace=workspacefile.Get(workspacename)
 
-#toy = toysfile.Get("toys/toy_1")
-#print(toy)
-#else:
-#    toy = toysfile.Get("toys/toy_"+str(nToy) )
+
 
 #Create categories list
 categoriesList = next(os.walk(opt.catdir))[2]
@@ -150,14 +152,6 @@ for icat, cat in enumerate(categoriesList):
     categoriesList[icat] = cat.replace("datacard_Res1ToRes2ToGluGlu_"+splitsignal[1]+"_"+splitsignal[2]+"_", "").replace(".txt", "")
 ncategories = len(categoriesList)
 
-#catType = 0
-
-#if M2val <= 600:
-#    catType = 1
-#elif M2val <= 1200:
-#    catType = 2
-#else:
-#    catType = 4
 
 #Create output rooROOT.TFile with chi2
 indexcat = array('i', [0 ])
@@ -166,32 +160,19 @@ Ndof     = array('d', [0.])
 Mass  = array('d', [0.])
 L    = array('d', [0.])
 
-GlobalChi2 = array('d', [0. ])
-GlobalNdof = array('d', [-1.]) #subtract r parameter
-CombineGoF = array('d', [0. ])
-CombineDof = array('d', [-1.]) #subtract r parameter
 
-chi2file = ROOT.TFile.Open(opt.outputdir+"/test_statistics.root", "RECREATE")
 
-chi2tree = ROOT.TTree("chi2tree","chi2tree")
-icatbranch = chi2tree.Branch("icat", indexcat, "icat/I")
-chi2branch = chi2tree.Branch("chi2", Chi2, "chi2/D")
-ndofbranch = chi2tree.Branch("ndof", Ndof, "ndof/D")
-chi2branch = chi2tree.Branch("Mass", Mass, "Mass/D")
-ndofbranch = chi2tree.Branch("L", L, "L/D")
 
-globchi2tree = ROOT.TTree("globchi2tree","globchi2tree")
-globchi2branch = globchi2tree.Branch("globchi2"  , GlobalChi2, "globchi2/D"  )
-globndofbranch = globchi2tree.Branch("globndof"  , GlobalNdof, "globndof/D"  )
-combiGoFbranch = globchi2tree.Branch("CombineGoF", CombineGoF, "CombineGoF/D")
-combiDoFbranch = globchi2tree.Branch("CombineDof", CombineDof, "CombineDof/D")
 
 outputrooTFile = [None] * len(categoriesList)
 
 if opt.debug:
-    ROOT.gROOT.LoadMacro("./Loop_toy.C++")
+    ROOT.gROOT.LoadMacro("./Loop_toy.C+")
 else:
     ROOT.gROOT.LoadMacro("./Loop_toy.C")
+
+
+#higgsCombine_toys1_expectSignal0_std_4par.MultiDimFit.mH120.123456.root
 
 
 for icat,cat in enumerate(categoriesList):
@@ -199,21 +180,23 @@ for icat,cat in enumerate(categoriesList):
             continue
         elif "gen_" in cat:
                 continue
-        outputrooTFile[icat] = ROOT.TFile.Open(opt.outputdir+"/"+cat+".root","RECREATE")
-        outputrooTFile[icat].cd()
+        print("cat ",cat, opt.fitFunction)
+        #outputrooTFile[icat] = ROOT.TFile.Open(opt.outputdir+"/"+cat+".root","RECREATE")
+        #outputrooTFile[icat].cd()
         indexcat[0]+=1
 
         #Define mjj category range
         splitname = cat.split("_")
-        Mass[0] = float(splitname[2].strip("M"))
-        L[0] = float(splitname[3].strip("L").replace("p","."))
+        Mass[0] = float(splitname[4].strip("M"))
+        L[0] = float(splitname[5].strip("L").replace("p","."))
 
-        app=(cat.split("_"))[4]
+        app=(cat.split("_"))[6]
         print(app)
-        sign_=(cat.strip("datacard_"))
+        sign_=(cat.replace("datacard_"+opt.fitFunction+"_", ""))
+        print(sign_, cat)
 
         varname = "m_muj_ak4_"+app
         print(app, sign_)
 
-
-        ROOT.Make_x2(toysfilenamePath, workspacePath, opt.fitFile, nToy, varname, app, sign_)
+        print(toysfilenamePath, workspacePath, opt.fitFile, nToy, varname, app, sign_, opt.outputdir, fitFunction)
+        ROOT.Make_x2(toysfilenamePath, workspacePath, opt.fitFile, nToy, varname, app, sign_, opt.outputdir, fitFunction, str(opt.rExpected))
