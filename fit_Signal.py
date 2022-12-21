@@ -49,7 +49,7 @@ var_min = []
 var_max = [] 
 
 for cat in subDirList:
-    var_min.append(453)
+    var_min.append(800)
     var_max.append(5000)
 
 ## Binning

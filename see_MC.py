@@ -138,6 +138,7 @@ fitResult = [None] * ncategories
 ndof = [None] * ncategories
 Chi2 = [None] * ncategories
 reducedChi2 = [None] * ncategories
+th1_error = [None]*ncategories
 
 
 ParametricBkgPdf = [None] * ncategories
@@ -292,6 +293,7 @@ for icat, cat in enumerate(subDirList):
         rooHist_bkg[icat] = ROOT.RooDataHist("ROOT.RooDataHist_bkg_"+cat,"ROOT.RooDataHist_bkg_"+cat,ROOT.RooArgList(var[icat]),ROOT.RooFit.Import(th1_rebin_bkg[icat]))
         numberOfEvents[icat] = rooHist_bkg[icat].sumEntries()
         nbkg[icat] = rooHist[icat].sumEntries()
+        th1_error[icat] = ROOT.TH1D("Error"+cat,"Error"+cat, NvarBins,array('d',varBins))
         #th1_rebin[icat].SetBinErrorOption(ROOT.TH1.kPoisson)
         #th1_rebin_bkg[icat].SetBinErrorOption(ROOT.TH1.kPoisson)
         for ibin,bin in enumerate(varBins):
@@ -303,6 +305,24 @@ for icat, cat in enumerate(subDirList):
             bin_width = th1_rebin[icat].GetBinWidth(ibin)
             print("Bin low ", bin_low, "  Bin Up: ", bin_low+bin_width, " bin content: ", bincontent)
             print("SumW2: ", binerror, " Sqrt(n):", error)
+            if error != 0:
+                th1_error[icat].SetBinContent(ibin,binerror/error)
+            else:
+                th1_error[icat].SetBinContent(ibin,0)
+            th1_error[icat].SetBinError(ibin,0)
+        canvas[icat].SetLogy(1)
+        th1_error[icat].SetMinimum(0.01)
+        th1_error[icat].GetYaxis().SetTitle("Mass")
+        th1_error[icat].GetYaxis().SetTitle("getbinerror/sqrt(n)")
+        th1_error[icat].GetYaxis().SetTitleSize(0.06)
+        th1_error[icat].GetYaxis().SetTitleOffset(0.8)
+        th1_error[icat].SetMarkerStyle(20)
+        th1_error[icat].SetMarkerSize(0.8)
+        th1_error[icat].SetMarkerColor(1)
+        th1_error[icat].SetLineColor(1)
+        th1_error[icat].Draw("P")
+        for ext in ['.png','.pdf']:
+            canvas[icat].SaveAs("Error_histo"+cat+ext)
 
             
 
