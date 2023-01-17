@@ -31,13 +31,13 @@ parser = optparse.OptionParser(usage)
 
 
 
-parser.add_option("-t", "--toysfile", dest="toysfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M2000_L1p0_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.0004.GenerateOnly.mH120.123456.root",
+parser.add_option("-t", "--toysfile", dest="toysfile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M1000_L0p1_t_1000_syst0_seed123456/higgsCombine_toys1000_expectSignal0.GenerateOnly.mH120.123456.root",
                   help="input file with fitted toys")
 
-parser.add_option("-f", "--fitFile", dest="fitFile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M2000_L1p0_t_1_syst0_seed123456/higgsCombine_toys1_expectSignal0.0004_gen.MultiDimFit.mH120.123456.root",
+parser.add_option("-f", "--fitFile", dest="fitFile", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/datacard_LQumu_M1000_L0p1_t_1000_syst0_seed123456/higgsCombine_toys1000_expectSignal0_std_4par.MultiDimFit.mH120.123456.root",
                   help="input file with tree of post-fit parameters.")
 
-parser.add_option("-c", "--catdir", dest="catdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M2000_L1p0/categories/",
+parser.add_option("-c", "--catdir", dest="catdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M1000_L0p1/categories/",
                   help="name of directory containing categories dirs")
                   
 parser.add_option("-o", "--outputdir", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/plotSimFit_std_4par/LQumu_M1000_L0p1_bis_test",
@@ -69,7 +69,7 @@ parser.add_option("--draw_limit_obs", dest="draw_limit_obs", default=False,
 parser.add_option("--save", dest="save", default=False,
                   help="Draw signal with observed limit on cross section")
 parser.add_option("--nc", dest="ncat", default="all",
-                  help="fcategories to be run")
+                  help="categories to be run")
 
 
 (opt, args) = parser.parse_args()
@@ -128,7 +128,7 @@ L           = float(L.replace("p","."))
 
 #workspacename = toysfilename.replace("workspace_","w_").replace(".root","")
 
-workspacePath = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/workspace.root"
+workspacePath = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/workspace_modExp_4par.root"
 #workspacePath = workspacePath.split("/")[-1]
 workspacefile = ROOT.TFile.Open(workspacePath)
 
@@ -200,6 +200,8 @@ for number in range(nToy):
     #           print("maremma boia")
     #           print(cat)
                 continue
+        elif "std_" in cat:
+            continue
         elif opt.ncat != "all" and opt.ncat not in cat:
             continue
        # print(cat)
@@ -210,7 +212,8 @@ for number in range(nToy):
         #Define mjj category range
         #print cat
         splitname = cat.split("_")
-        Mass[0] = float(splitname[4].strip("M"))
+        print(splitname)
+        Mass[0] = float(splitname[4].replace("M",""))
         L[0] = float(splitname[5].strip("L").replace("p","."))
         #L[0] = float(L.replace("p","."))
 
@@ -296,9 +299,11 @@ for number in range(nToy):
             p2_var    = workspace.var("p2_UA2"+app) 
         elif "modExp" in fitFunction:
             p1_var    = workspace.var("p1_modExp"+app) 
-            p2_var    = workspace.var("p2_modExp"+app) 
+            p2_var    = workspace.var("p2_modExp"+app)
+            p3_var    = workspace.var("p3_modExp"+app) 
 
         norm_var  = workspace.var("ParametricBkgPdf_"+app+"_norm")
+        print("Pre fit ",norm_var.getVal())
         ExtBkgFit = ROOT.RooExtendPdf("ExtBkgPdf_"+app, "ExtBkgPdf_"+app, BkgFit, norm_var)
 
         ## Get signal shape and floating parameters (only sys floating in the fit=
@@ -348,7 +353,7 @@ for number in range(nToy):
         p2_var.setVal(p2_postfit[0])
         p3_var.setVal(p3_postfit[0])
 
-
+        print("Post fit ",norm_var.getVal())
         #print("P1 post fit ",p1_var.getVal())
         #print("P0 post fit ",norm_var.getVal())
         #print("P2 post fit ",p2_var.getVal())
@@ -407,7 +412,7 @@ for number in range(nToy):
         #print(a[0], a[NvarBins])
         signal_pdfIntrinsicNorm = signalPdf.createIntegral(ROOT.RooArgSet(x),ROOT.RooFit.NormSet(ROOT.RooArgSet(x)),ROOT.RooFit.Range("global_range"))
         bkg_pdfIntrinsicNorm    = BkgFit.createIntegral(ROOT.RooArgSet(x),ROOT.RooFit.NormSet(ROOT.RooArgSet(x)),ROOT.RooFit.Range("global_range"))
-        #print(signal_pdfIntrinsicNorm.getVal(), nsig.getVal())
+        print(signal_pdfIntrinsicNorm.getVal(), nsig.getVal())
 
 
         Sum=0
@@ -449,6 +454,7 @@ for number in range(nToy):
         # 
             hSignal.SetBinContent(ibin,bin_signalEvents_norm)
 
+
             bkg_pdfIntegral = BkgFit.createIntegral(ROOT.RooArgSet(x),ROOT.RooFit.NormSet(ROOT.RooArgSet(x)),ROOT.RooFit.Range("toy_"+str(ibin)))
             bkg_pdfIntegral_norm = bkg_pdfIntegral.getVal()/bkg_pdfIntrinsicNorm.getVal()
             bin_bkgEvents = bkg_pdfIntegral_norm*norm_var.getVal()
@@ -458,6 +464,8 @@ for number in range(nToy):
     
             #hBkg.SetBinContent(ibin,bin_bkgEvents)
             hBkg.SetBinContent(ibin,bin_bkgEvents_norm)
+            #print(bkg_pdfIntegral_norm, norm_var.getVal())
+            #print(bin_bkgEvents_norm)
             
             bin_data = hData.GetBinContent(ibin)
             #if bin_data !=  norm_var.getVal() and bin_up == a[NvarBins]:

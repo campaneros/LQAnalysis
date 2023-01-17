@@ -195,7 +195,7 @@ for icat, cat in enumerate(subDirList):
         #Res2mjet_low = float(category_edges[4])
         #Res2mjet_high = float(category_edges[5])
 
-        var_min_set = 800
+        var_min_set = 550
         var_max_set = 5000
         
         ## Modify variable binning
@@ -473,6 +473,8 @@ for icat, cat in enumerate(subDirList):
             for param in fitparam:
                 outputfile.write( param.GetName()+u" flatParam"+"\n" )
                 outputfile.write( nbkg[icat].GetName()+u" flatParam"+"\n" )
+                print("################# Param ", nbkg[icat].GetName(), "      ",nbkg[icat].getVal())
+                #print("################# Param ", param.GetName(), "      ",param.getVal())
             outputfile.close()            
         signalInputfile.close()
 

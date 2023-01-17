@@ -24,7 +24,7 @@ usage = "usage: To be run from trijetana: python bias_study.py -g /afs/cern.ch/w
 
 parser = optparse.OptionParser(usage)
 
-parser.add_option("-d", "--datacard", dest="datacard", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M1000_L0p1/datacard_LQumu_M1000_L0p1.txt",
+parser.add_option("-d", "--datacard", dest="datacard", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards/LQumu_M1000_L0p1/datacard_std_4par_LQumu_M1000_L0p1.txt",
                   help="input combine datacard you want to use for fit")
 
 parser.add_option("-o", "--output", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/", 
@@ -65,7 +65,7 @@ if not opt.toys or int(opt.toys)<=0:
 datacardname = (opt.datacard.split("/")[-1]).split(".")[0]
 #print datacardname
 
-mass = float( (datacardname.split("_")[2]).replace("M","") )
+mass = float( (datacardname.split("_")[4]).replace("M","") )
 
 genoutputlabel = datacardname+"_genToys_"+str(opt.toys)+"_syst"+str(opt.syst)+"_seed"+str(opt.seed)
 outputlabel = datacardname+"_t_"+str(opt.toys)+"_syst"+str(opt.syst)+"_seed"+str(opt.seed)

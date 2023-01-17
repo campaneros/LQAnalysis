@@ -49,7 +49,7 @@ var_min = []
 var_max = [] 
 
 for cat in subDirList:
-    var_min.append(800)
+    var_min.append(550)
     var_max.append(5000)
 
 ## Binning
@@ -172,7 +172,7 @@ for icat, cat in enumerate(subDirList):
         #    signalPdf.plotOn(frame,ROOT.RooFit.Binning(100))
         #frame.Draw()
         #frame = var[icat].frame()
-        var[icat].setRange("signal",  max(float(M1value)*0.65, var_min[icat]), min(float(M1value)*1.45, 4000) )
+        var[icat].setRange("signal",  max(float(M1value)*0.65, var_min[icat]), min(float(M1value)*1.45, 5000) )
         var[icat].setRange("full", var_min[icat], var_max[icat] )
         rooHist_signal.plotOn(frame,ROOT.RooFit.Binning(100), ROOT.RooFit.Range("full"))
         if( float(M1value) > var_min[icat] and float(M1value) < var_max[icat]):

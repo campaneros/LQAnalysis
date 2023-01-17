@@ -191,7 +191,7 @@ for icat, cat in enumerate(subDirList):
         #Res2mjet_low = float(category_edges[4])
         #Res2mjet_high = float(category_edges[5])
 
-        var_min_set = 800
+        var_min_set = 550
         var_max_set = 5000
         
         ## Modify variable binning
@@ -235,7 +235,7 @@ for icat, cat in enumerate(subDirList):
         print("Get "+histoname+" from file "+rootfilename)
         th1_fromFile[icat] = rootfile[icat].Get(histoname) # 1 GeV bin histogram
         th1_fromFile[icat].Draw()
-        canvas[icat].SaveAs("tets.png")
+        #canvas[icat].SaveAs("tets.png")
         integral = int(th1_fromFile[icat].Integral())
         print("diocaro", integral)
 
