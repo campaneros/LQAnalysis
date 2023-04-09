@@ -828,15 +828,20 @@ for index in range(0, len(fit_function_list)-1):
     for icat, cat in enumerate(subDirList):
         print(cat)
         print((cat.strip("category")).replace("_BDT_","_"))
-        print(str(fit_function_list[index]) + " rchi2 = " + str(chi2_reduced_dict["%s"%fit_function_list[index]]["%s"%cat] ))
-        print(str(fit_function_list[index+1]) + " rchi2 = " + str(chi2_reduced_dict["%s"%fit_function_list[index+1]]["%s"%cat] ))
-        chi2_fisher["%s"%cat] = chi2_reduced_dict["%s"%fit_function_list[index]]["%s"%cat] - chi2_reduced_dict["%s"%fit_function_list[index+1]]["%s"%cat]
-        pval_fisher["%s"%cat] = ROOT.TMath.Prob(chi2_fisher["%s"%cat],1)
+        print(str(fit_function_list[index]) + " rchi2 = " + str(chi2_dict["%s"%fit_function_list[index]]["%s"%cat] ))
+        print(str(fit_function_list[index+1]) + " rchi2 = " + str(chi2_dict["%s"%fit_function_list[index+1]]["%s"%cat] ))
+        chi2_fisher["%s"%cat] = chi2_dict["%s"%fit_function_list[index]]["%s"%cat] - chi2_dict["%s"%fit_function_list[index+1]]["%s"%cat]
+        if chi2_fisher["%s"%cat] > 1000:
+            pval_fisher["%s"%cat] = 0.000001
+        elif chi2_fisher["%s"%cat] < 0:
+            pval_fisher["%s"%cat] = 1
+        else:
+            pval_fisher["%s"%cat] = ROOT.TMath.Prob(chi2_fisher["%s"%cat],1)
         print("chi2 = " + str(chi2_fisher["%s"%cat]))
         print("pval = " + str(pval_fisher["%s"%cat]))
-        print(str(fit_function_list[index]) + " all_rchi2 = " + str(chi2all_reduced_dict["%s"%fit_function_list[index]]["%s"%cat] ))
-        print(str(fit_function_list[index+1]) + " all_rchi2 = " + str(chi2all_reduced_dict["%s"%fit_function_list[index+1]]["%s"%cat] ))
-        chi2all_fisher["%s"%cat] = chi2all_reduced_dict["%s"%fit_function_list[index]]["%s"%cat] - chi2all_reduced_dict["%s"%fit_function_list[index+1]]["%s"%cat]
+        print(str(fit_function_list[index]) + " all_rchi2 = " + str(chi2all_dict["%s"%fit_function_list[index]]["%s"%cat] ))
+        print(str(fit_function_list[index+1]) + " all_rchi2 = " + str(chi2all_dict["%s"%fit_function_list[index+1]]["%s"%cat] ))
+        chi2all_fisher["%s"%cat] = chi2all_dict["%s"%fit_function_list[index]]["%s"%cat] - chi2all_dict["%s"%fit_function_list[index+1]]["%s"%cat]
         pvalall_fisher["%s"%cat] = ROOT.TMath.Prob(chi2all_fisher["%s"%cat],1)
         print("chi2 = " + str(chi2all_fisher["%s"%cat]))
         print("pval = " + str(pvalall_fisher["%s"%cat]))
