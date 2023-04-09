@@ -21,13 +21,13 @@ import CMS_lumi
 ROOT.gROOT.SetBatch(True)
 
 ## Input directories (each folder contains a root file with histograms)
-inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna/src/RootTreeAnalyzer/Fit_Signal/category"
+inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna_new/src/RootTreeAnalyzer/all_years/category_BDT_data_all/"
 subDirList = next(os.walk(inputdir))[1]
 print(subDirList)
 
 ## Output directories  
-outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output"
-weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output"
+outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output"
+weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output"
 os.system("mkdir -p "+outputdir)
 os.system("mkdir -p "+weboutputdir)
 scriptsPath = os.path.dirname(os.path.abspath(__file__))+"/../../"
@@ -41,7 +41,8 @@ varname = "m_muj_ak"
 vartitle = "m_muj_ak [GeV]"
 
 ## Signal Histogram
-histoname_signal = ["h1_mmuj_ak4__LQumu_M3000_L1p0", "h1_mmuj_ak4__LQumu_M3000_L0p1", "h1_mmuj_ak4__LQumu_M2000_L1p0", "h1_mmuj_ak4__LQumu_M2000_L0p1", "h1_mmuj_ak4__LQumu_M1000_L1p0", "h1_mmuj_ak4__LQumu_M1000_L0p1"]
+histoname_signal = ["h1_mmuj_ak4__umuLQumu_M700_L1p0", "h1_mmuj_ak4__umuLQumu_M1000_L1p0", "h1_mmuj_ak4__umuLQumu_M2000_L1p0", "h1_mmuj_ak4__umuLQumu_M3000_L1p0", "h1_mmuj_ak4__umuLQumu_M4000_L1p0", "h1_mmuj_ak4__umuLQumu_M5000_L1p0"]
+#histoname_signal = ["h1_mmuj_ak4__bmuLQbmu_M700_L1p0", "h1_mmuj_ak4__bmuLQbmu_M1000_L1p0", "h1_mmuj_ak4__bmuLQbmu_M2000_L1p0", "h1_mmuj_ak4__bmuLQbmu_M3000_L1p0", "h1_mmuj_ak4__bmuLQbmu_M4000_L1p0", "h1_mmuj_ak4__bmuLQbmu_M5000_L1p0"]
 
 ## Fit ranges (!!should match the categories!!)
 ncategories = len(subDirList)
@@ -49,8 +50,8 @@ var_min = []
 var_max = [] 
 
 for cat in subDirList:
-    var_min.append(550)
-    var_max.append(5000)
+    var_min.append(450)
+    var_max.append(7000)
 
 ## Binning
 varBins_all = [1, 3, 6, 10, 16, 23, 31, 40, 50, 61, 74, 88, 103, 119, 137, 156, 176, 197, 220, 244, 270, 296, 325, 354, 386, 419, 453, 489, 526, 565, 606, 649,  693, 740, 788, 838, 890, 944, 1000, 1058, 1118, 1181, 1246, 1313, 1383, 1455, 1530, 1607, 1687, 1770, 1856, 1945, 2037, 2132, 2231, 2332, 2438, 2546, 2659, 2775, 2895, 3019, 3147, 3279, 3416, 3558, 3704, 3854, 4010, 4171, 4337, 4509, 4686, 4869, 5058, 5253, 5455, 5663, 5877, 6099, 6328, 6564, 6808, 7000, 7250, 7500, 7750, 8000]
@@ -172,7 +173,7 @@ for icat, cat in enumerate(subDirList):
         #    signalPdf.plotOn(frame,ROOT.RooFit.Binning(100))
         #frame.Draw()
         #frame = var[icat].frame()
-        var[icat].setRange("signal",  max(float(M1value)*0.65, var_min[icat]), min(float(M1value)*1.45, 5000) )
+        var[icat].setRange("signal",  max(float(M1value)*0.65, var_min[icat]), min(float(M1value)*1.45, 6000) )
         var[icat].setRange("full", var_min[icat], var_max[icat] )
         rooHist_signal.plotOn(frame,ROOT.RooFit.Binning(100), ROOT.RooFit.Range("full"))
         if( float(M1value) > var_min[icat] and float(M1value) < var_max[icat]):
@@ -211,7 +212,7 @@ for icat, cat in enumerate(subDirList):
         var[icat].setRange("my_range", var_min[icat], var_max[icat])  # create range to integrate over
         intrinsicNorm = signalPdf.createIntegral(ROOT.RooArgSet(var[icat]), ROOT.RooArgSet(var[icat]), "my_range")
         #print(var_min[icat], var_min_eff[icat])
-        var[icat].setRange("CBfit_range", max(float(M1value)*0.5, var_min[icat]), min(float(M1value)*1.4, 4000) )  # create range to integrate over
+        var[icat].setRange("CBfit_range", max(float(M1value)*0.5, var_min[icat]), min(float(M1value)*1.4, 6000) )  # create range to integrate over
         CBfitNorm = signalPdf.createIntegral(ROOT.RooArgSet(var[icat]), ROOT.RooArgSet(var[icat]), "CBfit_range")
         #var[icat].setRange("my_range_2", var_min_eff[icat], var_max_eff[icat])  # create range to integrate over
         #integral = signalPdf.createIntegral(ROOT.RooArgSet(var[icat]), ROOT.RooArgSet(var[icat]),"my_range_2")

@@ -25,6 +25,8 @@ parser = optparse.OptionParser(usage)
 parser.add_option("-F", dest="fitFunction", default="std_4par",
                   help="fit function name")
 
+parser.add_option("-s", dest="start_range", default="450",
+                    help="start range for graph")
 
 (opt, args) = parser.parse_args()
 
@@ -36,15 +38,15 @@ ROOT.gROOT.SetBatch(True)
 gErrorIgnoreLevel = ROOT.kFatal
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 
-inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna/src/RootTreeAnalyzer/Fit_Signal/category"
+inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna_new/src/RootTreeAnalyzer/all_years/category_BDT_data_all/"
 filenameInput = "test_h1_mmuj_ak4.root"
 subDirList = next(os.walk(inputdir))[1]
 print(subDirList)
 
 ## Output directories  
-outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC"
-outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/datacards"
-weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_plot"
+outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_MC_"+str(opt.start_range)
+outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/datacards_"+str(opt.start_range)
+weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_plot_"+str(opt.start_range)
 os.system("mkdir -p "+outputdir)
 os.system("mkdir -p "+outputdirdatacards)
 #os.system(u"rm -f "+outputdirdatacards+"/*")
@@ -64,15 +66,16 @@ workspaceName = "w"
 #    generateToy = -1
 #    histoname = "h1_mmuj_ak4__DATA"
 #else:
-generateToy = 1
-histoname = "htot_bkg_MC_m_muj_ak4"
+generateToy = - 1
+#histoname = "htot_bkg_MC_m_muj_ak4"
+histoname = "h1_mmuj_ak4__DATA"
 
 statMultiplier = 1
 varname = "m_muj_ak4"
 vartitle = "m_{\muj}_ak4 [GeV]"
 
 ## Signal input
-signalInputfilename = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output/signals.txt"
+signalInputfilename = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output/signals.txt"
 
 
 ncategories = len(subDirList)
@@ -128,6 +131,9 @@ th1_original = [None] * ncategories
 th1_rebin = [None] * ncategories
 th1_rebin_bkg = [None] * ncategories
 th1_rebin_pull = [None] * ncategories
+th1_rebin_blind = [None] * ncategories
+th1_rebin_bkg_blind = [None] * ncategories
+th1_rebin_pull_blind = [None] * ncategories
 rooHist = [None] * ncategories
 numberOfEvents = [None] * ncategories
 
@@ -162,6 +168,7 @@ ndof = array('i', [0])
 chi2 = array('f', [0.])
 rchi2 = array('f', [0.])
 pval = array('f', [0.])
+pval_all = array('f', [0.])
 orig_pval = array('f', [0.])
 pval_ok = array('i', [0])
 
@@ -195,8 +202,8 @@ for icat, cat in enumerate(subDirList):
         #Res2mjet_low = float(category_edges[4])
         #Res2mjet_high = float(category_edges[5])
 
-        var_min_set = 550
-        var_max_set = 5000
+        var_min_set = int(opt.start_range)
+        var_max_set = 7000
         
         ## Modify variable binning
         i_min_border = 0
@@ -244,11 +251,12 @@ for icat, cat in enumerate(subDirList):
         test=th1_fromFile[icat].ComputeIntegral()   
         print(test)
         ## Generate toy histogram
-        gRandom = ROOT.TRandom()
+        ROOT.gRandom = ROOT.TRandom3()
         if(generateToy==1):
             th1_original[icat] = ROOT.TH1D("Toy","Toy", th1_fromFile[icat].GetNbinsX(), th1_fromFile[icat].GetXaxis().GetXmin(), th1_fromFile[icat].GetXaxis().GetXmax())
             #th1_original[icat] = TH1D("","", 5000, 0, 5000)
-            gRandom.SetSeed(0)
+            ROOT.gRandom.SetSeed(0)
+	    #test.SetSeed(0)
             print("MAREMMA MAIALA")
             th1_original[icat].FillRandom(th1_fromFile[icat],integral)
             print("MAREMMA MAIALA")
@@ -277,6 +285,10 @@ for icat, cat in enumerate(subDirList):
         
         ## Create data histogram with coarser binning
         th1_rebin[icat] = th1_original[icat].Rebin(NvarBins,"th1_rebin_"+cat,array('d',varBins))
+        th1_rebin_blind[icat] = th1_original[icat].Rebin(NvarBins,"th1_rebin_blind_"+cat,array('d',varBins))
+	th1_rebin[icat].Draw()
+	canvas[icat].SetLogy(1)
+	canvas[icat].SaveAs(cat+"histo_first"+str(generateToy)+".png")
         print(th1_rebin[icat].GetBin(0))
 
         ## Create ROOT.RooDataHist in fit range from TH1
@@ -309,7 +321,9 @@ for icat, cat in enumerate(subDirList):
         ## Create background and pull histogram for final plot
         th1_rebin[icat].SetBinErrorOption(ROOT.TH1.kPoisson)
         th1_rebin_bkg[icat] = ROOT.TH1D("th1_rebin_bkg_"+cat,"th1_rebin_bkg_"+cat,NvarBins,array('d',varBins))
+        th1_rebin_bkg_blind[icat] = ROOT.TH1D("th1_rebin_bkg_"+cat,"th1_rebin_bkg_"+cat,NvarBins,array('d',varBins))
         th1_rebin_pull[icat] = ROOT.TH1D("th1_rebin_pull_"+cat,"th1_rebin_pull_"+cat,NvarBins,array('d',varBins))
+        th1_rebin_pull_blind[icat] = ROOT.TH1D("th1_rebin_pull_"+cat,"th1_rebin_pull_"+cat,NvarBins,array('d',varBins))
 
         Npos[0] = 0
         Nneg[0] = 0
@@ -323,18 +337,32 @@ for icat, cat in enumerate(subDirList):
             bin_up = th1_rebin[icat].GetBinLowEdge(bin)+th1_rebin[icat].GetBinWidth(bin)
         
             data = float(th1_rebin[icat].GetBinContent(bin))
-            err_data_up = float(th1_rebin[icat].GetBinErrorUp(bin))
+            err_2_up = float(th1_rebin[icat].GetBinErrorUp(bin))
             
             exp_ = float(bkgExtPdfTF1[icat].Integral(bin_low,bin_up))
 
             # bkg histo
             th1_rebin_bkg[icat].SetBinContent(bin, exp_)
+            if bin_low>1000:
+            	th1_rebin_blind[icat].SetBinContent(bin, 0)
+            	th1_rebin_bkg_blind[icat].SetBinContent(bin, 0)
+	        else:	
+            	th1_rebin_blind[icat].SetBinContent(bin, th1_rebin[icat].GetBinContent(bin))
+            	th1_rebin_bkg_blind[icat].SetBinContent(bin, exp_)
 
             # pull histo
             if data!=0:
-                pull = (data - exp_) / err_data_up
+                pull = (data - exp_) / err_2_up
                 th1_rebin_pull[icat].SetBinContent(bin,pull)
                 th1_rebin_pull[icat].SetBinError(bin,1)
+
+		        if bin_low>1000:
+			        th1_rebin_pull_blind[icat].SetBinContent(bin,0)
+                    th1_rebin_pull_blind[icat].SetBinError(bin,0)
+		        else:
+			        th1_rebin_pull_blind[icat].SetBinContent(bin,pull)
+                    th1_rebin_pull_blind[icat].SetBinError(bin,1)
+
 
                 if pull >= 0:
                     Npos[0] += 1
@@ -351,6 +379,7 @@ for icat, cat in enumerate(subDirList):
         icat_br[0] = icat
         cwd_utils.evaluate_chi2(icat, ndof, chi2, rchi2, ndof_allbins, chi2_allbins, reducedchi2_allbins, th1_rebin, th1_rebin_pull, len(fitparam)+1)
         pval[0] = ROOT.TMath.Prob(chi2[0], ndof[0])
+        pval_all[0] = ROOT.TMath.Prob(chi2_allbins[0], ndof_allbins[0])
 
         pval_ok[0] = 0
 
@@ -396,8 +425,8 @@ for icat, cat in enumerate(subDirList):
             n2 = ROOT.RooRealVar("n2_"+signalString,"n2_"+signalString,float(n2))
             nsig = ROOT.RooRealVar("ParametricSignalPdf_"+signalString+"_norm","ParametricSignalPdf_"+signalString+"_norm",float(Nsig),0,100000000)
 
-            var_tmp = ROOT.RooRealVar("var_tmp","var_tmp",453, 5000)
-            var_tmp.setRange("maximum_range", 453, 5000)  # create range to integrate over
+            var_tmp = ROOT.RooRealVar("var_tmp","var_tmp",453, 7000)
+            var_tmp.setRange("maximum_range", 453, 7000)  # create range to integrate over
             signalPdf_tmp = ROOT.RooDoubleCBFast("CB_tmp", "CB_tmp", var_tmp, mean, width, alpha1, n1, alpha2, n2)            
             intrinsicNorm = signalPdf_tmp.createIntegral(ROOT.RooArgSet(var_tmp), ROOT.RooFit.NormSet(ROOT.RooArgSet(var_tmp)), ROOT.RooFit.Range("maximum_range")) 
             var_tmp.setRange("fit_range", var_min_set, var_max_set)  # create range to integrate over
@@ -514,19 +543,19 @@ for icat, cat in enumerate(subDirList):
 
    ## Pad1
         fPads1.cd()
-        th1_rebin[icat].SetMinimum(0.03)
-        th1_rebin[icat].GetYaxis().SetTitle("Number of events")
-        th1_rebin[icat].GetYaxis().SetTitleSize(0.06)
-        th1_rebin[icat].GetYaxis().SetTitleOffset(0.8)
-        th1_rebin[icat].SetMarkerStyle(20)
-        th1_rebin[icat].SetMarkerSize(0.8)
-        th1_rebin[icat].SetMarkerColor(1)
-        th1_rebin[icat].SetLineColor(1)
-        th1_rebin[icat].SetStats(0)
-        th1_rebin[icat].Draw("pe")
-        th1_rebin_bkg[icat].SetLineColor(2)
-        th1_rebin_bkg[icat].SetLineWidth(1)
-        th1_rebin_bkg[icat].Draw("histsame")
+        th1_rebin_blind[icat].SetMinimum(0.03)
+        th1_rebin_blind[icat].GetYaxis().SetTitle("Number of events")
+        th1_rebin_blind[icat].GetYaxis().SetTitleSize(0.06)
+        th1_rebin_blind[icat].GetYaxis().SetTitleOffset(0.8)
+        th1_rebin_blind[icat].SetMarkerStyle(20)
+        th1_rebin_blind[icat].SetMarkerSize(0.8)
+        th1_rebin_blind[icat].SetMarkerColor(1)
+        th1_rebin_blind[icat].SetLineColor(1)
+        th1_rebin_blind[icat].SetStats(0)
+        th1_rebin_blind[icat].Draw("pe")
+        th1_rebin_bkg_blind[icat].SetLineColor(2)
+        th1_rebin_bkg_blind[icat].SetLineWidth(1)
+        th1_rebin_bkg_blind[icat].Draw("histsame")
         
    	#draw the lumi text on the canvas
         CMS_lumi.CMS_lumi(fPads1, iPeriod, iPos) 
@@ -535,24 +564,24 @@ for icat, cat in enumerate(subDirList):
    #
         ## Pad2
         fPads2.cd()
-        th1_rebin_pull[icat].GetXaxis().SetTitle(vartitle)
-        th1_rebin_pull[icat].GetYaxis().SetTitle("#frac{Data - Fit}{Uncertainty} ")
-        th1_rebin_pull[icat].SetTitle("")
-        th1_rebin_pull[icat].SetMinimum(-4)    
-        th1_rebin_pull[icat].SetMaximum(4)
-        th1_rebin_pull[icat].SetLineColor(2)
-        th1_rebin_pull[icat].SetFillColor(2)
-        th1_rebin_pull[icat].SetMarkerStyle(20)
-        th1_rebin_pull[icat].SetMarkerColor(1)
-        th1_rebin_pull[icat].SetStats(0)
-        th1_rebin_pull[icat].GetYaxis().SetNdivisions(405, ROOT.kTRUE)
-        th1_rebin_pull[icat].GetXaxis().SetTitleSize(0.16)
-        th1_rebin_pull[icat].GetXaxis().SetLabelSize(0.13)
-        th1_rebin_pull[icat].GetXaxis().SetTitleOffset(0.83)
-        th1_rebin_pull[icat].GetYaxis().SetTitleSize(0.12)
-        th1_rebin_pull[icat].GetYaxis().SetLabelSize(0.11)
-        th1_rebin_pull[icat].GetYaxis().SetTitleOffset(0.35)
-        th1_rebin_pull[icat].Draw("hist")
+        th1_rebin_pull_blind[icat].GetXaxis().SetTitle(vartitle)
+        th1_rebin_pull_blind[icat].GetYaxis().SetTitle("#frac{Data - Fit}{Uncertainty} ")
+        th1_rebin_pull_blind[icat].SetTitle("")
+        th1_rebin_pull_blind[icat].SetMinimum(-4)    
+        th1_rebin_pull_blind[icat].SetMaximum(4)
+        th1_rebin_pull_blind[icat].SetLineColor(2)
+        th1_rebin_pull_blind[icat].SetFillColor(2)
+        th1_rebin_pull_blind[icat].SetMarkerStyle(20)
+        th1_rebin_pull_blind[icat].SetMarkerColor(1)
+        th1_rebin_pull_blind[icat].SetStats(0)
+        th1_rebin_pull_blind[icat].GetYaxis().SetNdivisions(405, ROOT.kTRUE)
+        th1_rebin_pull_blind[icat].GetXaxis().SetTitleSize(0.16)
+        th1_rebin_pull_blind[icat].GetXaxis().SetLabelSize(0.13)
+        th1_rebin_pull_blind[icat].GetXaxis().SetTitleOffset(0.83)
+        th1_rebin_pull_blind[icat].GetYaxis().SetTitleSize(0.12)
+        th1_rebin_pull_blind[icat].GetYaxis().SetLabelSize(0.11)
+        th1_rebin_pull_blind[icat].GetYaxis().SetTitleOffset(0.35)
+        th1_rebin_pull_blind[icat].Draw("hist")
    ## Pa
         ## Legend
         fPads1.cd()
@@ -581,7 +610,11 @@ for icat, cat in enumerate(subDirList):
         t1 = pt.AddText(Chi2Text)
         t1.SetTextColor(1)
         t1.SetTextSize( 0.04 )
-        Chi2Text = "#chi^{2} / ndf (N_{bin}>10) = "+str(round(reducedchi2_allbins[0],2))+"  pval = "+str(round(pval[0],5))
+        Chi2Text = "#chi^{2}="+str(round(chi2_allbins[0],2))+"   Ndf="+str(ndof_allbins[0])
+        t1 = pt.AddText(Chi2Text)
+        t1.SetTextColor(1)
+        t1.SetTextSize( 0.04 )
+        Chi2Text = "#chi^{2} / ndf (all) = "+str(round(reducedchi2_allbins[0],2))+"  pval = "+str(round(pval_all[0],5))
         t1 = pt.AddText(Chi2Text)
         t1.SetTextColor(1)
         t1.SetTextSize( 0.04 )
@@ -723,7 +756,7 @@ for signal in listOfSignalModels:
         Lval  = (splitline[2]).strip("L")
         Lval =  Lval.replace("p",".")
         category = splitline[3]         
-        datacardList_single.write(modell+" "+M1val+" "+Lval+" "+category+" "+datacardfilename+"\n")
+        datacardList_single.write(modell+" "+M1val+" "+Lval+" "+cat+" "+datacardfilename+"\n")
 
         command += " > "+datacardfilenameAll
         print(command)

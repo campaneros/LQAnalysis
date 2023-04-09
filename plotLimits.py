@@ -67,7 +67,7 @@ cross = array('d')
 file_list=[]
 for path, subdirs, files in os.walk(opt.inputdir):
 	for name in files:
-		#print(os.path.join(path, name))
+		print(os.path.join(path, name))
 		file_list.append(os.path.join(path, name))	
 
 file_list.sort()
@@ -90,7 +90,11 @@ for fl in file_list:
         model = (filename.split(".AsymptoticLimits")[0]).split("_") [1]
         mass = ( filename.split(".AsymptoticLimits")[0]).split("_") [2]
         L = ( filename.split(".AsymptoticLimits")[0]).split("_") [3]
-        cat = (filename.split(".AsymptoticLimits")[0]).split("_") [4]
+	if (filename.split(".AsymptoticLimits")[0]).split("_") [4] == "all":
+		cat = (filename.split(".AsymptoticLimits")[0]).split("_") [4]
+	else:
+        	cat = (filename.split(".AsymptoticLimits")[0]).split("_") [4]
+        #	cat = (filename.split(".AsymptoticLimits")[0]).split("_") [4]+"_"+(filename.split(".AsymptoticLimits")[0]).split("_") [5]+"_"+(filename.split(".AsymptoticLimits")[0]).split("_") [6]+"_"+(filename.split(".AsymptoticLimits")[0]).split("_") [7]
         print(model, mass, L, cat)
 
 
@@ -102,6 +106,8 @@ for fl in file_list:
         tree = inputfile.Get("limit")
  
         if app != cat:
+	    print("dio boia")
+	    print(cat)
             app=cat
             var[cat] = []
             limit_central[cat] = []
@@ -118,18 +124,24 @@ for fl in file_list:
        #     sigma[cat].append(5.16E-05)
        #     sigma[cat].append(5.73E-06)
        # elif "1p0"in L:
-        sigma_1p0[cat].append(9.53E-02)
-        sigma_1p0[cat].append(5.27E-03)
-        sigma_1p0[cat].append(6.09E-04)
-        sigma_1p0[cat].append(9.35E-05)
-        sigma_0p1[cat].append(9.51E-04)
-        sigma_0p1[cat].append(5.16E-05)
-        sigma_0p1[cat].append(5.73E-06)
-        sigma_0p1[cat].append(8.00E-07)
-        sigma_0p2[cat].append(3.81E-03)
-        sigma_0p2[cat].append(2.06E-04)
-        sigma_0p2[cat].append(2.30E-05)
-        sigma_0p2[cat].append(3.21E-06)
+        sigma_1p0[cat].append(3.48E-01)#700
+        sigma_1p0[cat].append(9.55E-02)#1000
+        sigma_1p0[cat].append(5.01E-03)#2000
+        sigma_1p0[cat].append(5.72E-04)#3000
+        sigma_1p0[cat].append(8.91E-05)#4000
+        sigma_1p0[cat].append(1.73E-05)#5000
+        sigma_0p1[cat].append(3.48E-03)#700
+        sigma_0p1[cat].append(9.49E-04)#1000
+        sigma_0p1[cat].append(4.86E-05)#2000
+        sigma_0p1[cat].append(5.29E-06)#3000
+        sigma_0p1[cat].append(7.36E-07)#4000
+        sigma_0p1[cat].append(1.08E-07)#5000
+        sigma_0p2[cat].append(1.39E-02)#700
+        sigma_0p2[cat].append(3.80E-03)#1000
+        sigma_0p2[cat].append(1.95E-04)#2000
+        sigma_0p2[cat].append(2.12E-05)#3000
+        sigma_0p2[cat].append(2.95E-06)#4000
+        sigma_0p2[cat].append(4.34E-07)#5000
         var[cat].append( float(mass) )
         for event in tree:
             limit = event.limit
@@ -154,7 +166,7 @@ for fl in file_list:
 for count,key in enumerate(sorted(var)):
      #if "all" in key
     print(key)
-    var[key].append(4000)
+    #var[key].append(4000)
     print(var[key])
     limit_2sigmaDown[key].append(limit_2sigmaDown[key][-1]*0.95)
     limit_1sigmaDown[key].append(limit_1sigmaDown[key][-1]*0.95)
@@ -316,6 +328,7 @@ c.cd()
 
 
 for count,key in enumerate(sorted(var)):
+    print("dio boia")
     print(key)
     if "all" in key:
         frame = c.DrawFrame(1.4,0.001, 4.1, 10)
@@ -373,13 +386,13 @@ for count,key in enumerate(sorted(var)):
         R.gPad.SetTicks(1,1)
         frame.Draw('sameaxis')
         x1 = 0.40
-        x2 = x1 + 0.24
+        x2 = x1 + 0.34
         y2 = 0.90
         y1 = 0.65
         legend = R.TLegend(x1,y1,x2,y2)
         legend.SetFillStyle(0)
         legend.SetBorderSize(0)
-        legend.SetTextSize(0.041)
+        legend.SetTextSize(0.020)
         legend.SetTextFont(42)
         #legend.AddEntry(observed[key], "Asymptotic CL_{s} observed",'L')
         #legend.AddEntry(median[key], "Asymptotic CL_{s} expected %s"%key,'L')
@@ -393,8 +406,8 @@ for count,key in enumerate(sorted(var)):
         median[key].SetLineColor(count*2)
         median[key].SetLineWidth(2)
         median[key].SetLineStyle(2)
-        #median[key].Draw('Lsame')
-        #legend.AddEntry(median[key], " Median asymptotic expected %s"%(key.strip("category")),'L')
+        median[key].Draw('Lsame')
+        legend.AddEntry(median[key], " Median asymptotic expected %s"%(key.strip("category")),'L')
 
     legend.Draw()
 for ext in ['png','pdf']:

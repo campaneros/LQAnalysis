@@ -33,6 +33,17 @@ def set_bkg_fit_function(icat, cat, var, fitFunction_name, fitparam, nbkg, bkgPd
         bkgPdf[icat] = ROOT.RooGenericPdf("bkgPdf_"+cat, "pow( (1-@0/13000), @1 )/pow(@0/13000, @2+@3*log(@0/13000))", ROOT.RooArgList(var[icat], fitparam[0], fitparam[1], fitparam[2]))  # 3 par (excl norm) standard dijet
         ParametricBkgPdf[icat] = ROOT.RooParametricShapeBinPdf( "ParametricBkgPdf_"+cat, "ParametricBkgPdf_"+cat, bkgPdf[icat], var[icat], ROOT.RooArgList(fitparam[0], fitparam[1], fitparam[2]), th1_rebin[icat])
         bkgExtPdf[icat] = ROOT.RooExtendPdf("ParametricbkgExtPdf_"+cat,"bkgExtPdf_"+cat,ParametricBkgPdf[icat],nbkg[icat]) 
+
+    if fitFunction_name == "std_5par": # 4 par (including normalization) standard dijet
+        fitparam.append( ROOT.RooRealVar("p1_std"+cat,"p1_std"+cat,5,-50,50) )
+        fitparam.append( ROOT.RooRealVar("p2_std"+cat,"p2_std"+cat,5,-50,50) )
+        fitparam.append( ROOT.RooRealVar("p3_std"+cat,"p3_std"+cat,1,-10,10) )
+        fitparam.append( ROOT.RooRealVar("p4_std"+cat,"p4_std"+cat,1,-10,10) )
+        
+        nbkg[icat] = ROOT.RooRealVar("ParametricBkgPdf_"+cat+"_norm","ParametricBkgPdf_"+cat+"_norm",numberOfEvents[icat],0,numberOfEvents[icat]*3)
+        bkgPdf[icat] = ROOT.RooGenericPdf("bkgPdf_"+cat, "pow( (1-@0/13000), @1 )/pow( @0/13000 , @2 + @3*log(@0/13000) + @4*pow( log( @0/13000) , 2 ) )", ROOT.RooArgList(var[icat], fitparam[0], fitparam[1], fitparam[2], fitparam[3]))  # 4 par (excl norm) standard dijet
+        ParametricBkgPdf[icat] = ROOT.RooParametricShapeBinPdf( "ParametricBkgPdf_"+cat, "ParametricBkgPdf_"+cat, bkgPdf[icat], var[icat], ROOT.RooArgList(fitparam[0], fitparam[1], fitparam[2],fitparam[3]), th1_rebin[icat])
+        bkgExtPdf[icat] = ROOT.RooExtendPdf("ParametricbkgExtPdf_"+cat,"bkgExtPdf_"+cat,ParametricBkgPdf[icat],nbkg[icat]) 
             
     if fitFunction_name == "modExp_2par": # 2 par (including normalization) exponential
         fitparam.append( ROOT.RooRealVar("p1_modExp"+cat,"p1_modExp"+cat,-35,-100,0) )
@@ -134,6 +145,17 @@ def bkgRooPdf_to_TF1(icat, cat, fitFunction_name, fitparam, bkgExtPdfTF1, nbkg, 
         bkgExtPdfTF1[icat].SetParameter(1,fitparam[0].getValV())
         bkgExtPdfTF1[icat].SetParameter(2,fitparam[1].getValV())
         bkgExtPdfTF1[icat].SetParameter(3,fitparam[2].getValV())
+        integral_TF1 = bkgExtPdfTF1[icat].Integral(var_min_set,var_max_set)
+        bkgExtPdfTF1[icat].SetParameter(0,float(nbkg[icat].getValV())/float(integral_TF1))    
+
+    if fitFunction_name == "std_5par":
+        bkgExtPdfTF1[icat] = ROOT.TF1("bkgExtPdfTF1_"+cat,"[0]*pow( 1-x/13000, [1] )/pow(x/13000, [2]+[3]*log(x/13000)+[4]*pow(log(x/13000),2))",var_min_set,var_max_set)
+        
+        bkgExtPdfTF1[icat].SetParameter(0,1)    
+        bkgExtPdfTF1[icat].SetParameter(1,fitparam[0].getValV())
+        bkgExtPdfTF1[icat].SetParameter(2,fitparam[1].getValV())
+        bkgExtPdfTF1[icat].SetParameter(3,fitparam[2].getValV())
+        bkgExtPdfTF1[icat].SetParameter(4,fitparam[3].getValV())
         integral_TF1 = bkgExtPdfTF1[icat].Integral(var_min_set,var_max_set)
         bkgExtPdfTF1[icat].SetParameter(0,float(nbkg[icat].getValV())/float(integral_TF1))    
             
@@ -247,6 +269,7 @@ def evaluate_chi2(icat, ndof, Chi2, rChi2, ndof_allbins, Chi2_allbins, reducedCh
     ndof_allbins[0] -= Npar
     if ndof_allbins[0]>Npar:
         reducedChi2_allbins[0] = Chi2_allbins[0]/float(ndof_allbins[0])
+
 
 def parse_syst_file( syst_22cat, syst_9cat, syst_1cat, syst_dir ):
     
