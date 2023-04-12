@@ -44,9 +44,9 @@ subDirList = next(os.walk(inputdir))[1]
 print(subDirList)
 
 ## Output directories  
-outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_MC_"+str(opt.start_range)
-outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/datacards_"+str(opt.start_range)
-weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_plot_"+str(opt.start_range)
+outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_MC_"          +str(opt.start_range) + "_" + str(fitFunction_name)
+outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/datacards_" +str(opt.start_range) + "_" + str(fitFunction_name) 
+weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_plot_"     +str(opt.start_range) + "_" + str(fitFunction_name)
 os.system("mkdir -p "+outputdir)
 os.system("mkdir -p "+outputdirdatacards)
 #os.system(u"rm -f "+outputdirdatacards+"/*")
@@ -286,9 +286,9 @@ for icat, cat in enumerate(subDirList):
         ## Create data histogram with coarser binning
         th1_rebin[icat] = th1_original[icat].Rebin(NvarBins,"th1_rebin_"+cat,array('d',varBins))
         th1_rebin_blind[icat] = th1_original[icat].Rebin(NvarBins,"th1_rebin_blind_"+cat,array('d',varBins))
-	th1_rebin[icat].Draw()
-	canvas[icat].SetLogy(1)
-	canvas[icat].SaveAs(cat+"histo_first"+str(generateToy)+".png")
+        th1_rebin[icat].Draw()
+        canvas[icat].SetLogy(1)
+        canvas[icat].SaveAs(cat+"histo_first"+str(generateToy)+".png")
         print(th1_rebin[icat].GetBin(0))
 
         ## Create ROOT.RooDataHist in fit range from TH1
@@ -344,11 +344,11 @@ for icat, cat in enumerate(subDirList):
             # bkg histo
             th1_rebin_bkg[icat].SetBinContent(bin, exp_)
             if bin_low>1000:
-            	th1_rebin_blind[icat].SetBinContent(bin, 0)
-            	th1_rebin_bkg_blind[icat].SetBinContent(bin, 0)
-	        else:	
-            	th1_rebin_blind[icat].SetBinContent(bin, th1_rebin[icat].GetBinContent(bin))
-            	th1_rebin_bkg_blind[icat].SetBinContent(bin, exp_)
+                th1_rebin_blind[icat].SetBinContent(bin, 0)
+                th1_rebin_bkg_blind[icat].SetBinContent(bin, 0)
+            else:	
+                th1_rebin_blind[icat].SetBinContent(bin, th1_rebin[icat].GetBinContent(bin))
+                th1_rebin_bkg_blind[icat].SetBinContent(bin, exp_)
 
             # pull histo
             if data!=0:
@@ -356,11 +356,11 @@ for icat, cat in enumerate(subDirList):
                 th1_rebin_pull[icat].SetBinContent(bin,pull)
                 th1_rebin_pull[icat].SetBinError(bin,1)
 
-		        if bin_low>1000:
-			        th1_rebin_pull_blind[icat].SetBinContent(bin,0)
+                if bin_low>1000:
+                    th1_rebin_pull_blind[icat].SetBinContent(bin,0)
                     th1_rebin_pull_blind[icat].SetBinError(bin,0)
-		        else:
-			        th1_rebin_pull_blind[icat].SetBinContent(bin,pull)
+                else:
+                    th1_rebin_pull_blind[icat].SetBinContent(bin,pull)
                     th1_rebin_pull_blind[icat].SetBinError(bin,1)
 
 
