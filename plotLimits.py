@@ -125,23 +125,23 @@ for fl in file_list:
        #     sigma[cat].append(5.73E-06)
        # elif "1p0"in L:
         sigma_1p0[cat].append(3.48E-01)#700
-        sigma_1p0[cat].append(9.55E-02)#1000
+        #sigma_1p0[cat].append(9.55E-02)#1000
         sigma_1p0[cat].append(5.01E-03)#2000
         sigma_1p0[cat].append(5.72E-04)#3000
         sigma_1p0[cat].append(8.91E-05)#4000
         sigma_1p0[cat].append(1.73E-05)#5000
-        sigma_0p1[cat].append(3.48E-03)#700
-        sigma_0p1[cat].append(9.49E-04)#1000
-        sigma_0p1[cat].append(4.86E-05)#2000
-        sigma_0p1[cat].append(5.29E-06)#3000
-        sigma_0p1[cat].append(7.36E-07)#4000
-        sigma_0p1[cat].append(1.08E-07)#5000
-        sigma_0p2[cat].append(1.39E-02)#700
-        sigma_0p2[cat].append(3.80E-03)#1000
-        sigma_0p2[cat].append(1.95E-04)#2000
-        sigma_0p2[cat].append(2.12E-05)#3000
-        sigma_0p2[cat].append(2.95E-06)#4000
-        sigma_0p2[cat].append(4.34E-07)#5000
+        #sigma_0p1[cat].append(3.48E-03)#700
+        #sigma_0p1[cat].append(9.49E-04)#1000
+        #sigma_0p1[cat].append(4.86E-05)#2000
+        #sigma_0p1[cat].append(5.29E-06)#3000
+        #sigma_0p1[cat].append(7.36E-07)#4000
+        #sigma_0p1[cat].append(1.08E-07)#5000
+        #sigma_0p2[cat].append(1.39E-02)#700
+        #sigma_0p2[cat].append(3.80E-03)#1000
+        #sigma_0p2[cat].append(1.95E-04)#2000
+        #sigma_0p2[cat].append(2.12E-05)#3000
+        #sigma_0p2[cat].append(2.95E-06)#4000
+        #sigma_0p2[cat].append(4.34E-07)#5000
         var[cat].append( float(mass) )
         for event in tree:
             limit = event.limit
@@ -158,8 +158,8 @@ for fl in file_list:
                 limit_1sigmaDown[cat].append(limit)
             if quantile>0.02 and quantile<0.03:
                 limit_2sigmaDown[cat].append(limit)
-            if quantile == -1:
-                limit_observed[cat].append(limit)
+            #if quantile == -1:
+            #    limit_observed[cat].append(limit)
 
         inputfile.Close()
         counter+=1
@@ -173,7 +173,7 @@ for count,key in enumerate(sorted(var)):
     limit_2sigmaUp[key].append(limit_2sigmaUp[key][-1]*0.95)
     limit_1sigmaUp[key].append(limit_1sigmaUp[key][-1]*0.95)
     limit_central[key].append(limit_central[key][-1]*0.95)
-    limit_observed[key].append(limit_observed[key][-1]*0.95)
+    #limit_observed[key].append(limit_observed[key][-1]*0.95)
 
 #print(var)
 yellow={}
@@ -185,6 +185,7 @@ cross_0p2 = {}
 cross_1p0 = {}
 
 for key in var:
+    print(key)
     
     N = len(var[key])
     print(N)
@@ -193,8 +194,8 @@ for key in var:
     green[key] = R.TGraph(2*N)     # green band
     median[key] = R.TGraph(N)      # median line
     observed[key] = R.TGraph(N)
-    cross_0p1[key] =  R.TGraph(N)
-    cross_0p2[key] =  R.TGraph(N)  
+    #cross_0p1[key] =  R.TGraph(N)
+    #cross_0p2[key] =  R.TGraph(N)  
     cross_1p0[key] =  R.TGraph(N)
 
 
@@ -206,9 +207,9 @@ for key in var:
             median[key].SetPoint(    i,    float(var[key][i]), float(limit_central[key][i]) ) # median[key]
             green[key].SetPoint(  2*N-1-i, float(var[key][i]), float(limit_1sigmaDown[key][i]) ) # - 1 sigma
             yellow[key].SetPoint( 2*N-1-i, float(var[key][i]), float(limit_2sigmaDown[key][i]) ) # - 2 sigma
-            observed[key].SetPoint(  i,    float(var[key][i]), float(limit_observed[key][i]) ) # observed
-            cross_0p1[key].SetPoint(i, float(var[key][i]), float(sigma_0p1[key][i]))
-            cross_0p2[key].SetPoint(i, float(var[key][i]), float(sigma_0p2[key][i]))
+            #observed[key].SetPoint(  i,    float(var[key][i]), float(limit_observed[key][i]) ) # observed
+            #cross_0p1[key].SetPoint(i, float(var[key][i]), float(sigma_0p1[key][i]))
+            #cross_0p2[key].SetPoint(i, float(var[key][i]), float(sigma_0p2[key][i]))
             cross_1p0[key].SetPoint(i, float(var[key][i]), float(sigma_1p0[key][i]))
 	#elif opt.single and (not "all" in cat):
         #	median[key].SetPoint(    i,    float(var[key][i]), float(limit_central[key][i]) ) # median[key]
@@ -344,7 +345,7 @@ for count,key in enumerate(sorted(var)):
         frame.GetXaxis().SetTitle("Resonance mass [GeV]")
         #frame.SetMinimum(min(min(limit_2sigmaUp[key]),min(sigma[key]))*0.10)
         #frame.SetMaximum(max(max(limit_2sigmaUp[key]),max(sigma[key]))*10)
-        frame.SetMinimum(min(min(limit_2sigmaUp[key]),min(sigma_0p1[key]))*0.10)
+        frame.SetMinimum(min(min(limit_2sigmaUp[key]),min(sigma_1p0[key]))*0.10)
         frame.SetMaximum(max(max(limit_2sigmaUp[key]),max(sigma_1p0[key]))*10)
         frame.GetXaxis().SetLimits(float(min(var[key])),float(max(var[key])))
         c.SetLogy(1)        
@@ -372,15 +373,15 @@ for count,key in enumerate(sorted(var)):
         cross_1p0[key].SetLineStyle(1)
         cross_1p0[key].Draw('Lsame')
 
-        cross_0p2[key].SetLineColor(R.kRed)
-        cross_0p2[key].SetLineWidth(2)
-        cross_0p2[key].SetLineStyle(1)
-        cross_0p2[key].Draw('Lsame')
+        #cross_0p2[key].SetLineColor(R.kRed)
+        #cross_0p2[key].SetLineWidth(2)
+        #cross_0p2[key].SetLineStyle(1)
+        #cross_0p2[key].Draw('Lsame')
 
-        cross_0p1[key].SetLineColor(R.kGreen)
-        cross_0p1[key].SetLineWidth(2)
-        cross_0p1[key].SetLineStyle(1)
-        cross_0p1[key].Draw('Lsame')
+        #cross_0p1[key].SetLineColor(R.kGreen)
+        #cross_0p1[key].SetLineWidth(2)
+        #cross_0p1[key].SetLineStyle(1)
+        #cross_0p1[key].Draw('Lsame')
 
         CMS_lumi.CMS_lumi(c, iPeriod, iPos)   
         R.gPad.SetTicks(1,1)
@@ -399,10 +400,12 @@ for count,key in enumerate(sorted(var)):
         legend.AddEntry(median[key], "Asymptotic CL_{s} expected",'L')
         legend.AddEntry(green[key], "#pm 1 std. deviation",'f')
         legend.AddEntry(yellow[key],"#pm 2 std. deviation",'f')
-        legend.AddEntry(cross_0p1[key],"cross section #lambda=0.1",'L')
-        legend.AddEntry(cross_0p2[key],"cross section #lambda=0.2",'L')
+        #legend.AddEntry(cross_0p1[key],"cross section #lambda=0.1",'L')
+        #legend.AddEntry(cross_0p2[key],"cross section #lambda=0.2",'L')
         legend.AddEntry(cross_1p0[key],"cross section #lambda=1.0",'L')
     else:
+        #print(median[key])
+        print(key)
         median[key].SetLineColor(count*2)
         median[key].SetLineWidth(2)
         median[key].SetLineStyle(2)

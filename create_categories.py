@@ -30,7 +30,7 @@ parser.add_option("-s", dest="start_range", default="450",
 
 (opt, args) = parser.parse_args()
 
-fitFunction_name = opt.fitFunction
+#fitFunction_name = opt.fitFunction
 #fitFunction_name = "std_4par"
 fitparam = []
 #gROOT.LoadMacro(os.path.dirname(os.path.abspath(__file__))+"/../../src/libCpp/RooDoubleCBFast.cc+")
@@ -43,10 +43,11 @@ filenameInput = "test_h1_mmuj_ak4.root"
 subDirList = next(os.walk(inputdir))[1]
 print(subDirList)
 
+fitFunction_name = "std_family_real"
 ## Output directories  
-outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_MC_"          +str(opt.start_range) + "_" + str(fitFunction_name)
-outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/datacards_" +str(opt.start_range) + "_" + str(fitFunction_name) 
-weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_plot_"     +str(opt.start_range) + "_" + str(fitFunction_name)
+outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/newsample_output_MC_finalcatSTD"          +str(opt.start_range) + "_" + str(fitFunction_name)
+outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/newsample_datacards_finalcatSTD" +str(opt.start_range) + "_" + str(fitFunction_name) 
+weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_plot_finalcatSTD"     +str(opt.start_range) + "_" + str(fitFunction_name)
 os.system("mkdir -p "+outputdir)
 os.system("mkdir -p "+outputdirdatacards)
 #os.system(u"rm -f "+outputdirdatacards+"/*")
@@ -75,7 +76,7 @@ varname = "m_muj_ak4"
 vartitle = "m_{\muj}_ak4 [GeV]"
 
 ## Signal input
-signalInputfilename = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output/signals.txt"
+signalInputfilename = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_umu_new/output/signals.txt"
 
 
 ncategories = len(subDirList)
@@ -146,8 +147,10 @@ bkgExtPdf = [None] * ncategories
 bkgExtPdfTF1 = [None] * ncategories
 fitResult = [None] * ncategories
 ndof = [None] * ncategories
+ndof_low = [None] * ncategories
 Chi2 = [None] * ncategories
 reducedChi2 = [None] * ncategories
+reducedChi2_low = [None] * ncategories
 
 
 ParametricBkgPdf = [None] * ncategories
@@ -167,7 +170,11 @@ Nevt  = array('i', [0])
 ndof = array('i', [0])
 chi2 = array('f', [0.])
 rchi2 = array('f', [0.])
+ndof_low = array('i', [0])
+chi2_low = array('f', [0.])
+rchi2_low = array('f', [0.])
 pval = array('f', [0.])
+pval_low = array('f', [0.])
 pval_all = array('f', [0.])
 orig_pval = array('f', [0.])
 pval_ok = array('i', [0])
@@ -184,16 +191,19 @@ WWpval = array('f', [0.])
 fitrange_L = array('f', [0.])
 fitrange_R = array('f', [0.])
 
-
 ## Loop over signal categories  
 #var_min_limit = M1val*0.85
 for icat, cat in enumerate(subDirList):
+        #if ("_btag" in cat):
+        #    continue
+        fitFunction_name = cwd_utils.function["%s"%cat]
 	#if ("2Muon" in str(cat)):	
 	#	continue
         print("\n")
         print("#######################################################")
         print("Cat: "+str(icat))
         print("#######################################################")
+        print("function: "+str(fitFunction_name))
     
         counter = 0
         #category_edges = cat.split("_")
@@ -378,9 +388,10 @@ for icat, cat in enumerate(subDirList):
         ## Chi2 and p-value
         icat_br[0] = icat
         cwd_utils.evaluate_chi2(icat, ndof, chi2, rchi2, ndof_allbins, chi2_allbins, reducedchi2_allbins, th1_rebin, th1_rebin_pull, len(fitparam)+1)
+        cwd_utils.evaluate_chi2_lowstat(icat, ndof_low, chi2_low, rchi2_low, ndof_allbins, chi2_allbins, reducedchi2_allbins, th1_rebin, th1_rebin_pull, len(fitparam)+1)
         pval[0] = ROOT.TMath.Prob(chi2[0], ndof[0])
         pval_all[0] = ROOT.TMath.Prob(chi2_allbins[0], ndof_allbins[0])
-
+        pval_low[0]=ROOT.TMath.Prob(chi2_low[0], ndof_low[0])
         pval_ok[0] = 0
 
     ## Loop over signals
@@ -599,7 +610,7 @@ for icat, cat in enumerate(subDirList):
         legend.Draw()
         
        ## Plot fit results
-        pt = ROOT.TPaveText(0.73, 0.58, 0.87, 0.87,"ndc")
+        pt = ROOT.TPaveText(0.73, 0.48, 0.87, 0.87,"ndc")
         pt.SetFillColor(0)
         
         Chi2Text = "#chi^{2}="+str(round(chi2[0],2))+"   Ndf="+str(ndof[0])
@@ -607,6 +618,14 @@ for icat, cat in enumerate(subDirList):
         t1.SetTextColor(1)
         t1.SetTextSize( 0.04 )
         Chi2Text = "#chi^{2} / ndf (N_{bin}>10) = "+str(round(rchi2[0],2))+"  pval = "+str(round(pval[0],5))
+        t1 = pt.AddText(Chi2Text)
+        t1.SetTextColor(1)
+        t1.SetTextSize( 0.04 )
+        Chi2Text = "#chi^{2}="+str(round(chi2_low[0],2))+"   Ndf="+str(ndof_low[0])
+        t1 = pt.AddText(Chi2Text)
+        t1.SetTextColor(1)
+        t1.SetTextSize( 0.04 )
+        Chi2Text = "#chi^{2} / ndf (N_{bin}<100) = "+str(round(rchi2_low[0],2))+"  pval = "+str(round(pval_low[0],5))
         t1 = pt.AddText(Chi2Text)
         t1.SetTextColor(1)
         t1.SetTextSize( 0.04 )
@@ -713,22 +732,30 @@ signalInputfile.close()
 print(listOfSignalModels)
 
 datacardList = io.open(outputdirdatacards+"/datacardList_"+fitFunction_name+".txt", 'w')
+datacardList1 = io.open(outputdirdatacards+"/datacardList_"+fitFunction_name+"_1Muon.txt", 'w')
+datacardList2 = io.open(outputdirdatacards+"/datacardList_"+fitFunction_name+"_2Muon.txt", 'w')
 datacardList_single = io.open(outputdirdatacards+"/datacardList_"+fitFunction_name+"_single_category.txt", 'w')
 ## Loop over signals and categories (create combined datacard)
 for signal in listOfSignalModels:
     currentPath = os.getcwd()
     command = ""
+    command1 = ""
+    command2 = ""
     os.system("mkdir -p "+outputdirdatacards+"/"+signal)
     ## Loop over event categories    
     for icat, cat in enumerate(subDirList):
+        fitFunction_name = cwd_utils.function["%s"%cat]
         signalStringCat = signal+"_"+cat
         datacardfilenameAll = outputdirdatacards+"/"+signal+"/"+"datacard_"+fitFunction_name+"_"+signal+".txt"
+        datacardfilename1 = outputdirdatacards+"/"+signal+"/"+"datacard_"+fitFunction_name+"_1Muon_"+signal+".txt"
+        datacardfilename2 = outputdirdatacards+"/"+signal+"/"+"datacard_"+fitFunction_name+"_2Muon_"+signal+".txt"
         datacardfilename = outputdirdatacards+"/"+signal+"/categories/"+"datacard_"+fitFunction_name+"_"+signalStringCat+".txt"        
 
         print(signal)
         if icat==0:
             command = "python "+combineCardScriptPath
-
+            command1 = "python "+combineCardScriptPath
+            command2 = "python "+combineCardScriptPath
         if not os.path.isfile(datacardfilename):
             continue        
 
@@ -757,10 +784,19 @@ for signal in listOfSignalModels:
         Lval =  Lval.replace("p",".")
         category = splitline[3]         
         datacardList_single.write(modell+" "+M1val+" "+Lval+" "+cat+" "+datacardfilename+"\n")
+        if "1Muon" in cat:
+            command1 += " "+cat+"="+datacardfilename
+        else:
+            command2 += " "+cat+"="+datacardfilename
 
         command += " > "+datacardfilenameAll
+        command1 += " > "+datacardfilename1
+        command2 += " > "+datacardfilename2
         print(command)
+        print(command1)
         os.system("cd "+outputdirdatacards+" ; "+command+" ; "+ "cd .." )
+        os.system("cd "+outputdirdatacards+" ; "+command1+" ; "+ "cd .." )
+        os.system("cd "+outputdirdatacards+" ; "+command2+" ; "+ "cd .." )
         print("Created final datacard at "+datacardfilenameAll) 
    
         splitline = signal.split("_")  
@@ -769,6 +805,8 @@ for signal in listOfSignalModels:
         val  = (splitline[2]).strip("L")
         val =  Lval.replace("p",".")
 
+    datacardList1.write(modell+" "+M1val+" "+Lval+" "+"category1Muon "+datacardfilename1+"\n")
+    datacardList2.write(modell+" "+M1val+" "+Lval+" "+"category2Muon "+datacardfilename2+"\n")
     datacardList.write(modell+" "+M1val+" "+Lval+" "+datacardfilenameAll+"\n")
     print("Created datacard List at ",outputdirdatacards,"/datacardList.txt")
 

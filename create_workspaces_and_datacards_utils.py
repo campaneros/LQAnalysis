@@ -3,6 +3,34 @@
 #from ROOT import *
 import ROOT as ROOT
 
+
+
+function = {
+      "category1Muon_BDT_loose_btag" : "std_3par",
+      "category1Muon_BDT_loose_nobtag" : "std_3par",
+      "category2Muon_BDT_loose_btag" : "std_3par",
+      "category2Muon_BDT_loose_nobtag" : "std_3par",
+      "category2Muon_BDT_tight_btag" : "std_3par",
+      "category2Muon_BDT_tight_nobtag" : "std_3par",
+      "category1Muon_BDT_tight_btag" : "std_4par",
+      "category1Muon_BDT_tight_nobtag" : "std_4par",
+      }
+
+
+#function = {
+#      "category1Muon_BDT_loose_btag" : "UA2_3par",
+#      "category1Muon_BDT_loose_nobtag" : "UA2_3par",
+#      "category2Muon_BDT_loose_btag" : "UA2_2par",
+#      "category2Muon_BDT_loose_nobtag" : "UA2_3par",
+#      "category2Muon_BDT_tight_btag" : "UA2_2par",
+#      "category2Muon_BDT_tight_nobtag" : "UA2_3par",
+#      "category1Muon_BDT_tight_btag" : "UA2_4par",
+#      "category1Muon_BDT_tight_nobtag" : "UA2_3par",
+#      }
+
+
+
+
 def set_bkg_fit_function(icat, cat, var, fitFunction_name, fitparam, nbkg, bkgPdf, ParametricBkgPdf, bkgExtPdf, th1_rebin, numberOfEvents):
 
     del fitparam[:]
@@ -83,7 +111,7 @@ def set_bkg_fit_function(icat, cat, var, fitFunction_name, fitparam, nbkg, bkgPd
         bkgPdf[icat] = ROOT.RooGenericPdf("bkgPdf_"+cat, "exp( @1*pow((@0/13000), @2) + @3*pow((1-@0/13000), @4) )", ROOT.RooArgList(var[icat], fitparam[0], fitparam[1], fitparam[2], fitparam[3]))
         bkgExtPdf[icat] = ROOT.RooExtendPdf("bkgExtPdf_"+cat,"bkgExtPdf_"+cat,bkgPdf[icat],nbkg[icat]) 
 
-    if fitFunction_name == "UA2_2par": # 3 par (including normalization) UA2/ATLAS family
+    if fitFunction_name == "UA2_2par": # 2 par (including normalization) UA2/ATLAS family
         fitparam.append( ROOT.RooRealVar("p1_UA2"+cat,"p1_UA2"+cat,5,-50,50) )
         
         nbkg[icat] = ROOT.RooRealVar("ParametricBkgPdf_"+cat+"_norm","ParametricBkgPdf_"+cat+"_norm",numberOfEvents[icat],0,numberOfEvents[icat]*3)
@@ -270,6 +298,41 @@ def evaluate_chi2(icat, ndof, Chi2, rChi2, ndof_allbins, Chi2_allbins, reducedCh
     if ndof_allbins[0]>Npar:
         reducedChi2_allbins[0] = Chi2_allbins[0]/float(ndof_allbins[0])
 
+def evaluate_chi2_lowstat(icat, ndof, Chi2, rChi2, ndof_allbins, Chi2_allbins, reducedChi2_allbins, th1_rebin, th1_rebin_pull, Npar):
+    ndof[0] = 0
+    Chi2[0] = 0. 
+    rChi2[0] = 0.
+
+    ndof_allbins[0] = 0 
+    Chi2_allbins[0] = 0. 
+    reducedChi2_allbins[0] = 0.
+
+    ## Get Chi2 from final fit
+    for bin in range(th1_rebin[icat].GetNbinsX()):
+        if bin == 0:
+            continue
+
+        data = float(th1_rebin[icat].GetBinContent(bin))
+
+        # pull histo
+        if data!=0:
+            pull = th1_rebin_pull[icat].GetBinContent(bin)
+
+            #Chi2 for all not empty bins
+            ndof_allbins[0] += 1
+            Chi2_allbins[0] += pull*pull
+            
+            #chi2
+            if(data<100):
+                Chi2[0]+=pull*pull
+                ndof[0]+=1
+
+    ndof[0] -= Npar
+    if ndof[0]>0:
+        rChi2[0] = Chi2[0]/float(ndof[0])
+    ndof_allbins[0] -= Npar
+    if ndof_allbins[0]>Npar:
+        reducedChi2_allbins[0] = Chi2_allbins[0]/float(ndof_allbins[0])
 
 def parse_syst_file( syst_22cat, syst_9cat, syst_1cat, syst_dir ):
     

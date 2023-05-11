@@ -45,18 +45,24 @@ print(subDirList)
 combineCardScriptPath = os.path.dirname(os.path.abspath(__file__))+"/../"+"combineCards_modified.py" #allows absolute paths of files
 
 pval_dict= {}
+pval_low_dict= {}
 pvalall_dict= {}
 chi2_dict= {}
+chi2_low_dict= {}
 chi2all_dict= {}
 chi2_reduced_dict = {}
+chi2_reduced_low_dict = {}
 chi2all_reduced_dict = {}
 ndof_dict = {}
+ndof_low_dict = {}
 ndofall_dict = {}
 
 canvas_dict = {}
 
 
 ## Output directories  
+#fit_function_list=["UA2_2par","UA2_3par","UA2_4par"]
+#fit_function_list=["modExp_2par","modExp_3par","modExp_4par"]#,"modExp_5par"]
 fit_function_list=["std_2par","std_3par","std_4par","std_5par"]
 for index,lists in enumerate(fit_function_list):
     fitFunction_name = lists
@@ -163,6 +169,9 @@ for index,lists in enumerate(fit_function_list):
     ndof = [None] * ncategories
     Chi2 = [None] * ncategories
     reducedChi2 = [None] * ncategories
+    ndof_low = [None] * ncategories
+    Chi2_low = [None] * ncategories
+    reducedChi2_low = [None] * ncategories
     
     
     ParametricBkgPdf = [None] * ncategories
@@ -182,7 +191,11 @@ for index,lists in enumerate(fit_function_list):
     ndof = array('i', [0])
     chi2 = array('f', [0.])
     rchi2 = array('f', [0.])
+    ndof_low = array('i', [0])
+    chi2_low = array('f', [0.])
+    rchi2_low = array('f', [0.])
     pval = array('f', [0.])
+    pval_low = array('f', [0.])
     pval_all = array('f', [0.])
     orig_pval = array('f', [0.])
     pval_ok = array('i', [0])
@@ -199,12 +212,16 @@ for index,lists in enumerate(fit_function_list):
     fitrange_L = array('f', [0.])
     fitrange_R = array('f', [0.])
     pval_dict["%s"%lists]    = {}
+    pval_low_dict["%s"%lists]    = {}
     pvalall_dict["%s"%lists] = {}
     chi2_dict["%s"%lists]    = {}
+    chi2_low_dict["%s"%lists]    = {}
     chi2all_dict["%s"%lists] = {}
     chi2_reduced_dict["%s"%lists]    = {}
+    chi2_reduced_low_dict["%s"%lists]    = {}
     chi2all_reduced_dict["%s"%lists] = {}
     ndof_dict["%s"%lists]    = {}
+    ndof_low_dict["%s"%lists]    = {}
     ndofall_dict["%s"%lists] = {}
     
     
@@ -309,9 +326,9 @@ for index,lists in enumerate(fit_function_list):
             ## Create data histogram with coarser binning
             th1_rebin[icat] = th1_original[icat].Rebin(NvarBins,"th1_rebin_"+cat,array('d',varBins))
             th1_rebin_blind[icat] = th1_original[icat].Rebin(NvarBins,"th1_rebin_blind_"+cat,array('d',varBins))
-    	    th1_rebin[icat].Draw()
-    	    canvas[icat].SetLogy(1)
-    	    canvas[icat].SaveAs(cat+"histo_first"+str(generateToy)+".png")
+            th1_rebin[icat].Draw()
+            canvas[icat].SetLogy(1)
+            canvas[icat].SaveAs(cat+"histo_first"+str(generateToy)+".png")
             print(th1_rebin[icat].GetBin(0))
     
             ## Create ROOT.RooDataHist in fit range from TH1
@@ -368,10 +385,10 @@ for index,lists in enumerate(fit_function_list):
                 th1_rebin_bkg[icat].SetBinContent(bin, exp_)
                 if bin_low>1000:
                 	th1_rebin_blind[icat].SetBinContent(bin, 0)
-                	th1_rebin_bkg_blind[icat].SetBinContent(bin, 0)
-    	        else:	
-                	th1_rebin_blind[icat].SetBinContent(bin, th1_rebin[icat].GetBinContent(bin))
-                	th1_rebin_bkg_blind[icat].SetBinContent(bin, exp_)
+                    th1_rebin_bkg_blind[icat].SetBinContent(bin, 0)
+                else:
+                    th1_rebin_blind[icat].SetBinContent(bin, th1_rebin[icat].GetBinContent(bin))
+                    th1_rebin_bkg_blind[icat].SetBinContent(bin, exp_)
     
                 # pull histo
                 if data!=0:
@@ -384,7 +401,7 @@ for index,lists in enumerate(fit_function_list):
                         th1_rebin_pull_blind[icat].SetBinError(bin,0)
                     else:
                         th1_rebin_pull_blind[icat].SetBinContent(bin,pull)
-                    	th1_rebin_pull_blind[icat].SetBinError(bin,1)
+                        th1_rebin_pull_blind[icat].SetBinError(bin,1)
     
     
                     if pull >= 0:
@@ -401,17 +418,23 @@ for index,lists in enumerate(fit_function_list):
             ## Chi2 and p-value
             icat_br[0] = icat
             cwd_utils.evaluate_chi2(icat, ndof, chi2, rchi2, ndof_allbins, chi2_allbins, reducedchi2_allbins, th1_rebin, th1_rebin_pull, len(fitparam)+1)
+            cwd_utils.evaluate_chi2_lowstat(icat, ndof_low, chi2_low, rchi2_low, ndof_allbins, chi2_allbins, reducedchi2_allbins, th1_rebin, th1_rebin_pull, len(fitparam)+1)
+            pval_low[0]=ROOT.TMath.Prob(chi2_low[0], ndof_low[0])
             pval[0] = ROOT.TMath.Prob(chi2[0], ndof[0])
             pval_all[0] = ROOT.TMath.Prob(chi2_allbins[0], ndof_allbins[0])
     
             pval_ok[0] = 0
             pval_dict["%s"%lists]["%s"%cat] = pval[0]
+            pval_low_dict["%s"%lists]["%s"%cat] = pval_low[0]
             pvalall_dict["%s"%lists]["%s"%cat] = pval_all[0]
             chi2_dict["%s"%lists]["%s"%cat] = chi2[0]
+            chi2_low_dict["%s"%lists]["%s"%cat] = chi2_low[0]
             chi2all_dict["%s"%lists]["%s"%cat] = chi2_allbins[0]
             chi2_reduced_dict["%s"%lists]["%s"%cat] = rchi2[0]
+            chi2_reduced_low_dict["%s"%lists]["%s"%cat] = rchi2_low[0]
             chi2all_reduced_dict["%s"%lists]["%s"%cat] = reducedchi2_allbins[0]
             ndof_dict["%s"%lists]["%s"%cat] = ndof[0]
+            ndof_low_dict["%s"%lists]["%s"%cat] = ndof_low[0]
             ndofall_dict["%s"%lists]["%s"%cat] = ndof_allbins[0]
     
         ## Loop over signals
@@ -630,7 +653,7 @@ for index,lists in enumerate(fit_function_list):
             legend.Draw()
             
            ## Plot fit results
-            pt = ROOT.TPaveText(0.73, 0.58, 0.87, 0.87,"ndc")
+            pt = ROOT.TPaveText(0.73, 0.38, 0.87, 0.87,"ndc")
             pt.SetFillColor(0)
             
             Chi2Text = "#chi^{2}="+str(round(chi2[0],2))+"   Ndf="+str(ndof[0])
@@ -638,6 +661,14 @@ for index,lists in enumerate(fit_function_list):
             t1.SetTextColor(1)
             t1.SetTextSize( 0.04 )
             Chi2Text = "#chi^{2} / ndf (N_{bin}>10) = "+str(round(rchi2[0],2))+"  pval = "+str(round(pval[0],5))
+            t1 = pt.AddText(Chi2Text)
+            t1.SetTextColor(1)
+            t1.SetTextSize( 0.04 )
+            Chi2Text = "#chi^{2}="+str(round(chi2_low[0],2))+"   Ndf="+str(ndof_low[0])
+            t1 = pt.AddText(Chi2Text)
+            t1.SetTextColor(1)
+            t1.SetTextSize( 0.04 )
+            Chi2Text = "#chi^{2} / ndf (N_{bin}<100) = "+str(round(rchi2_low[0],2))+"  pval = "+str(round(pval_low[0],5))
             t1 = pt.AddText(Chi2Text)
             t1.SetTextColor(1)
             t1.SetTextSize( 0.04 )
@@ -804,12 +835,15 @@ for index,lists in enumerate(fit_function_list):
         print("Created datacard List at ",outputdirdatacards,"/datacardList.txt")
 
 pval_fisher= {}
+pvallow_fisher= {}
 pvalall_fisher= {}
 chi2_fisher= {}
+chi2low_fisher= {}
 chi2all_fisher= {}
-chi2_reduced_fisher = {}
+chi2low_reduced_fisher = {}
 chi2all_reduced_fisher = {}
 ndof_fisher = {}
+ndoflow_fisher = {}
 ndofall_fisher = {}
 hitos_fisher = {}
 #datacardList.close()
@@ -838,7 +872,13 @@ for index in range(0, len(fit_function_list)-1):
         print(fit_function_list[index+1])
         histos["chi2all_%s"%(fit_function_list[index+1])] = ROOT.TH1D("chi2all_%s"%(fit_function_list[index+1]),"chi2all_%s"%(fit_function_list[index+1]),len(subDirList), 0, len(subDirList))
         histos["chi2allred_%s"%(fit_function_list[index+1])] = ROOT.TH1D("chi2allred_%s"%(fit_function_list[index+1]),"chi2allred_%s"%(fit_function_list[index+1]),len(subDirList), 0, len(subDirList)) 
+    histos["chi2low_%s"%(fit_function_list[index])] = ROOT.TH1D("chi2low_%s"%(fit_function_list[index]),"chi2low_%s"%(fit_function_list[index]),len(subDirList), 0, len(subDirList))
+    histos["chi2lowred_%s"%(fit_function_list[index])] = ROOT.TH1D("chi2lowred_%s"%(fit_function_list[index]),"chi2lowred_%s"%(fit_function_list[index]),len(subDirList), 0, len(subDirList))
+    if (index == len(fit_function_list)-2):
+        histos["chi2low_%s"%(fit_function_list[index+1])] = ROOT.TH1D("chi2low_%s"%(fit_function_list[index+1]),"chi2low_%s"%(fit_function_list[index+1]),len(subDirList), 0, len(subDirList))
+        histos["chi2lowred_%s"%(fit_function_list[index+1])] = ROOT.TH1D("chi2lowred_%s"%(fit_function_list[index+1]),"chi2lowred_%s"%(fit_function_list[index+1]),len(subDirList), 0, len(subDirList)) 
     histos["%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])] = ROOT.TH1D("%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1]), "%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1]), len(subDirList), 0, len(subDirList))
+    histos["low_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])] = ROOT.TH1D("low_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1]), "low_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1]), len(subDirList), 0, len(subDirList))
     histos["all_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])] = ROOT.TH1D("all_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1]), "all_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1]), len(subDirList), 0, len(subDirList))
     for icat, cat in enumerate(subDirList):
         print(cat)
@@ -857,13 +897,27 @@ for index in range(0, len(fit_function_list)-1):
         print(str(fit_function_list[index]) + " all_rchi2 = " + str(chi2all_dict["%s"%fit_function_list[index]]["%s"%cat] ))
         print(str(fit_function_list[index+1]) + " all_rchi2 = " + str(chi2all_dict["%s"%fit_function_list[index+1]]["%s"%cat] ))
         chi2all_fisher["%s"%cat] = chi2all_dict["%s"%fit_function_list[index]]["%s"%cat] - chi2all_dict["%s"%fit_function_list[index+1]]["%s"%cat]
-        pvalall_fisher["%s"%cat] = ROOT.TMath.Prob(chi2all_fisher["%s"%cat],1)
+        if chi2all_fisher["%s"%cat] > 1000:
+            pvalall_fisher["%s"%cat] = 0.0000001
+        elif chi2all_fisher["%s"%cat] < 0:
+            pvalall_fisher["%s"%cat] = 1
+        else:
+            pvalall_fisher["%s"%cat] = ROOT.TMath.Prob(chi2all_fisher["%s"%cat],1)
         print("chi2 = " + str(chi2all_fisher["%s"%cat]))
         print("pval = " + str(pvalall_fisher["%s"%cat]))
+        chi2low_fisher["%s"%cat] = chi2_low_dict["%s"%fit_function_list[index]]["%s"%cat] - chi2_low_dict["%s"%fit_function_list[index+1]]["%s"%cat]
+        if chi2low_fisher["%s"%cat] > 1000:
+            pvallow_fisher["%s"%cat] = 0.0000001
+        elif chi2low_fisher["%s"%cat] < 0:
+            pvallow_fisher["%s"%cat] = 1
+        else:
+            pvallow_fisher["%s"%cat] = ROOT.TMath.Prob(chi2low_fisher["%s"%cat],1)
         histos["%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].SetBinContent(icat+1,pval_fisher["%s"%cat])
         histos["%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].GetXaxis().SetBinLabel(icat+1,(cat.strip("category")).replace("_BDT_","_"))
         histos["all_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].SetBinContent(icat+1,pvalall_fisher["%s"%cat])
         histos["all_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].GetXaxis().SetBinLabel(icat+1,(cat.strip("category")).replace("_BDT_","_"))
+        histos["low_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].SetBinContent(icat+1,pvallow_fisher["%s"%cat])
+        histos["low_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].GetXaxis().SetBinLabel(icat+1,(cat.strip("category")).replace("_BDT_","_"))
         histos["chi2_%s"%(fit_function_list[index])].SetBinContent(icat+1,chi2_dict["%s"%fit_function_list[index]]["%s"%cat])  
         histos["chi2red_%s"%(fit_function_list[index])].SetBinContent(icat+1,chi2_reduced_dict["%s"%fit_function_list[index]]["%s"%cat])
         histos["chi2_%s"%(fit_function_list[index])].GetXaxis().SetBinLabel(icat+1,(cat.strip("category")).replace("_BDT_","_")) 
@@ -882,6 +936,15 @@ for index in range(0, len(fit_function_list)-1):
             histos["chi2allred_%s"%(fit_function_list[index+1])].SetBinContent(icat+1,chi2all_reduced_dict["%s"%fit_function_list[index+1]]["%s"%cat])
             histos["chi2all_%s"%(fit_function_list[index+1])].GetXaxis().SetBinLabel(icat+1,(cat.strip("category")).replace("_BDT_","_")) 
             histos["chi2allred_%s"%(fit_function_list[index+1])].GetXaxis().SetBinLabel(icat+1,(cat.strip("category")).replace("_BDT_","_")) 
+        histos["chi2low_%s"%(fit_function_list[index])].SetBinContent(icat+1,chi2_low_dict["%s"%fit_function_list[index]]["%s"%cat])  
+        histos["chi2lowred_%s"%(fit_function_list[index])].SetBinContent(icat+1,chi2_reduced_low_dict["%s"%fit_function_list[index]]["%s"%cat])
+        histos["chi2low_%s"%(fit_function_list[index])].GetXaxis().SetBinLabel(icat+1,(cat.strip("category")).replace("_BDT_","_")) 
+        histos["chi2lowred_%s"%(fit_function_list[index])].GetXaxis().SetBinLabel(icat+1,(cat.strip("category")).replace("_BDT_","_")) 
+        if (index == len(fit_function_list)-2):
+            histos["chi2low_%s"%(fit_function_list[index+1])].SetBinContent(icat+1,chi2_low_dict["%s"%fit_function_list[index+1]]["%s"%cat])  
+            histos["chi2lowred_%s"%(fit_function_list[index+1])].SetBinContent(icat+1,chi2_reduced_low_dict["%s"%fit_function_list[index+1]]["%s"%cat])
+            histos["chi2low_%s"%(fit_function_list[index+1])].GetXaxis().SetBinLabel(icat+1,(cat.strip("category")).replace("_BDT_","_")) 
+            histos["chi2lowred_%s"%(fit_function_list[index+1])].GetXaxis().SetBinLabel(icat+1,(cat.strip("category")).replace("_BDT_","_")) 
     histos["%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].GetXaxis().SetLabelSize(.03)
     histos["%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].SetMarkerStyle(20)
     histos["%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].SetMarkerSize(0.8)
@@ -896,6 +959,13 @@ for index in range(0, len(fit_function_list)-1):
     histos["all_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].Write()
     for ext in [".png",".pdf"]:
         canvas_dict["%s_vs_%s"%(str(fit_function_list[index]),str(fit_function_list[index+1]))].SaveAs(outputdir_fisher+"/all"+fit_function_list[index]+"_vs_"+fit_function_list[index+1]+ext)
+    histos["low_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].GetXaxis().SetLabelSize(.03)
+    histos["low_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].SetMarkerStyle(20)
+    histos["low_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].SetMarkerSize(0.8)
+    histos["low_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].Draw("P")
+    histos["low_%s_vs_%s"%(fit_function_list[index],fit_function_list[index+1])].Write()
+    for ext in [".png",".pdf"]:
+        canvas_dict["%s_vs_%s"%(str(fit_function_list[index]),str(fit_function_list[index+1]))].SaveAs(outputdir_fisher+"/low"+fit_function_list[index]+"_vs_"+fit_function_list[index+1]+ext)
     histos["chi2_%s"%(fit_function_list[index])].Draw("P") 
     histos["chi2red_%s"%(fit_function_list[index])].Draw("P")
     histos["chi2_%s"%(fit_function_list[index])].Write() 
@@ -914,5 +984,14 @@ for index in range(0, len(fit_function_list)-1):
         histos["chi2allred_%s"%(fit_function_list[index+1])].Draw("P")
         histos["chi2all_%s"%(fit_function_list[index+1])].Write() 
         histos["chi2allred_%s"%(fit_function_list[index+1])].Write()
+    histos["chi2low_%s"%(fit_function_list[index])].Draw("P") 
+    histos["chi2lowred_%s"%(fit_function_list[index])].Draw("P")
+    histos["chi2low_%s"%(fit_function_list[index])].Write() 
+    histos["chi2lowred_%s"%(fit_function_list[index])].Write()
+    if (index == len(fit_function_list)-2):
+        histos["chi2low_%s"%(fit_function_list[index+1])].Draw("P") 
+        histos["chi2lowred_%s"%(fit_function_list[index+1])].Draw("P")
+        histos["chi2low_%s"%(fit_function_list[index+1])].Write() 
+        histos["chi2lowred_%s"%(fit_function_list[index+1])].Write()
 
 

@@ -55,8 +55,10 @@ canvas_dict = {}
 
 
 ## Output directories
-range_list        = [ 300, 320, 350, 385, 400, 450, 480, 525,]
-fit_function_list = ["std_2par","std_3par","std_4par","std_5par"]
+range_list        = [ 320, 350, 385, 400, 450, 485, 525, 560, 600]
+fit_function_list = ["UA2_2par","UA2_3par","UA2_4par"]#,"UA2_5par"]
+#fit_function_list = ["modExp_2par","modExp_3par","modExp_4par"]#,"modExp_5par"]
+#fit_function_list = ["std_2par","std_3par","std_4par","std_5par"]
 histos={}
 for ilists,lists in enumerate(fit_function_list):
     canvas_dict["%s"%lists] = ROOT.TCanvas("canvas_%s"%lists,"canvas_%s"%lists, 200,10,900,500)
@@ -107,7 +109,7 @@ for ilists,lists in enumerate(fit_function_list):
     chi2_dict ["%s"%lists] = ROOT.TH2D("%s"%lists,"%s"%lists, len(subDirList), 0, len(subDirList), len(range_list), 0,len(range_list))
     chi2_reduced_dict ["%s"%lists] = ROOT.TH2D("%s_reduced"%lists,"%s_reduced"%lists, len(subDirList), 0, len(subDirList), len(range_list), 0,len(range_list))
     for index,rang in enumerate(range_list):
-        outroot=ROOT.TFile.Open("/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_MC_"+str(rang)+"std/outFile_fisher.root")
+        outroot=ROOT.TFile.Open("/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_MC_"+str(rang)+fit_function_list[0].split("_")[0]+"/outFile_fisher.root")
         histos["%s"%lists]=outroot.Get("chi2_%s"%lists) 
         histos["%s_reduced"%lists]=outroot.Get("chi2red_%s"%lists) 
         for icat, cat in enumerate(subDirList):

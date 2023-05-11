@@ -128,7 +128,7 @@ L           = float(L.replace("p","."))
 
 #workspacename = toysfilename.replace("workspace_","w_").replace(".root","")
 
-workspacePath = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_MC/workspace_modExp_4par.root"
+workspacePath = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_MC/workspace_std_4par.root"
 #workspacePath = workspacePath.split("/")[-1]
 workspacefile = ROOT.TFile.Open(workspacePath)
 
@@ -191,7 +191,7 @@ for number in range(nToy):
     toy = toysfile.Get("toys/toy_"+str(number+1))
     #Make plot of data + fit for each category
     #var_min_limit = M1*0.85
-
+    print("diocane")
     for icat,cat in enumerate(categoriesList):
 
         if "workspace_"  in cat:
@@ -200,8 +200,8 @@ for number in range(nToy):
     #           print("maremma boia")
     #           print(cat)
                 continue
-        elif "std_" in cat:
-            continue
+        #elif "std_" in cat:
+         #   continue
         elif opt.ncat != "all" and opt.ncat not in cat:
             continue
        # print(cat)
@@ -217,7 +217,8 @@ for number in range(nToy):
         L[0] = float(splitname[5].strip("L").replace("p","."))
         #L[0] = float(L.replace("p","."))
 
-        app=(cat.split("_"))[6]
+        app=(cat.split("_"))[6]+"_"+(cat.split("_"))[7] +"_"+(cat.split("_"))[8]+"_"+(cat.split("_"))[9]
+        #print(app)
         sign_=(cat.replace("datacard_"+opt.fitFunction+"_", ""))
         #print(app)
         #print(sign_)

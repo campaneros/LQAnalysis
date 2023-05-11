@@ -21,13 +21,13 @@ import CMS_lumi
 ROOT.gROOT.SetBatch(True)
 
 ## Input directories (each folder contains a root file with histograms)
-inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna_new/src/RootTreeAnalyzer/all_years/category_BDT_data_all/"
+inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna_new/src/RootTreeAnalyzer/all_years_newsample/category_BDT_data_all/"
 subDirList = next(os.walk(inputdir))[1]
 print(subDirList)
 
 ## Output directories  
-outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output"
-weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output"
+outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_umu_new/output"
+weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_umu_new/output"
 os.system("mkdir -p "+outputdir)
 os.system("mkdir -p "+weboutputdir)
 scriptsPath = os.path.dirname(os.path.abspath(__file__))+"/../../"
@@ -41,7 +41,7 @@ varname = "m_muj_ak"
 vartitle = "m_muj_ak [GeV]"
 
 ## Signal Histogram
-histoname_signal = ["h1_mmuj_ak4__umuLQumu_M700_L1p0", "h1_mmuj_ak4__umuLQumu_M1000_L1p0", "h1_mmuj_ak4__umuLQumu_M2000_L1p0", "h1_mmuj_ak4__umuLQumu_M3000_L1p0", "h1_mmuj_ak4__umuLQumu_M4000_L1p0", "h1_mmuj_ak4__umuLQumu_M5000_L1p0"]
+histoname_signal = ["h1_mmuj_ak4__umuLQumu_M700_L1p0", "h1_mmuj_ak4__umuLQumu_M1000_L1p5", "h1_mmuj_ak4__umuLQumu_M2000_L1p0", "h1_mmuj_ak4__umuLQumu_M3000_L1p0", "h1_mmuj_ak4__umuLQumu_M4000_L1p0", "h1_mmuj_ak4__umuLQumu_M5000_L1p0","h1_mmuj_ak4__umuLQumu_M700_L0p1", "h1_mmuj_ak4__umuLQumu_M1000_L1p5", "h1_mmuj_ak4__umuLQumu_M2000_L0p1", "h1_mmuj_ak4__umuLQumu_M3000_L0p1", "h1_mmuj_ak4__umuLQumu_M4000_L0p1", "h1_mmuj_ak4__umuLQumu_M5000_L0p1","h1_mmuj_ak4__umuLQumu_M700_L1p5", "h1_mmuj_ak4__umuLQumu_M1000_L1p5", "h1_mmuj_ak4__umuLQumu_M2000_L1p5", "h1_mmuj_ak4__umuLQumu_M3000_L1p5", "h1_mmuj_ak4__umuLQumu_M4000_L1p5", "h1_mmuj_ak4__umuLQumu_M5000_L1p0","h1_mmuj_ak4__umuLQumu_M700_L2p0", "h1_mmuj_ak4__umuLQumu_M1000_L2p0", "h1_mmuj_ak4__umuLQumu_M2000_L2p0", "h1_mmuj_ak4__umuLQumu_M3000_L2p0", "h1_mmuj_ak4__umuLQumu_M4000_L2p0", "h1_mmuj_ak4__umuLQumu_M5000_L2p0"]
 #histoname_signal = ["h1_mmuj_ak4__bmuLQbmu_M700_L1p0", "h1_mmuj_ak4__bmuLQbmu_M1000_L1p0", "h1_mmuj_ak4__bmuLQbmu_M2000_L1p0", "h1_mmuj_ak4__bmuLQbmu_M3000_L1p0", "h1_mmuj_ak4__bmuLQbmu_M4000_L1p0", "h1_mmuj_ak4__bmuLQbmu_M5000_L1p0"]
 
 ## Fit ranges (!!should match the categories!!)
@@ -81,7 +81,8 @@ outputfile = io.open(outputfilename,'w')
 
 ## Loop over event categories  
 for icat, cat in enumerate(subDirList):
-
+    #if ("_btag" in cat):
+    #    continue
     #if icat > 1:
     #    continue
 

@@ -130,9 +130,13 @@ if float(opt.expectSignal)==0:
     rMin = -limit*10
     #rMin = 0
     rMax = limit*10
+    if "2Muon" in gendatacard:
+        if mass >= 1500:
+            rMin = 0
+    else:
+        if mass>=3100:
+            rMin = 0
 
-    #if mass >= 2100:
-    #    rMin = 0
 else:
     rMin = -float(opt.expectSignal)*10
     rMax = float(opt.expectSignal)*10
@@ -181,7 +185,7 @@ else:
            #+" -v 4"
            #+" --freezeParameters \"rgx{meanShape_sigma_err_*}\"""
 #           +" --noErrors"
-           #+" --setParameters r=0"
+           +" --setParameters r="+str(opt.expectSignal)
            #+" --freezeParameters r"
           )
 print(command)  
