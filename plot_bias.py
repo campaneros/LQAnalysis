@@ -34,6 +34,9 @@ parser.add_option("-f", "--file", dest="outputfile",
 parser.add_option("-r", dest="rExpected", default=0,
                   help="expected signal strenght (r)")
 
+parser.add_option("-a", dest="all", default=0,
+                  help="all category toghether (1) or not (0)")
+
 (opt, args) = parser.parse_args()
 
 if not opt.inputfile:   
@@ -59,14 +62,32 @@ if( iPos==0 ): CMS_lumi.relPosX = 0.15
 iPeriod = 4
 
 ######################################################################
+cat_name = os.path.dirname(opt.inputfile)
+print(cat_name)
+cat_parts = cat_name.split("_")
+if not opt.all:
+    if "2Muon" in cat_name:
+        index = cat_parts.index('category2Muon')
+    else:
+        index = cat_parts.index('category1Muon') 
+
+    cat = cat_parts[index]+"_"+cat_parts[index+1]+"_"+cat_parts[index+2]+"_"+cat_parts[index+3]
+    print(cat)
+    Mass = float(cat_parts[index-2].replace("M",""))
+else:
+    cat = "all"
+    Mass = 0
 
 inputfile = TFile.Open(opt.inputfile)
 tree = inputfile.Get("limit")
 
-h_pull = TH1D("h_pull", "", 16, -4, 4)
+h_pull = TH1D("h_pull", "", 32, -4, 4)
 tree.Draw("(r-"+str(opt.rExpected)+")/trackedParamErr_r>>h_pull", "trackedParamErr_r>0")
-h_pull.Fit("gaus")
-gaus = h_pull.GetListOfFunctions().FindObject("gaus")
+if ("2Muon" in cat_name and Mass<2000) or ("1Muon" in cat_name and Mass<3100) or opt.all:
+        h_pull.Fit("gaus")
+        gaus = h_pull.GetListOfFunctions().FindObject("gaus")
+
+
 
 gStyle.SetOptStat(0)
 gStyle.SetOptFit(0)
@@ -93,16 +114,19 @@ t1 = pt.AddText("toys number: "+str(h_pull.GetEntries()))
 t1.SetTextColor(1)
 t1.SetTextSize( 0.04 )
 
-t_mu     = pt.AddText("#mu    = %s #pm %s" % ( str(round(gaus.GetParameter(1),2)) , str(round(gaus.GetParError(1),2))      )    )
-t_sigma  = pt.AddText("#sigma = %s #pm %s" % ( str(round(gaus.GetParameter(2),2)) , str(round(gaus.GetParError(2),2))      )    )
+if ("2Muon" in cat_name and Mass<2000) or ("1Muon" in cat_name and Mass<3100) or opt.all:
+    t_mu     = pt.AddText("#mu    = %s #pm %s" % ( str(round(gaus.GetParameter(1),2)) , str(round(gaus.GetParError(1),2))      )    )
+    t_sigma  = pt.AddText("#sigma = %s #pm %s" % ( str(round(gaus.GetParameter(2),2)) , str(round(gaus.GetParError(2),2))      )    )
+    t_mu.SetTextColor(1)
+    t_mu.SetTextSize( 0.04 )
+    t_sigma.SetTextColor(1)
+    t_sigma.SetTextSize( 0.04 )
 t_mean   = pt.AddText("mean   = %s " % ( str(round(h_pull.GetMean(), 3))    ) )    
 t_StdDev = pt.AddText("StdDev = %s " % ( str(round(h_pull.GetStdDev(),2))   ) )    
 t_r      = pt.AddText("signal inj r = %s"  % ( str( format(float(opt.rExpected), ".2E") ) ) )
 
-t_mu.SetTextColor(1)
-t_mu.SetTextSize( 0.04 )
-t_sigma.SetTextColor(1)
-t_sigma.SetTextSize( 0.04 )
+
+
 t_mean.SetTextColor(1)
 t_mean.SetTextSize( 0.04 )
 t_StdDev.SetTextColor(1)

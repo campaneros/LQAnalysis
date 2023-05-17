@@ -5,7 +5,7 @@ import ROOT as ROOT
 
 
 
-function = {
+function_STD= {
       "category1Muon_BDT_loose_btag" : "std_3par",
       "category1Muon_BDT_loose_nobtag" : "std_3par",
       "category2Muon_BDT_loose_btag" : "std_3par",
@@ -17,19 +17,111 @@ function = {
       }
 
 
-#function = {
-#      "category1Muon_BDT_loose_btag" : "UA2_3par",
-#      "category1Muon_BDT_loose_nobtag" : "UA2_3par",
-#      "category2Muon_BDT_loose_btag" : "UA2_2par",
-#      "category2Muon_BDT_loose_nobtag" : "UA2_3par",
-#      "category2Muon_BDT_tight_btag" : "UA2_2par",
-#      "category2Muon_BDT_tight_nobtag" : "UA2_3par",
-#      "category1Muon_BDT_tight_btag" : "UA2_4par",
-#      "category1Muon_BDT_tight_nobtag" : "UA2_3par",
-#      }
+function_UA2 = {
+      "category1Muon_BDT_loose_btag" : "UA2_3par",
+      "category1Muon_BDT_loose_nobtag" : "UA2_3par",
+      "category2Muon_BDT_loose_btag" : "UA2_2par",
+      "category2Muon_BDT_loose_nobtag" : "UA2_3par",
+      "category2Muon_BDT_tight_btag" : "UA2_2par",
+      "category2Muon_BDT_tight_nobtag" : "UA2_3par",
+      "category1Muon_BDT_tight_btag" : "UA2_4par",
+      "category1Muon_BDT_tight_nobtag" : "UA2_3par",
+      }
+
+nested_dict = {"function_STD": function_STD, "function_UA2": function_UA2}
 
 
 
+limit_dict_1p0= {
+    "700": 0.02, 
+    "1000": 0.009,
+    "2000": 0.002,
+    "3000": 0.001,
+    "4000": 0.00009,
+    "5000" : 0.0008,
+}
+
+nested_dict_limit = {"limit_dict_1p0": limit_dict_1p0}
+
+cross_section_dict_umu_0p1= {
+    "700": 3.46008E-03, 
+    "1000": 9.45814E-04,
+    "2000": 4.85404E-05,
+    "3000": 5.28391E-06,
+    "4000": 7.33823E-07,
+    "5000": 1.07973E-07, 
+}
+
+cross_section_dict_umu_1p0= {
+    "700": 3.45971E-01, 
+    "1000": 9.49567E-02,
+    "2000": 4.97741E-03,
+    "3000": 5.66914E-04,
+    "4000": 8.74072E-05,
+    "5000": 1.65938E-05,
+} 
+
+
+cross_section_dict_umu_1p5= {
+    "700": 7.77979E-01, 
+    "1000": 2.14614E-01,
+    "2000": 1.15361E-02,
+    "3000": 1.38123E-03,
+    "4000": 2.35351E-04,
+    "5000": 5.34450E-05, 
+}
+
+cross_section_dict_umu_2p0= {
+    "700": 1.38027E+00, 
+    "1000": 3.83304E-01,
+    "2000": 2.12795E-02,
+    "3000": 2.70481E-03,
+    "4000": 5.11174E-04,
+    "5000": 1.34026E-04, 
+}
+
+nested_dict_umu_cross_section = {"cross_section_dict_umu_0p1": cross_section_dict_umu_0p1, "cross_section_dict_umu_1p0": cross_section_dict_umu_1p0, "cross_section_dict_umu_1p5": cross_section_dict_umu_1p5, "cross_section_dict_umu_2p0": cross_section_dict_umu_2p0}
+
+cross_section_dict_bmu_0p1= {
+    "700": 2.73661E-04, 
+    "1000": 5.27037E-05,
+    "2000": 1.09773E-06,
+    "3000": 5.87234E-08,
+    "4000": 4.23152E-09,
+    "5000": 2.71429E-10, 
+}
+
+cross_section_dict_bmu_1p0= {
+    "700": 2.77177E-02, 
+    "1000": 5.41827E-03,
+    "2000": 1.24580E-04,
+    "3000": 8.85890E-06,
+    "4000": 1.32583E-06,
+    "5000": 3.83615E-07,
+} 
+
+
+cross_section_dict_bmu_1p5= {
+    "700": 6.33016E-02, 
+    "1000": 1.25938E-02,
+    "2000": 3.20714E-04,
+    "3000": 2.81736E-05,
+    "4000": 5.46531E-06,
+    "5000": 1.84223E-06, 
+}
+
+cross_section_dict_bmu_2p0= {
+    "700": 1.14575E-01, 
+    "1000": 2.33070E-02,
+    "2000": 6.67795E-04,
+    "3000": 7.00758E-05,
+    "4000": 1.58225E-05,
+    "5000": 5.68700E-06, 
+}
+
+nested_dict_bmu_cross_section = {"cross_section_dict_bmu_0p1": cross_section_dict_bmu_0p1, "cross_section_dict_bmu_1p0": cross_section_dict_bmu_1p0, "cross_section_dict_bmu_1p5": cross_section_dict_bmu_1p5, "cross_section_dict_bmu_2p0": cross_section_dict_bmu_2p0}
+
+nested_dict_cross_section = {"nested_dict_umu_cross_section": nested_dict_umu_cross_section, "nested_dict_bmu_cross_section": nested_dict_bmu_cross_section}    
 
 def set_bkg_fit_function(icat, cat, var, fitFunction_name, fitparam, nbkg, bkgPdf, ParametricBkgPdf, bkgExtPdf, th1_rebin, numberOfEvents):
 

@@ -12,6 +12,7 @@ import ROOT as R
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__))+"/../../")
 import CMS_lumi
+import create_workspaces_and_datacards_utils as cwd_utils
 
 R.gROOT.SetBatch(True)
 
@@ -53,9 +54,9 @@ limit_central = {}
 limit_1sigmaDown = {}
 limit_2sigmaDown = {}
 limit_observed = {}
-sigma_0p1 = {}
-sigma_0p2 = {}
-sigma_1p0 = {}
+sigma = {}
+#sigma_0p2 = {}
+#sigma_1p0 = {}
 
 cat_list = {}
 
@@ -90,13 +91,17 @@ for fl in file_list:
         model = (filename.split(".AsymptoticLimits")[0]).split("_") [1]
         mass = ( filename.split(".AsymptoticLimits")[0]).split("_") [2]
         L = ( filename.split(".AsymptoticLimits")[0]).split("_") [3]
-	if (filename.split(".AsymptoticLimits")[0]).split("_") [4] == "all":
-		cat = (filename.split(".AsymptoticLimits")[0]).split("_") [4]
-	else:
-        	cat = (filename.split(".AsymptoticLimits")[0]).split("_") [4]
-        #	cat = (filename.split(".AsymptoticLimits")[0]).split("_") [4]+"_"+(filename.split(".AsymptoticLimits")[0]).split("_") [5]+"_"+(filename.split(".AsymptoticLimits")[0]).split("_") [6]+"_"+(filename.split(".AsymptoticLimits")[0]).split("_") [7]
+        lambd= L.replace("p",".")
+        if (filename.split(".AsymptoticLimits")[0]).split("_") [4] == "all":
+            cat = (filename.split(".AsymptoticLimits")[0]).split("_") [4]
+        else:
+            cat = (filename.split(".AsymptoticLimits")[0]).split("_") [4]
         print(model, mass, L, cat)
-
+        #	cat = (filename.split(".AsymptoticLimits")[0]).split("_") [4]+"_"+(filename.split(".AsymptoticLimits")[0]).split("_") [5]+"_"+(filename.split(".AsymptoticLimits")[0]).split("_") [6]+"_"+(filename.split(".AsymptoticLimits")[0]).split("_") [7]
+        if "umu" in model:
+             cross_type= "umu"
+        elif "bmu" in model:
+             cross_type= "bmu"
 
         #fl_fullpath = opt.inputdir+"/"+fl
         print(fl)
@@ -106,8 +111,8 @@ for fl in file_list:
         tree = inputfile.Get("limit")
  
         if app != cat:
-	    print("dio boia")
-	    print(cat)
+            print("dio boia")
+            print(cat)
             app=cat
             var[cat] = []
             limit_central[cat] = []
@@ -116,20 +121,18 @@ for fl in file_list:
             limit_2sigmaUp[cat] = []
             limit_2sigmaDown[cat] = []
             limit_observed[cat] = []
-            sigma_0p1[cat] = []
-            sigma_0p2[cat] = []
-            sigma_1p0[cat] = []
+            sigma[cat] = []
        # if "0p1" in L:
        #     sigma[cat].append(9.51E-04)
        #     sigma[cat].append(5.16E-05)
        #     sigma[cat].append(5.73E-06)
        # elif "1p0"in L:
-        sigma_1p0[cat].append(3.48E-01)#700
+        sigma[cat].append(cwd_utils.nested_dict_cross_section["nested_dict_%s_cross_section"%cross_type]["cross_section_dict_%s_%s"%(cross_type,L)]["%s"%mass])
         #sigma_1p0[cat].append(9.55E-02)#1000
-        sigma_1p0[cat].append(5.01E-03)#2000
-        sigma_1p0[cat].append(5.72E-04)#3000
-        sigma_1p0[cat].append(8.91E-05)#4000
-        sigma_1p0[cat].append(1.73E-05)#5000
+        #sigma[cat].append(5.01E-03)#2000
+        #sigma[cat].append(5.72E-04)#3000
+        #sigma[cat].append(8.91E-05)#4000
+        #sigma[cat].append(1.73E-05)#5000
         #sigma_0p1[cat].append(3.48E-03)#700
         #sigma_0p1[cat].append(9.49E-04)#1000
         #sigma_0p1[cat].append(4.86E-05)#2000
@@ -180,9 +183,7 @@ yellow={}
 green={}
 median={}
 observed={}
-cross_0p1 = {}
-cross_0p2 = {}
-cross_1p0 = {}
+cross= {}
 
 for key in var:
     print(key)
@@ -196,7 +197,7 @@ for key in var:
     observed[key] = R.TGraph(N)
     #cross_0p1[key] =  R.TGraph(N)
     #cross_0p2[key] =  R.TGraph(N)  
-    cross_1p0[key] =  R.TGraph(N)
+    cross[key] =  R.TGraph(N)
 
 
     for i in range(N):
@@ -210,7 +211,7 @@ for key in var:
             #observed[key].SetPoint(  i,    float(var[key][i]), float(limit_observed[key][i]) ) # observed
             #cross_0p1[key].SetPoint(i, float(var[key][i]), float(sigma_0p1[key][i]))
             #cross_0p2[key].SetPoint(i, float(var[key][i]), float(sigma_0p2[key][i]))
-            cross_1p0[key].SetPoint(i, float(var[key][i]), float(sigma_1p0[key][i]))
+            cross[key].SetPoint(i, float(var[key][i]), float(sigma[key][i]))
 	#elif opt.single and (not "all" in cat):
         #	median[key].SetPoint(    i,    float(var[key][i]), float(limit_central[key][i]) ) # median[key]
 	#else:
@@ -345,8 +346,8 @@ for count,key in enumerate(sorted(var)):
         frame.GetXaxis().SetTitle("Resonance mass [GeV]")
         #frame.SetMinimum(min(min(limit_2sigmaUp[key]),min(sigma[key]))*0.10)
         #frame.SetMaximum(max(max(limit_2sigmaUp[key]),max(sigma[key]))*10)
-        frame.SetMinimum(min(min(limit_2sigmaUp[key]),min(sigma_1p0[key]))*0.10)
-        frame.SetMaximum(max(max(limit_2sigmaUp[key]),max(sigma_1p0[key]))*10)
+        frame.SetMinimum(min(min(limit_2sigmaUp[key]),min(sigma[key]))*0.10)
+        frame.SetMaximum(max(max(limit_2sigmaUp[key]),max(sigma[key]))*10)
         frame.GetXaxis().SetLimits(float(min(var[key])),float(max(var[key])))
         c.SetLogy(1)        
         yellow[key].SetFillColor(R.kOrange)
@@ -368,10 +369,10 @@ for count,key in enumerate(sorted(var)):
         observed[key].SetLineStyle(1)
         #observed[key].Draw('Lsame')
 
-        cross_1p0[key].SetLineColor(R.kBlue)
-        cross_1p0[key].SetLineWidth(2)
-        cross_1p0[key].SetLineStyle(1)
-        cross_1p0[key].Draw('Lsame')
+        cross[key].SetLineColor(R.kBlue)
+        cross[key].SetLineWidth(2)
+        cross[key].SetLineStyle(1)
+        cross[key].Draw('Lsame')
 
         #cross_0p2[key].SetLineColor(R.kRed)
         #cross_0p2[key].SetLineWidth(2)
@@ -402,7 +403,7 @@ for count,key in enumerate(sorted(var)):
         legend.AddEntry(yellow[key],"#pm 2 std. deviation",'f')
         #legend.AddEntry(cross_0p1[key],"cross section #lambda=0.1",'L')
         #legend.AddEntry(cross_0p2[key],"cross section #lambda=0.2",'L')
-        legend.AddEntry(cross_1p0[key],"cross section #lambda=1.0",'L')
+        legend.AddEntry(cross[key],"cross section #lambda=%s"%lambd,'L')
     else:
         #print(median[key])
         print(key)

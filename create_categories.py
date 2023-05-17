@@ -22,7 +22,7 @@ usage = "usage: python plotSimFit.py -t toysfile/workspacefile -f fitFile -n 1 -
 
 parser = optparse.OptionParser(usage)
 
-parser.add_option("-F", dest="fitFunction", default="std_4par",
+parser.add_option("-F", dest="fitFunction", default="STD",
                   help="fit function name")
 
 parser.add_option("-s", dest="start_range", default="450",
@@ -38,23 +38,23 @@ ROOT.gROOT.SetBatch(True)
 gErrorIgnoreLevel = ROOT.kFatal
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 
-inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna_new/src/RootTreeAnalyzer/all_years/category_BDT_data_all/"
+inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna_new/src/RootTreeAnalyzer/all_years_new/category_BDT_data_all/"
 filenameInput = "test_h1_mmuj_ak4.root"
 subDirList = next(os.walk(inputdir))[1]
 print(subDirList)
 
-fitFunction_name = "std_family_real"
+familyFunction_name = opt.fitFunction
 ## Output directories  
-outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/newsample_output_MC_finalcatSTD"          +str(opt.start_range) + "_" + str(fitFunction_name)
-outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/newsample_datacards_finalcatSTD" +str(opt.start_range) + "_" + str(fitFunction_name) 
-weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_plot_finalcatSTD"     +str(opt.start_range) + "_" + str(fitFunction_name)
+outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/new_bmu_output_MC_finalcat_"+  str(familyFunction_name)+"_"+str(opt.start_range)
+outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/new_bmu_datacards_finalcat_"+str(familyFunction_name)+"_"+str(opt.start_range) 
+weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_plot_finalcat_"+str(familyFunction_name)+"_"+str(opt.start_range)
 os.system("mkdir -p "+outputdir)
 os.system("mkdir -p "+outputdirdatacards)
 #os.system(u"rm -f "+outputdirdatacards+"/*")
 os.system("mkdir -p "+weboutputdir)
 scriptsPath = os.path.dirname(os.path.abspath(__file__))+"/../../"
 os.system("cp "+scriptsPath+"/index.php "+weboutputdir)
-filenameworkspace = "workspace_"+fitFunction_name+".root"
+filenameworkspace = "workspace_"+familyFunction_name+".root"
 filenameworkspacePath = outputdir+"/"+filenameworkspace
 workspaceName = "w"
 
@@ -76,7 +76,7 @@ varname = "m_muj_ak4"
 vartitle = "m_{\muj}_ak4 [GeV]"
 
 ## Signal input
-signalInputfilename = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_umu_new/output/signals.txt"
+signalInputfilename = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_bmu_new/output/signals.txt"
 
 
 ncategories = len(subDirList)
@@ -196,7 +196,7 @@ fitrange_R = array('f', [0.])
 for icat, cat in enumerate(subDirList):
         #if ("_btag" in cat):
         #    continue
-        fitFunction_name = cwd_utils.function["%s"%cat]
+        fitFunction_name = cwd_utils.nested_dict["function_%s"%familyFunction_name]["%s"%cat]
 	#if ("2Muon" in str(cat)):	
 	#	continue
         print("\n")
@@ -744,7 +744,7 @@ for signal in listOfSignalModels:
     os.system("mkdir -p "+outputdirdatacards+"/"+signal)
     ## Loop over event categories    
     for icat, cat in enumerate(subDirList):
-        fitFunction_name = cwd_utils.function["%s"%cat]
+        fitFunction_name = cwd_utils.nested_dict["function_%s"%familyFunction_name]["%s"%cat]
         signalStringCat = signal+"_"+cat
         datacardfilenameAll = outputdirdatacards+"/"+signal+"/"+"datacard_"+fitFunction_name+"_"+signal+".txt"
         datacardfilename1 = outputdirdatacards+"/"+signal+"/"+"datacard_"+fitFunction_name+"_1Muon_"+signal+".txt"
