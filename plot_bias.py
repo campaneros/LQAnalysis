@@ -78,6 +78,9 @@ else:
     cat = "all"
     Mass = 0
 
+index = cat_name.index('umuLQumu')
+
+
 inputfile = TFile.Open(opt.inputfile)
 tree = inputfile.Get("limit")
 

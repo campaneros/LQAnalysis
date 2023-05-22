@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from os import *
+
 import os
 import sys
 import optparse
@@ -76,6 +76,16 @@ file_list.sort()
 print(file_list)
 
 app=""
+
+test=os.path.abspath(opt.inputdir)
+path_parts=test.split("/")
+coupling=test.split("/")[-1]
+index=path_parts.index("src")
+print(path_parts)
+
+file_out = open("limit_"+str(path_parts[index+2])+"_"+str(path_parts[index+1]) +"_"+str(coupling)+".txt","w")
+
+
 
 for fl in file_list:
         #print fl
@@ -157,6 +167,7 @@ for fl in file_list:
                 limit_1sigmaUp[cat].append(limit)
             if quantile==0.5:
                 limit_central[cat].append(limit)
+                file_out.write('L %s "%s":%s \n'%(L,mass,limit))
             if quantile>0.15 and quantile<0.17:
                 limit_1sigmaDown[cat].append(limit)
             if quantile>0.02 and quantile<0.03:
