@@ -45,8 +45,8 @@ print(subDirList)
 
 familyFunction_name = opt.fitFunction
 ## Output directories  
-outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/new_umu_output_MC_finalcat_"+  str(familyFunction_name)+"_"+str(opt.start_range)
-outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/new_umu_datacards_finalcat_"+str(familyFunction_name)+"_"+str(opt.start_range) 
+outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/new_bmu_output_MC_finalcat_"+  str(familyFunction_name)+"_"+str(opt.start_range)
+outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/new_bmu_datacards_finalcat_"+str(familyFunction_name)+"_"+str(opt.start_range) 
 weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_plot_finalcat_"+str(familyFunction_name)+"_"+str(opt.start_range)
 os.system("mkdir -p "+outputdir)
 os.system("mkdir -p "+outputdirdatacards)
@@ -76,7 +76,7 @@ varname = "m_muj_ak4"
 vartitle = "m_{\muj}_ak4 [GeV]"
 
 ## Signal input
-signalInputfilename = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_umu_new/output/signals.txt"
+signalInputfilename = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_bmu_new/output/signals.txt"
 
 
 ncategories = len(subDirList)

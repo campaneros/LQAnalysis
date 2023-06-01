@@ -46,6 +46,9 @@ parser.add_option("-o", "--outputdir", dest="outputdir", default="/data/mcampana
 parser.add_option("-b", "--outputFilename", dest="outputFile", default="expect_signal",
                   help="name of the output file")
 
+parser.add_option("-W", "--Workspace", dest="workspace", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/newsample_output_MC_finalcatSTD450_std_family_real/workspace_std_family_real.root",
+                  help="name of the workspace file")
+
 parser.add_option("-w", "--weboutputdir", dest="weboutputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal/output_plot/plotSimFit_std_4par/LQumu_M1000_L0p1_bis",
                   help="name of the web output directory")
 
@@ -128,8 +131,9 @@ L           = float(L.replace("p","."))
 
 #workspacename = toysfilename.replace("workspace_","w_").replace(".root","")
 
-workspacePath = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_MC/workspace_std_4par.root"
+#workspacePath = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_MC/workspace_std_4par.root"
 #workspacePath = workspacePath.split("/")[-1]
+workspacePath = opt.workspace
 workspacefile = ROOT.TFile.Open(workspacePath)
 
 workspacename = "w"
@@ -189,11 +193,18 @@ outputrooTFile = [None] * len(categoriesList)
 
 cat_name = os.path.dirname(toysfilenamePath)
 print(cat_name)
+cat_name = cat_name.split("/")[-1]
 cat_parts = cat_name.split("_")
+print(cat_parts)    
 if "2Muon" in cat_name:
     index = cat_parts.index('category2Muon')
 else:
     index = cat_parts.index('category1Muon') 
+
+
+index_func = cat_name.index('datacard')
+fit_func = cat_parts[index_func+1] +"_"+cat_parts[index_func+2]
+print(fit_func)
 
 cat = cat_parts[index]+"_"+cat_parts[index+1]+"_"+cat_parts[index+2]+"_"+cat_parts[index+3]
 print(cat)
@@ -219,7 +230,7 @@ for number in range(nToy):
     #print(app)
     sign_= cat_parts[index-3]+"_"+cat_parts[index-2]+"_"+cat_parts[index-1]+"_"+cat
     #print(app)
-    print(sign_)
+    #print(sign_)
     #x = RooRealVar("m_muj_ak4_category1Muon","m_muj_ak4_category1Muon",41,453,3854)
     #x = workspace.var("m_muj_ak4_"+app)
 
@@ -235,7 +246,7 @@ for number in range(nToy):
     #toy2 = RooDataSet("Dataset_m_muj_ak4_"+app,"Dataset_m_muj_ak4_"+app, toy ,RooArgSet(toyvar), RooFormulaVar("CMS_channel::category1Muon"))
     #test = toy2.binnedClone("test","test")
     #print(toy2.Print())
-    print(test.Print())
+    #print(test.Print())
     #toy.printArgs()
     #for ind in range(toy.sumEntries()):
     #    print()
@@ -288,19 +299,27 @@ for number in range(nToy):
 
     #Get ParametricShapeBin pdf and parameters from workspace and extend with norm
     BkgFit    = workspace.pdf("ParametricBkgPdf_"+cat)
+    print("p1_std"+cat)
 
-    if "std" in fitFunction:
+    if "std" in fit_func:
+        print("eureka")
         p1_var    = workspace.var("p1_std"+cat) 
         p2_var    = workspace.var("p2_std"+cat) 
-        p3_var    = workspace.var("p3_std"+cat) 
-    elif "UA2" in fitFunction:
+        if "4par" in fit_func:
+            p3_var    = workspace.var("p3_std"+cat) 
+    elif "UA2" in fit_func:
+        print("eureka workspace")
         p1_var    = workspace.var("p1_UA2"+cat) 
         p2_var    = workspace.var("p2_UA2"+cat) 
-    elif "modExp" in fitFunction:
+        if "4par" in fit_func:
+            p3_var    = workspace.var("p3_std"+cat) 
+    elif "modExp" in fit_func:
         p1_var    = workspace.var("p1_modExp"+cat) 
         p2_var    = workspace.var("p2_modExp"+cat)
         p3_var    = workspace.var("p3_modExp"+cat) 
 
+    print(workspace.var("p1_std"+cat).getVal())
+    print(p1_var)
     norm_var  = workspace.var("ParametricBkgPdf_"+cat+"_norm")
     print("Pre fit ",norm_var.getVal())
     ExtBkgFit = ROOT.RooExtendPdf("ExtBkgPdf_"+cat, "ExtBkgPdf_"+cat, BkgFit, norm_var)
@@ -309,6 +328,7 @@ for number in range(nToy):
     #if signalname == "":
     #    signalname = opt.appdir.split("/")[-2]
     #signalstring = signalname+"_"+app
+    print(sign_)
     signalPdf = workspace.pdf("ParametricSignalPdf_"+sign_)
 
     #JES_sys = workspace.var("JES_uncertainty")
@@ -318,6 +338,8 @@ for number in range(nToy):
 
     nsig = workspace.var("ParametricSignalPdf_"+sign_+"_norm")
     #print("maremma maiala",sign_)
+    print("checcazzo")
+    print(workspace.pdf("ParametricSignalPdf_"+sign_))
     signalExtendPdf = ROOT.RooExtendPdf("ParametricSignalExtPdf_"+sign_, "ParametricSignalExtPdf_"+sign_, signalPdf, nsig)
 
 
@@ -333,24 +355,36 @@ for number in range(nToy):
     p3_postfit = array('f', [0.])
 
     fitTree.SetBranchAddress("trackedParam_shapeBkg_bkg_"+cat+"__norm", p0_postfit)
+    print("trackedParam_p1_std"+cat)
 
-    if "std" in fitFunction:
+    if "std" in fit_func:
         fitTree.SetBranchAddress("trackedParam_p1_std"+cat, p1_postfit)
         fitTree.SetBranchAddress("trackedParam_p2_std"+cat, p2_postfit)
-        fitTree.SetBranchAddress("trackedParam_p3_std"+cat, p3_postfit)
-    if "UA2" in fitFunction:
+        if "4par" in fit_func:
+            fitTree.SetBranchAddress("trackedParam_p3_std"+cat, p3_postfit)
+    if "UA2" in fit_func:
+        print("eureka tree")
         fitTree.SetBranchAddress("trackedParam_p1_UA2"+cat, p1_postfit)
         fitTree.SetBranchAddress("trackedParam_p2_UA2"+cat, p2_postfit)
-    if "modExp" in fitFunction:
+        if "4par" in fit_func:
+            fitTree.SetBranchAddress("trackedParam_p3_std"+cat, p3_postfit) 
+    if "modExp" in fit_func:
         fitTree.SetBranchAddress("trackedParam_p1_modExp"+cat, p1_postfit)
         fitTree.SetBranchAddress("trackedParam_p2_modExp"+cat, p2_postfit)
 
+
+
     fitTree.GetEntry(number)
+    #fitTree.GetEntry(1)
+    print("Post fit ")
+    print(p1_postfit[0])
+
 
     norm_var.setVal(p0_postfit[0])
     p1_var.setVal(p1_postfit[0])
     p2_var.setVal(p2_postfit[0])
-    p3_var.setVal(p3_postfit[0])
+    if "4par" in fit_func:
+        p3_var.setVal(p3_postfit[0])
 
     print("Post fit ",norm_var.getVal())
     #print("P1 post fit ",p1_var.getVal())
@@ -430,7 +464,7 @@ for number in range(nToy):
         #print(x.setRange("binrange",bin_low,bin_up))
         
        # print("bin range ",bin_low,"  ", bin_up)
-        print("X range ",x.getMin(),"  ", x.getMax())
+        #print("X range ",x.getMin(),"  ", x.getMax())
         signal_pdfIntegral = signalPdf.createIntegral(ROOT.RooArgSet(x),ROOT.RooFit.NormSet(ROOT.RooArgSet(x)),ROOT.RooFit.Range("toy_"+str(ibin)))
         signal_pdfIntegral_norm = signal_pdfIntegral.getVal()/signal_pdfIntrinsicNorm.getVal()
         bin_signalEvents = signal_pdfIntegral_norm*nsig.getVal()*r
@@ -488,10 +522,10 @@ for number in range(nToy):
         #print("Signal strenght", r)
 
         #Pull histo2 and chi square computation
-    Ndof[0] = -3
+    Ndof[0] = -4
     Chi2[0] = 0
-    GlobalNdof[0] -= 3
-    CombineDof[0] -= 3
+    GlobalNdof[0] -= 4
+    CombineDof[0] -= 4
     redChi2 = 0.
     hist_pull = ROOT.TH1D("pull_"+cat, "", NvarBins, a)
     hist_pull_signal = ROOT.TH1D("pull_signal_"+cat, "", NvarBins, a)
@@ -519,12 +553,13 @@ for number in range(nToy):
 
         CombineDof[0] += 1
         if data!=0 or bkg!=0:
-            pull = (data-bkg)/bkg_err
-            hist_pull.SetBinContent(ibin,pull)
-            CombineGoF[0] += 2*(  (bkg+sign*r)-data + data*ROOT.TMath.Log( data/(bkg+sign*r) )  )
+            if bkg_err !=0:
+                pull = (data-bkg)/bkg_err
+                hist_pull.SetBinContent(ibin,pull)
+                CombineGoF[0] += 2*(  (bkg+sign*r)-data + data*ROOT.TMath.Log( data/(bkg+sign*r) )  )
         #print data, bkg, sign*r, 2*(  (bkg+sign*r)-data + data*ROOT.TMath.Log( data/(bkg+sign*r) )  ), GlobalNdof[0], CombineGoF[0]
-        else:
-            CombineGoF[0] += 2*( (bkg+sign*r)-data )
+            else:
+                CombineGoF[0] += 2*( (bkg+sign*r)-data )
         #print data, bkg, sign*r, 2*( (bkg+sign*r)-data ), GlobalNdof[0], CombineGoF[0]
 
         if bkg_err !=0:
@@ -533,7 +568,7 @@ for number in range(nToy):
             pull_signal = 0
         hist_pull_signal.SetBinContent(ibin,pull_signal)
 
-        if data>10/bin_width:
+        if data>5/bin_width:
             Chi2[0] += pull*pull
             Ndof[0] += 1.0
             GlobalChi2[0] += pull*pull
@@ -698,9 +733,10 @@ for number in range(nToy):
     tp2 = pt.AddText("p2 "+str( round(p2_var.getVal(),2) )+" +/- "+str( round(p2_var.getError(),2) ))
     tp2.SetTextColor(1)
     tp2.SetTextSize( 0.04 )
-    tp3 = pt.AddText("p3 "+str( round(p3_var.getVal(),2) )+" +/- "+str( round(p3_var.getError(),2) ))
-    tp3.SetTextColor(1)
-    tp3.SetTextSize( 0.04 )
+    if "4par" in fit_func:
+        tp3 = pt.AddText("p3 "+str( round(p3_var.getVal(),2) )+" +/- "+str( round(p3_var.getError(),2) ))
+        tp3.SetTextColor(1)
+        tp3.SetTextSize( 0.04 )
     
     pt.Draw("same")
     canvas.Update()

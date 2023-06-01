@@ -178,7 +178,7 @@ else:
            +" --trackParameters \"rgx{.*}\""
            +" --robustHesse 1"
            +" --saveFitResult"
-          # +" --expectSignal "+str(opt.expectSignal)
+           #+" --expectSignal "+str(opt.expectSignal)
            +" -n _toys%s_expectSignal%s_%s" % ( str(opt.toys), str(opt.expectSignal), str(opt.fitFunction) )
             #+ " -s "+ str(opt.seed) 
            #+" --cminDefaultMinimizerStrategy=0"

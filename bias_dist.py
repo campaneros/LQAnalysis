@@ -103,7 +103,7 @@ def main():
         for m,l,t in tasks:
             print(m,l,t)
             exp = 3*float(cwd_utils.nested_dict_limit["limit_dict_%s"%l]["%s"%m])
-            inputfile ="../Fit_Signal/output_MC/gen_"+function_gen+"_fit"+function_fit+"/datacard_"+fit_fucntion_name_gen+"_umuLQumu_M"+str(m)+"_L"+str(l)+"_t_"+str(t)+"_syst0_seed123456/higgsCombine_toys"+str(t)+"_expectSignal"+str(round(exp,4))+"_std_4par.MultiDimFit.mH120.123456.root"
+            inputfile ="../Fit_Signal/output_MC/bmu_gen_"+function_gen+"_fit_"+function_fit+"/datacard_"+fit_fucntion_name_gen+"_bmuLQbmu_M"+str(m)+"_L"+str(l)+"_t_"+str(t)+"_syst0_seed123456/higgsCombine_toys"+str(t)+"_expectSignal"+str(round(exp,4))+"_std_4par.MultiDimFit.mH120.123456.root"
             cat_name = os.path.dirname(inputfile)
             print(cat_name)
             cat_parts = cat_name.split("_")
@@ -121,18 +121,21 @@ def main():
             print(inputfile)
             inputfile = TFile.Open(inputfile)
             tree = inputfile.Get("limit")
-            h_pull = TH1D("h_pull", "", 32, -4, 4)
-            tree.Draw("(r-"+str(exp)+")/trackedParamErr_r>>h_pull", "trackedParamErr_r>0")
-            if ("2Muon" in cat_name and mmass<2000) or ("1Muon" in cat_name and mmass<3100) or opt.all:
-                h_pull.Fit("gaus")
-                gaus = h_pull.GetListOfFunctions().FindObject("gaus")
-                print(gaus)
-            if ("2Muon" in cat_name and mmass<2000) or ("1Muon" in cat_name and mmass<3100) or opt.all:
-                t_mu     = gaus.GetParameter(1)
-                #t_mu     = pt.AddText("#mu    = %s #pm %s" % ( str(round(gaus.GetParameter(1),2)) , str(round(gaus.GetParError(1),2))      )    )
-                #t_sigma  = pt.AddText("#sigma = %s #pm %s" % ( str(round(gaus.GetParameter(2),2)) , str(round(gaus.GetParError(2),2))      )    )
-            if not t_mu:
-                t_mu   = h_pull.GetMean()    
+            t_mu =99.
+            if tree:
+                if tree.GetEntries() >0:
+                    h_pull = TH1D("h_pull", "", 32, -4, 4)
+                    tree.Draw("(r-"+str(exp)+")/trackedParamErr_r>>h_pull", "trackedParamErr_r>0")
+                    if ("2Muon" in cat_name and mmass<2000) or ("1Muon" in cat_name and mmass<3100) or opt.all:
+                        h_pull.Fit("gaus")
+                        gaus = h_pull.GetListOfFunctions().FindObject("gaus")
+                        print(gaus)
+                    if ("2Muon" in cat_name and mmass<2000) or ("1Muon" in cat_name and mmass<3100) or opt.all:
+                        t_mu     = gaus.GetParameter(1)
+                        #t_mu     = pt.AddText("#mu    = %s #pm %s" % ( str(round(gaus.GetParameter(1),2)) , str(round(gaus.GetParError(1),2))      )    )
+                        #t_sigma  = pt.AddText("#sigma = %s #pm %s" % ( str(round(gaus.GetParameter(2),2)) , str(round(gaus.GetParError(2),2))      )    )
+                    if not t_mu:
+                        t_mu   = h_pull.GetMean()    
             
             #t_mean   = pt.AddText("mean   = %s " % ( str(round(h_pull.GetMean(), 3))    ) )    
             #t_StdDev = pt.AddText("StdDev = %s " % ( str(round(h_pull.GetStdDev(),2))   ) )    
@@ -159,7 +162,7 @@ def main():
         histos["%s_%s"%(function_gen, function_fit)].SetTitle("Bias %s_%s"%(function_gen, function_fit))
         histos["%s_%s"%(function_gen, function_fit)].Draw("COLZ TEXT")
         for ext in ['png', 'pdf','C']:
-            c1.SaveAs("%s/bias_signal_%s_%s.%s"%(opt.outputdir, function_gen, function_fit, ext))
+            c1.SaveAs("%s/bmu_bias_signal_%s_%s.%s"%(opt.outputdir, function_gen, function_fit, ext))
         outputfile.cd()
         histos["%s_%s"%(function_gen, function_fit)].Write()
 
