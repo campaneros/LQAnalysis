@@ -28,7 +28,7 @@ usage = "usage: To be run from trijetana: python bias_study.py "
 
 parser = optparse.OptionParser(usage)
 
-parser.add_option("-d", "--datacard", dest="datacard", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/new_umu_datacards_finalcat_STD_450/umuLQumu_M1000_L1p0/categories/datacard_STD_umuLQumu_M1000_L1p0.txt ",
+parser.add_option("-d", "--datacard", dest="datacard", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/new_umu_datacards_finalcat_STD_450/umuLQumu_M1000_L1p0/categories/datacard_std_4par_umuLQumu_M1000_L1p0_category1Muon_BDT_tight_btag.txt",
                   help="input combine datacard you want to use for fit")
 
 parser.add_option("-t", dest="toys", default=1,
@@ -46,7 +46,7 @@ parser.add_option("-s", "--seed", dest="seed", default=123456,
 parser.add_option("-F", dest="fitFunction", default="std_3par",
                   help="fit function name")
 
-parser.add_option("-o", "--output", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_test/new_umu_datacards_finalcat_STD_450/umuLQumu_M1000_L1p0",
+parser.add_option("-o", "--output", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_test/new_umu_datacards_finalcat_STD_450/umuLQumu_M1000_L1p0/categories/",
                   help="the web output directory. Sub-directories are created automatically.")
 
 parser.add_option("-f", "--file", dest="outputfile", default="goodness_of_fit_study.root",
@@ -54,6 +54,9 @@ parser.add_option("-f", "--file", dest="outputfile", default="goodness_of_fit_st
 
 parser.add_option("-a", "--algo", dest="algo", default="saturated",
                     help="algo for goodness of fit test")
+
+parser.add_option("--syst", dest="syst", default=0,
+                  help="0= no syst, !=0 syst")
 
 (opt, args) = parser.parse_args()
 
@@ -73,7 +76,7 @@ datacardname = (opt.datacard.split("/")[-1]).split(".")[0]
 print(datacardname)
 
 
-mass = float( (datacardname.split("_")[4]).replace("M","") )
+#mass = float( (datacardname.split("_")[4]).replace("M","") )
 genoutputlabel = datacardname+"_genToys_"+str(opt.toys)+"_syst"+str(opt.syst)+"_seed"+str(opt.seed)
 outputlabel = datacardname+"_t_"+str(opt.toys)+"_syst"+str(opt.syst)+"_seed"+str(opt.seed)
 
@@ -93,6 +96,8 @@ if opt.freezer:
                +" --algo="+str(opt.algo)
                +" --fixedSignalStrength="+str(opt.expectSignal)
                +" --seed="+str(opt.seed)
+               +" -S "+str(opt.syst)
+               #+" --toysFreq"
                +" -n _toys%s_expectSignal%s_%s_rfreezed" % ( str(opt.toys), str(opt.expectSignal), str(opt.fitFunction) )
     )
 else:
@@ -100,6 +105,8 @@ else:
                 +" -t "+str(opt.toys)
                 +" --algo="+str(opt.algo)
                 +" --seed="+str(opt.seed)
+                +" -S "+str(opt.syst)
+                #+" --toysFreq"
                 +" -n _toys%s_expectSignal%s_%s" % ( str(opt.toys), str(opt.expectSignal), str(opt.fitFunction) )
     )
 print(command)  

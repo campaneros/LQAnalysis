@@ -127,9 +127,9 @@ if opt.gentoys:
 
 limit = float(opt.limit)
 if float(opt.expectSignal)==0:
-    rMin = -limit*10
+    rMin = -limit
     #rMin = 0
-    rMax = limit*10
+    rMax = limit
     if "2Muon" in gendatacard:
         if mass >= 1500:
             rMin = 0
