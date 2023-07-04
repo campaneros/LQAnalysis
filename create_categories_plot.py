@@ -39,16 +39,15 @@ gErrorIgnoreLevel = ROOT.kFatal
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
 
 inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna_new/src/RootTreeAnalyzer/all_years_new/category_BDT_data_all/"
-#inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna_new/src/RootTreeAnalyzer/EXO_pres_cut/category_BDT_data_all/"
 filenameInput = "test_h1_mmuj_ak4.root"
 subDirList = next(os.walk(inputdir))[1]
 print(subDirList)
 
 familyFunction_name = opt.fitFunction
 ## Output directories  
-outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/new_umu_output_MC_finalcat_"+  str(familyFunction_name)+"_"+str(opt.start_range)
-outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/new_umu_datacards_finalcat_"+str(familyFunction_name)+"_"+str(opt.start_range) 
-weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_plot_finalcat_"+str(familyFunction_name)+"_"+str(opt.start_range)
+outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/new_umu_output_plot_sig_MC_finalcat_"+  str(familyFunction_name)+"_"+str(opt.start_range)
+outputdirdatacards = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/new_umu_plot_datacards_finalcat_"+str(familyFunction_name)+"_"+str(opt.start_range) 
+weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_all/output_plot_plot_finalcat_"+str(familyFunction_name)+"_"+str(opt.start_range)
 os.system("mkdir -p "+outputdir)
 os.system("mkdir -p "+outputdirdatacards)
 #os.system(u"rm -f "+outputdirdatacards+"/*")
@@ -133,11 +132,14 @@ th1_original = [None] * ncategories
 th1_rebin = [None] * ncategories
 th1_rebin_bkg = [None] * ncategories
 th1_rebin_pull = [None] * ncategories
+th1_rebin_pull_signal = [None] * ncategories
 th1_rebin_blind = [None] * ncategories
 th1_rebin_bkg_blind = [None] * ncategories
 th1_rebin_pull_blind = [None] * ncategories
 rooHist = [None] * ncategories
 numberOfEvents = [None] * ncategories
+signal_histo=[None] * ncategories
+
 
 nbkg = [None] * ncategories
 p1 = [None] * ncategories
@@ -198,7 +200,6 @@ for icat, cat in enumerate(subDirList):
         #if ("_btag" in cat):
         #    continue
         fitFunction_name = cwd_utils.nested_dict["function_%s"%familyFunction_name]["%s"%cat]
-        #fitFunction_name = "std_3par"
 	#if ("2Muon" in str(cat)):	
 	#	continue
         print("\n")
@@ -336,65 +337,13 @@ for icat, cat in enumerate(subDirList):
         th1_rebin_bkg_blind[icat] = ROOT.TH1D("th1_rebin_bkg_"+cat,"th1_rebin_bkg_"+cat,NvarBins,array('d',varBins))
         th1_rebin_pull[icat] = ROOT.TH1D("th1_rebin_pull_"+cat,"th1_rebin_pull_"+cat,NvarBins,array('d',varBins))
         th1_rebin_pull_blind[icat] = ROOT.TH1D("th1_rebin_pull_"+cat,"th1_rebin_pull_"+cat,NvarBins,array('d',varBins))
+        th1_rebin_pull_signal[icat] = ROOT.TH1D("th1_rebin_pull_"+cat,"th1_rebin_pull_"+cat,NvarBins,array('d',varBins))
 
         Npos[0] = 0
         Nneg[0] = 0
         WWruns[0]  = 1
         prev_pull_sign = 0
         pull_sign = 0
-        for bin in range(NvarBins):
-            bin+=1
-            
-            bin_low = th1_rebin[icat].GetBinLowEdge(bin)
-            bin_up = th1_rebin[icat].GetBinLowEdge(bin)+th1_rebin[icat].GetBinWidth(bin)
-        
-            data = float(th1_rebin[icat].GetBinContent(bin))
-            err_2_up = float(th1_rebin[icat].GetBinErrorUp(bin))
-            
-            exp_ = float(bkgExtPdfTF1[icat].Integral(bin_low,bin_up))
-
-            # bkg histo
-            th1_rebin_bkg[icat].SetBinContent(bin, exp_)
-            if bin_low>1000:
-                th1_rebin_blind[icat].SetBinContent(bin, 0)
-                th1_rebin_bkg_blind[icat].SetBinContent(bin, 0)
-            else:	
-                th1_rebin_blind[icat].SetBinContent(bin, th1_rebin[icat].GetBinContent(bin))
-                th1_rebin_bkg_blind[icat].SetBinContent(bin, exp_)
-
-            # pull histo
-            if data!=0:
-                pull = (data - exp_) / err_2_up
-                th1_rebin_pull[icat].SetBinContent(bin,pull)
-                th1_rebin_pull[icat].SetBinError(bin,1)
-
-                if bin_low>1000:
-                    th1_rebin_pull_blind[icat].SetBinContent(bin,0)
-                    th1_rebin_pull_blind[icat].SetBinError(bin,0)
-                else:
-                    th1_rebin_pull_blind[icat].SetBinContent(bin,pull)
-                    th1_rebin_pull_blind[icat].SetBinError(bin,1)
-
-
-                if pull >= 0:
-                    Npos[0] += 1
-                else:
-                    Nneg[0] += 1
-                if prev_pull_sign == 0:
-                    prev_pull_sign = ROOT.TMath.Sign(1, pull)
-                pull_sign = ROOT.TMath.Sign(1, pull)
-
-            if pull_sign != prev_pull_sign and data != 0: 
-                WWruns[0] += 1
-
-        ## Chi2 and p-value
-        icat_br[0] = icat
-        cwd_utils.evaluate_chi2(icat, ndof, chi2, rchi2, ndof_allbins, chi2_allbins, reducedchi2_allbins, th1_rebin, th1_rebin_pull, len(fitparam)+1)
-        cwd_utils.evaluate_chi2_lowstat(icat, ndof_low, chi2_low, rchi2_low, ndof_allbins, chi2_allbins, reducedchi2_allbins, th1_rebin, th1_rebin_pull, len(fitparam)+1)
-        pval[0] = ROOT.TMath.Prob(chi2[0], ndof[0])
-        pval_all[0] = ROOT.TMath.Prob(chi2_allbins[0], ndof_allbins[0])
-        pval_low[0]=ROOT.TMath.Prob(chi2_low[0], ndof_low[0])
-        pval_ok[0] = 0
 
     ## Loop over signals
         signalInputfile = io.open(signalInputfilename, "r")
@@ -459,7 +408,13 @@ for icat, cat in enumerate(subDirList):
         	#ParametricSignalPdf_ = RooParametricShapeBinPdf("ParametricSignalPdf_"+signalString, "ParametricSignalPdf_"+signalString, signalPdf, var[icat], ROOT.RooArgList(mean_sist, width_sist, alpha1, n1, alpha2, n2), th1_rebin[icat])
             ParametricSignalPdf_ = ROOT.RooParametricShapeBinPdf("ParametricSignalPdf_"+signalString, "ParametricSignalPdf_"+signalString, signalPdf, var[icat], ROOT.RooArgList(mean, width, alpha1, n1, alpha2, n2), th1_rebin[icat])
 
-
+            bin_test = ROOT.RooBinning(varBins[0], varBins[-1])
+            for i in range(NvarBins):
+                bin_test.addBoundary(varBins[i])
+            if float(M1) == 2000 and float(L) == 1.0:
+                signal_histo[icat]=ParametricSignalPdf_.createHistogram("test",var[icat],ROOT.RooFit.Binning(bin_test))
+                signal_histo[icat].Scale(nsig.getVal()/20)
+                print(cat+" "+str(nsig.getVal()))
             mean.setConstant(ROOT.kTRUE)
             width.setConstant(ROOT.kTRUE)
             alpha1.setConstant(ROOT.kTRUE)
@@ -470,6 +425,9 @@ for icat, cat in enumerate(subDirList):
 
             signalPdf.Print()
             nsig.Print()
+
+
+
 
             ## Fill Workspace for signal
             # Import background pdf and normalization
@@ -519,6 +477,62 @@ for icat, cat in enumerate(subDirList):
                 #print("################# Param ", param.GetName(), "      ",param.getVal())
             outputfile.close()            
         signalInputfile.close()
+        for bin in range(NvarBins):
+            bin+=1
+            
+            bin_low = th1_rebin[icat].GetBinLowEdge(bin)
+            bin_up = th1_rebin[icat].GetBinLowEdge(bin)+th1_rebin[icat].GetBinWidth(bin)
+        
+            data = float(th1_rebin[icat].GetBinContent(bin))
+            err_2_up = float(th1_rebin[icat].GetBinErrorUp(bin))
+            
+            exp_ = float(bkgExtPdfTF1[icat].Integral(bin_low,bin_up))
+
+            # bkg histo
+            th1_rebin_bkg[icat].SetBinContent(bin, exp_)
+            if bin_low>1000:
+                th1_rebin_blind[icat].SetBinContent(bin, 0)
+                th1_rebin_bkg_blind[icat].SetBinContent(bin, exp_)
+            else:	
+                th1_rebin_blind[icat].SetBinContent(bin, th1_rebin[icat].GetBinContent(bin))
+                th1_rebin_bkg_blind[icat].SetBinContent(bin, exp_)
+
+            # pull histo
+            if data!=0:
+                pull = (data - exp_) / err_2_up
+                sign_pull=float(signal_histo[icat].GetBinContent(bin))/err_2_up
+                th1_rebin_pull_signal[icat].SetBinContent(bin,sign_pull)
+                th1_rebin_pull[icat].SetBinContent(bin,pull)
+                th1_rebin_pull[icat].SetBinContent(bin,pull)
+                th1_rebin_pull[icat].SetBinError(bin,1)
+
+                if bin_low>1000:
+                    th1_rebin_pull_blind[icat].SetBinContent(bin,0)
+                    th1_rebin_pull_blind[icat].SetBinError(bin,0)
+                else:
+                    th1_rebin_pull_blind[icat].SetBinContent(bin,pull)
+                    th1_rebin_pull_blind[icat].SetBinError(bin,1)
+
+
+                if pull >= 0:
+                    Npos[0] += 1
+                else:
+                    Nneg[0] += 1
+                if prev_pull_sign == 0:
+                    prev_pull_sign = ROOT.TMath.Sign(1, pull)
+                pull_sign = ROOT.TMath.Sign(1, pull)
+
+            if pull_sign != prev_pull_sign and data != 0: 
+                WWruns[0] += 1
+
+        ## Chi2 and p-value
+        icat_br[0] = icat
+        cwd_utils.evaluate_chi2(icat, ndof, chi2, rchi2, ndof_allbins, chi2_allbins, reducedchi2_allbins, th1_rebin, th1_rebin_pull, len(fitparam)+1)
+        cwd_utils.evaluate_chi2_lowstat(icat, ndof_low, chi2_low, rchi2_low, ndof_allbins, chi2_allbins, reducedchi2_allbins, th1_rebin, th1_rebin_pull, len(fitparam)+1)
+        pval[0] = ROOT.TMath.Prob(chi2[0], ndof[0])
+        pval_all[0] = ROOT.TMath.Prob(chi2_allbins[0], ndof_allbins[0])
+        pval_low[0]=ROOT.TMath.Prob(chi2_low[0], ndof_low[0])
+        pval_ok[0] = 0
 
     ## Fill Workspace for data and background
     # Import data
@@ -556,7 +570,7 @@ for icat, cat in enumerate(subDirList):
 
    ## Pad1
         fPads1.cd()
-        th1_rebin_blind[icat].SetMinimum(0.03)
+        th1_rebin_blind[icat].SetMinimum(0.3)
         th1_rebin_blind[icat].GetYaxis().SetTitle("Number of events")
         th1_rebin_blind[icat].GetYaxis().SetTitleSize(0.06)
         th1_rebin_blind[icat].GetYaxis().SetTitleOffset(0.8)
@@ -565,11 +579,18 @@ for icat, cat in enumerate(subDirList):
         th1_rebin_blind[icat].SetMarkerColor(1)
         th1_rebin_blind[icat].SetLineColor(1)
         th1_rebin_blind[icat].SetStats(0)
+        th1_rebin_blind[icat].SetAxisRange(455., 4500.,"X")
         th1_rebin_blind[icat].Draw("pe")
         th1_rebin_bkg_blind[icat].SetLineColor(2)
         th1_rebin_bkg_blind[icat].SetLineWidth(1)
         th1_rebin_bkg_blind[icat].Draw("histsame")
-        
+        signal_histo[icat].SetLineColor(ROOT.kBlue)
+        signal_histo[icat].SetLineStyle(ROOT.kDashed)
+        signal_histo[icat].SetLineWidth(2)
+        #signal_histo[icat].Scale(4)
+        signal_histo[icat].Draw("histsame")        
+
+
    	#draw the lumi text on the canvas
         CMS_lumi.CMS_lumi(fPads1, iPeriod, iPos) 
         canvas[icat].Modified()
@@ -594,7 +615,12 @@ for icat, cat in enumerate(subDirList):
         th1_rebin_pull_blind[icat].GetYaxis().SetTitleSize(0.12)
         th1_rebin_pull_blind[icat].GetYaxis().SetLabelSize(0.11)
         th1_rebin_pull_blind[icat].GetYaxis().SetTitleOffset(0.35)
+        th1_rebin_pull_blind[icat].SetAxisRange(455., 4500.,"X")
         th1_rebin_pull_blind[icat].Draw("hist")
+        th1_rebin_pull_signal[icat].SetLineColor(ROOT.kBlue)
+        th1_rebin_pull_signal[icat].SetLineStyle(ROOT.kDashed)
+        th1_rebin_pull_signal[icat].SetLineWidth(2)
+        th1_rebin_pull_signal[icat].Draw("histsame")
    ## Pa
         ## Legend
         fPads1.cd()
@@ -605,56 +631,59 @@ for icat, cat in enumerate(subDirList):
         legend.SetFillStyle(0)
         legend.SetBorderSize(0)
         if(generateToy==1):
-            legend.AddEntry(th1_rebin[icat], "Toy Data", "p")
+            legend.AddEntry(th1_rebin_blind[icat], "Toy Data", "p")
         else:
-            legend.AddEntry(th1_rebin[icat], "Toy Data", "p")
-        legend.AddEntry(th1_rebin_bkg[icat], "Fit", "l")
+            legend.AddEntry(th1_rebin_blind[icat], "Data", "p")
+        legend.AddEntry(th1_rebin_bkg_blind[icat], "Fit", "l")
+        legend.AddEntry(signal_histo[icat], "Signal", "l")  
         legend.Draw()
         
        ## Plot fit results
-        pt = ROOT.TPaveText(0.73, 0.48, 0.87, 0.87,"ndc")
+        pt = ROOT.TPaveText(0.73, 0.48, 0.85, 0.58,"ndc")
         pt.SetFillColor(0)
         
         Chi2Text = "#chi^{2}="+str(round(chi2[0],2))+"   Ndf="+str(ndof[0])
-        t1 = pt.AddText(Chi2Text)
-        t1.SetTextColor(1)
-        t1.SetTextSize( 0.04 )
-        Chi2Text = "#chi^{2} / ndf (N_{bin}>10) = "+str(round(rchi2[0],2))+"  pval = "+str(round(pval[0],5))
+        #t1 = pt.AddText(Chi2Text)
+        #t1.SetTextColor(1)
+        #t1.SetTextSize( 0.04 )
+        #Chi2Text = "#chi^{2} / ndf (N_{bin}>10) = "+str(round(rchi2[0],2))+"  pval = "+str(round(pval[0],5))
+        Chi2Text = "pval (N_{bin}>10) = "+str(round(pval[0],5))
         t1 = pt.AddText(Chi2Text)
         t1.SetTextColor(1)
         t1.SetTextSize( 0.04 )
         Chi2Text = "#chi^{2}="+str(round(chi2_low[0],2))+"   Ndf="+str(ndof_low[0])
-        t1 = pt.AddText(Chi2Text)
-        t1.SetTextColor(1)
-        t1.SetTextSize( 0.04 )
+        #t1 = pt.AddText(Chi2Text)
+        #t1.SetTextColor(1)
+        #t1.SetTextSize( 0.04 )
         Chi2Text = "#chi^{2} / ndf (N_{bin}<100) = "+str(round(rchi2_low[0],2))+"  pval = "+str(round(pval_low[0],5))
-        t1 = pt.AddText(Chi2Text)
-        t1.SetTextColor(1)
-        t1.SetTextSize( 0.04 )
+        #t1 = pt.AddText(Chi2Text)
+        #t1.SetTextColor(1)
+        #t1.SetTextSize( 0.04 )
         Chi2Text = "#chi^{2}="+str(round(chi2_allbins[0],2))+"   Ndf="+str(ndof_allbins[0])
-        t1 = pt.AddText(Chi2Text)
-        t1.SetTextColor(1)
-        t1.SetTextSize( 0.04 )
-        Chi2Text = "#chi^{2} / ndf (all) = "+str(round(reducedchi2_allbins[0],2))+"  pval = "+str(round(pval_all[0],5))
+        #t1 = pt.AddText(Chi2Text)
+        #t1.SetTextColor(1)
+        #t1.SetTextSize( 0.04 )
+        #Chi2Text = "#chi^{2} / ndf (all) = "+str(round(reducedchi2_allbins[0],2))+"  pval = "+str(round(pval_all[0],5))
+        Chi2Text = "pval (all bin) = "+str(round(pval_all[0],5))
         t1 = pt.AddText(Chi2Text)
         t1.SetTextColor(1)
         t1.SetTextSize( 0.04 )
         WWText = "N+ = "+str(int(Npos[0]))+"  N- = "+str(int(Nneg[0]))+"\n Nruns = "+str(int(WWruns[0])) + "  pval = "+str(round(WWpval[0],2)) 
         #t1 = pt.AddText(WWText)
-        t1.SetTextColor(1)
-        t1.SetTextSize( 0.04 )
+        #t1.SetTextColor(1)
+        #t1.SetTextSize( 0.04 )
         
-        t_covqual = pt.AddText("covQual = "+str(round(fitResult[icat].covQual(),1)))    
-        t_nbkg = pt.AddText("nbkg = "+str(round(nbkg[icat].getValV(),0))+" #pm "+str(round(nbkg[icat].getError(),0)))    
+        #t_covqual = pt.AddText("covQual = "+str(round(fitResult[icat].covQual(),1)))    
+        #t_nbkg = pt.AddText("nbkg = "+str(round(nbkg[icat].getValV(),0))+" #pm "+str(round(nbkg[icat].getError(),0)))    
         
-        for i,param in enumerate(fitparam):
-            t_p = pt.AddText("p"+str(i+1)+" = "+str(round(param.getValV(),2))+" #pm "+str(round(param.getError(),2)))    
-            t_p.SetTextColor(1)
-            t_p.SetTextSize( 0.04 )
-        t_covqual.SetTextColor(1)
-        t_covqual.SetTextSize( 0.04 )
-        t_nbkg.SetTextColor(1)
-        t_nbkg.SetTextSize( 0.04 )
+        #for i,param in enumerate(fitparam):
+            #t_p = pt.AddText("p"+str(i+1)+" = "+str(round(param.getValV(),2))+" #pm "+str(round(param.getError(),2)))    
+            #t_p.SetTextColor(1)
+            #t_p.SetTextSize( 0.04 )
+       #t_covqual.SetTextColor(1)
+        #t_covqual.SetTextSize( 0.04 )
+        #t_nbkg.SetTextColor(1)
+        #t_nbkg.SetTextSize( 0.04 )
         
         pt.Draw("same")
         canvas[icat].Update()
@@ -747,7 +776,6 @@ for signal in listOfSignalModels:
     ## Loop over event categories    
     for icat, cat in enumerate(subDirList):
         fitFunction_name = cwd_utils.nested_dict["function_%s"%familyFunction_name]["%s"%cat]
-        #`fitFunction_name = "std_3par"
         signalStringCat = signal+"_"+cat
         datacardfilenameAll = outputdirdatacards+"/"+signal+"/"+"datacard_"+fitFunction_name+"_"+signal+".txt"
         datacardfilename1 = outputdirdatacards+"/"+signal+"/"+"datacard_"+fitFunction_name+"_1Muon_"+signal+".txt"
@@ -805,11 +833,9 @@ for signal in listOfSignalModels:
         splitline = signal.split("_")  
         modell = splitline[0]
         M1val = (splitline[1]).strip("M")
-        print("pippo "+M1val)
         val  = (splitline[2]).strip("L")
         val =  Lval.replace("p",".")
 
-    print("pippo "+M1val)
     datacardList1.write(modell+" "+M1val+" "+Lval+" "+"category1Muon "+datacardfilename1+"\n")
     datacardList2.write(modell+" "+M1val+" "+Lval+" "+"category2Muon "+datacardfilename2+"\n")
     datacardList.write(modell+" "+M1val+" "+Lval+" "+datacardfilenameAll+"\n")

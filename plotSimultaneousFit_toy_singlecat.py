@@ -318,8 +318,8 @@ for number in range(nToy):
         p2_var    = workspace.var("p2_modExp"+cat)
         p3_var    = workspace.var("p3_modExp"+cat) 
 
-    print(workspace.var("p1_std"+cat).getVal())
     print(p1_var)
+    #print(workspace.var("p1_UA2"+cat).getVal())
     norm_var  = workspace.var("ParametricBkgPdf_"+cat+"_norm")
     print("Pre fit ",norm_var.getVal())
     ExtBkgFit = ROOT.RooExtendPdf("ExtBkgPdf_"+cat, "ExtBkgPdf_"+cat, BkgFit, norm_var)
@@ -339,6 +339,7 @@ for number in range(nToy):
     nsig = workspace.var("ParametricSignalPdf_"+sign_+"_norm")
     #print("maremma maiala",sign_)
     print("checcazzo")
+    print("ParametricSignalPdf_"+sign_)
     print(workspace.pdf("ParametricSignalPdf_"+sign_))
     signalExtendPdf = ROOT.RooExtendPdf("ParametricSignalExtPdf_"+sign_, "ParametricSignalExtPdf_"+sign_, signalPdf, nsig)
 

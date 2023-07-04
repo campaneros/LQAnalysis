@@ -19,15 +19,28 @@ import CMS_lumi
 
 #ROOT.kTRUE.LoadMacro(os.path.dirname(os.path.abspath(__file__))+"/../../src/libCpp/ROOT.RooDoubleCBFast.cc+")
 ROOT.gROOT.SetBatch(True)
+usage = "usage: python plotSimFit.py -t toysfile/workspacefile -f fitFile -n 1 -c catdir -o outputdir -w weboutputdir -F fitFunction --draw_limit_(exp/obs) limit_dir"
+
+parser = optparse.OptionParser(usage)
+
+parser.add_option("-i", dest="inputdir", default="/data/mcampana/CMS/CMSSW_10_6_28_LQAna_new/src/RootTreeAnalyzer/all_years_new/category_BDT_data_all/",
+                  help="input directory that contains the root files with histograms")
+
+parser.add_option("-o", dest="outputdir", default="/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_umu_new/output",
+                    help="start range for graph")
+
+(opt, args) = parser.parse_args()
 
 ## Input directories (each folder contains a root file with histograms)
-inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna_new/src/RootTreeAnalyzer/all_years_new/category_BDT_data_all/"
+#inputdir = "/data/mcampana/CMS/CMSSW_10_6_28_LQAna_new/src/RootTreeAnalyzer/all_years_new/category_BDT_data_all/"
+inputdir = opt.inputdir
+outputdir = opt.outputdir
 subDirList = next(os.walk(inputdir))[1]
 print(subDirList)
 
 ## Output directories  
-outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_bmu_new/output"
-weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_bmu_new/output"
+#outputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_bmu_new_pres/output"
+weboutputdir = "/data/mcampana/CMS/CMSSW_8_1_0_LQ/src/Fit_Signal_BDT_data_bmu_new_pres/output"
 os.system("mkdir -p "+outputdir)
 os.system("mkdir -p "+weboutputdir)
 scriptsPath = os.path.dirname(os.path.abspath(__file__))+"/../../"
@@ -142,13 +155,32 @@ for icat, cat in enumerate(subDirList):
         rooHist_signal.Print()
 
         ## Signal pdf
-        mean = ROOT.RooRealVar("mean_"+signalString,"mean_"+signalString,float(M1value),float(M1value)-300,float(M1value)+300) 
-        width = ROOT.RooRealVar("width_"+signalString,"width_"+signalString,float(M1value)*0.1,float(M1value)*0.1*0.1,float(M1value)*0.1*3) 
-        alpha1 = ROOT.RooRealVar("alpha1_"+signalString,"alpha1_"+signalString,1,0,5)
-        n1 = ROOT.RooRealVar("n1_"+signalString,"n1_"+signalString,1,0,50)
-        alpha2 = ROOT.RooRealVar("alpha2_"+signalString,"alpha2_"+signalString,1,0,5)
-        n2 = ROOT.RooRealVar("n2_"+signalString,"n2_"+signalString,5,0,15)
-        nsig = ROOT.RooRealVar("signalPdf_"+signalString+"_norm","signalPdf_"+signalString+"_norm",1000,0,1000000)
+        mean = ROOT.RooRealVar("mean_"+signalString,"mean_"+signalString,float(M1value),float(M1value)-float(M1value)*0.05,float(M1value)+float(M1value)*0.05) 
+        width = ROOT.RooRealVar("width_"+signalString,"width_"+signalString,float(M1value)*0.1,float(M1value)*0.01,float(M1value)*0.2) 
+        if (int(M1value)>4100) and float(Lvalue)>0.5:
+            alpha1 = ROOT.RooRealVar("alpha1_"+signalString,"alpha1_"+signalString,1,0.7,3)
+            n1 = ROOT.RooRealVar("n1_"+signalString,"n1_"+signalString,1,0.25,4)
+        elif (int(M1value)>4100) and float(Lvalue)<0.5:
+            alpha1 = ROOT.RooRealVar("alpha1_"+signalString,"alpha1_"+signalString,0.5,0.05,4)
+            n1 = ROOT.RooRealVar("n1_"+signalString,"n1_"+signalString,0.5,0.05,4)
+        elif (int(M1value)>3900) and float(Lvalue)>1.3:
+            alpha1 = ROOT.RooRealVar("alpha1_"+signalString,"alpha1_"+signalString,1,0.1,1)
+            n1 = ROOT.RooRealVar("n1_"+signalString,"n1_"+signalString,0.5,0.1,1)
+        elif (int(M1value)>3900) and float(Lvalue)<1.3:
+            alpha1 = ROOT.RooRealVar("alpha1_"+signalString,"alpha1_"+signalString,1,0.2,2)
+            n1 = ROOT.RooRealVar("n1_"+signalString,"n1_"+signalString,1,0.2,2)
+        elif (int(M1value)>2900) and float(Lvalue)>1.3:
+            alpha1 = ROOT.RooRealVar("alpha1_"+signalString,"alpha1_"+signalString,1,0.15,2)
+            n1 = ROOT.RooRealVar("n1_"+signalString,"n1_"+signalString,1,0.15,2)
+        elif (int(M1value)>2900) and float(Lvalue)<1.3:
+            alpha1 = ROOT.RooRealVar("alpha1_"+signalString,"alpha1_"+signalString,1,0.15,2)
+            n1 = ROOT.RooRealVar("n1_"+signalString,"n1_"+signalString,1,0.15,2)
+        else:
+            alpha1 = ROOT.RooRealVar("alpha1_"+signalString,"alpha1_"+signalString,2,0.1,10)
+            n1 = ROOT.RooRealVar("n1_"+signalString,"n1_"+signalString,5,0.1,60)
+        alpha2 = ROOT.RooRealVar("alpha2_"+signalString,"alpha2_"+signalString,2,0.01,10)
+        n2 = ROOT.RooRealVar("n2_"+signalString,"n2_"+signalString,5,0.01,60)
+        nsig = ROOT.RooRealVar("signalPdf_"+signalString+"_norm","signalPdf_"+signalString+"_norm",th1_fromFile_signal.GetSumOfWeights(),0,1000000)
         signalPdf = ROOT.RooDoubleCBFast("signalPdf_"+signalString, "signalPdf_"+signalString, var[icat], mean, width, alpha1, n1, alpha2, n2)
         
         # Signal extended pdf
@@ -175,7 +207,7 @@ for icat, cat in enumerate(subDirList):
         #    signalPdf.plotOn(frame,ROOT.RooFit.Binning(100))
         #frame.Draw()
         #frame = var[icat].frame()
-        var[icat].setRange("signal",  max(float(M1value)*0.65, var_min[icat]), min(float(M1value)*1.45, 6000) )
+        var[icat].setRange("signal",  max(float(M1value)*0.65, var_min[icat]), min(float(M1value)*1.35, 6000) )
         var[icat].setRange("full", var_min[icat], var_max[icat] )
         rooHist_signal.plotOn(frame,ROOT.RooFit.Binning(100), ROOT.RooFit.Range("full"))
         if( float(M1value) > var_min[icat] and float(M1value) < var_max[icat]):
@@ -185,7 +217,7 @@ for icat, cat in enumerate(subDirList):
         #frame.SetAxisRange(0.0,20000,"Y")
         canvas.SetLogy(0)
 
-        pt = ROOT.TPaveText(0.15, 0.3, 0.35, 0.7,"ndc")
+        pt = ROOT.TPaveText(0.80, 0.7, 0.95, 0.95,"ndc")
         pt.SetFillColor(0)
         
         Chi2Text = "#chi^{2}/ndof="+str(round(Chi2,2))

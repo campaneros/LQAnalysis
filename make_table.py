@@ -6,7 +6,7 @@ def parse_file(filename):
         for line in file:
             key, value = line.split(':')
             key = key.split('"')[1]  # extract the string within quotes
-            data[key] = float(value)  # convert the value to float
+            data[key] = float(value.split(" ")[0])  # convert the value to float
     return data
 
 def main(file1, file2, file3):
@@ -40,12 +40,12 @@ def main(file1, file2, file3):
     if "bmu" in app:
         filename = app[index]+"_"+app[index+1]+"_"+app[index+2]+"_result.txt"
     else:  
-        filename = app[index]+"_"+app[index+1]+"_result.txt"
+        filename = app[index]+"_"+app[index+1]+"_"+app[index+2]+"_result.txt"
     with open(filename, 'w') as file:
         for key, value in result.items():
-            file.write('4cat/2cat L '+str(app[index+1])+" " + key + '":' + str(value) + " 2cat: "+str(data1[key])+" 4cat "+str(data2[key])+'\n')
+            file.write('4cat/2cat L '+str(app[index+2])+" " + key + '":' + str(value) + " 2cat: "+str(data1[key])+" 4cat "+str(data2[key])+'\n')
         for key, value in result2.items():
-            file.write('8cat/4cat L '+str(app[index+1])+" " + key + '":' + str(value) + " 4cat: "+ str(data2[key])+" 8cat "+str(data3[key])+'\n')
+            file.write('8cat/4cat L '+str(app[index+2])+" " + key + '":' + str(value) + " 4cat: "+ str(data2[key])+" 8cat "+str(data3[key])+'\n')
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process three input files.")

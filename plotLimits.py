@@ -55,7 +55,7 @@ limit_1sigmaDown = {}
 limit_2sigmaDown = {}
 limit_observed = {}
 sigma = {}
-#sigma_0p2 = {}
+sigma_0p5 = {}
 #sigma_1p0 = {}
 
 cat_list = {}
@@ -85,6 +85,8 @@ print(path_parts)
 
 file_out = open("limit_"+str(path_parts[index+2])+"_"+str(path_parts[index+1]) +"_"+str(coupling)+".txt","w")
 
+
+limit_put={}
 
 
 for fl in file_list:
@@ -132,6 +134,8 @@ for fl in file_list:
             limit_2sigmaDown[cat] = []
             limit_observed[cat] = []
             sigma[cat] = []
+            sigma_0p5[cat] = []
+            limit_put [cat] = []
        # if "0p1" in L:
        #     sigma[cat].append(9.51E-04)
        #     sigma[cat].append(5.16E-05)
@@ -143,12 +147,12 @@ for fl in file_list:
         #sigma[cat].append(5.72E-04)#3000
         #sigma[cat].append(8.91E-05)#4000
         #sigma[cat].append(1.73E-05)#5000
-        #sigma_0p1[cat].append(3.48E-03)#700
-        #sigma_0p1[cat].append(9.49E-04)#1000
-        #sigma_0p1[cat].append(4.86E-05)#2000
-        #sigma_0p1[cat].append(5.29E-06)#3000
-        #sigma_0p1[cat].append(7.36E-07)#4000
-        #sigma_0p1[cat].append(1.08E-07)#5000
+        sigma_0p5[cat].append(8.64910E-02)#700
+        sigma_0p5[cat].append(2.36636E-02)#1000
+        sigma_0p5[cat].append(1.22018E-03)#2000
+        sigma_0p5[cat].append(1.34306E-04)#3000
+        sigma_0p5[cat].append(1.92049E-05)#4000
+        sigma_0p5[cat].append(3.05946E-06)#5000
         #sigma_0p2[cat].append(1.39E-02)#700
         #sigma_0p2[cat].append(3.80E-03)#1000
         #sigma_0p2[cat].append(1.95E-04)#2000
@@ -167,7 +171,11 @@ for fl in file_list:
                 limit_1sigmaUp[cat].append(limit)
             if quantile==0.5:
                 limit_central[cat].append(limit)
-                file_out.write('L %s "%s":%s \n'%(L,mass,limit))
+                if (sigma[cat][-1]>limit):
+                    limit_put[cat].append(1)
+                else:
+                     limit_put[cat].append(0)
+                file_out.write('L %s "%s":%s || %s \n'%(L,mass,limit,limit_put[cat][-1]))
             if quantile>0.15 and quantile<0.17:
                 limit_1sigmaDown[cat].append(limit)
             if quantile>0.02 and quantile<0.03:
@@ -195,6 +203,7 @@ green={}
 median={}
 observed={}
 cross= {}
+cross_0p5= {}
 
 for key in var:
     print(key)
@@ -207,7 +216,7 @@ for key in var:
     median[key] = R.TGraph(N)      # median line
     observed[key] = R.TGraph(N)
     #cross_0p1[key] =  R.TGraph(N)
-    #cross_0p2[key] =  R.TGraph(N)  
+    cross_0p5[key] =  R.TGraph(N)  
     cross[key] =  R.TGraph(N)
 
 
@@ -221,7 +230,7 @@ for key in var:
             yellow[key].SetPoint( 2*N-1-i, float(var[key][i]), float(limit_2sigmaDown[key][i]) ) # - 2 sigma
             #observed[key].SetPoint(  i,    float(var[key][i]), float(limit_observed[key][i]) ) # observed
             #cross_0p1[key].SetPoint(i, float(var[key][i]), float(sigma_0p1[key][i]))
-            #cross_0p2[key].SetPoint(i, float(var[key][i]), float(sigma_0p2[key][i]))
+            cross_0p5[key].SetPoint(i, float(var[key][i]), float(sigma_0p5[key][i]))
             cross[key].SetPoint(i, float(var[key][i]), float(sigma[key][i]))
 	#elif opt.single and (not "all" in cat):
         #	median[key].SetPoint(    i,    float(var[key][i]), float(limit_central[key][i]) ) # median[key]
@@ -385,10 +394,10 @@ for count,key in enumerate(sorted(var)):
         cross[key].SetLineStyle(1)
         cross[key].Draw('Lsame')
 
-        #cross_0p2[key].SetLineColor(R.kRed)
-        #cross_0p2[key].SetLineWidth(2)
-        #cross_0p2[key].SetLineStyle(1)
-        #cross_0p2[key].Draw('Lsame')
+        cross_0p5[key].SetLineColor(R.kRed)
+        cross_0p5[key].SetLineWidth(2)
+        cross_0p5[key].SetLineStyle(1)
+        cross_0p5[key].Draw('Lsame')
 
         #cross_0p1[key].SetLineColor(R.kGreen)
         #cross_0p1[key].SetLineWidth(2)
@@ -413,7 +422,7 @@ for count,key in enumerate(sorted(var)):
         legend.AddEntry(green[key], "#pm 1 std. deviation",'f')
         legend.AddEntry(yellow[key],"#pm 2 std. deviation",'f')
         #legend.AddEntry(cross_0p1[key],"cross section #lambda=0.1",'L')
-        #legend.AddEntry(cross_0p2[key],"cross section #lambda=0.2",'L')
+        legend.AddEntry(cross_0p5[key],"cross section #lambda=0.5",'L')
         legend.AddEntry(cross[key],"cross section #lambda=%s"%lambd,'L')
     else:
         #print(median[key])

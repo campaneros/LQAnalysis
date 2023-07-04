@@ -103,7 +103,7 @@ def main():
                 if not "%s_%s_%s"%(function_gen, function_fit,cat) in histos:
                     print("cazzo")
                     print(histos["%s_%s_%s"%(function_gen, function_fit,cat)])
-                inputfile ="../Fit_Signal/output_MC/umu_gen_"+function_gen+"_fit_"+function_fit+"/datacard_"+fit_fucntion_name_gen+"_umuLQumu_M"+str(m)+"_L"+str(l)+"_"+cat+"_t_"+str(t)+"_syst0_seed123456/higgsCombine_toys"+str(t)+"_expectSignal"+str(exp)+"_std_4par.MultiDimFit.mH120.123456.root"
+                inputfile ="../Fit_Signal/output_MC/umu_gen_"+function_gen+"_fit_"+function_fit+"/datacard_"+fit_fucntion_name_fit+"_umuLQumu_M"+str(m)+"_L"+str(l)+"_"+cat+"_t_"+str(t)+"_syst0_seed123456/higgsCombine_toys"+str(t)+"_expectSignal"+str(exp)+"_std_4par.MultiDimFit.mH120.123456.root"
                 cat_name = os.path.dirname(inputfile)
                 print(cat_name)
                 print(histos["%s_%s_%s"%(function_gen, function_fit,cat)])
